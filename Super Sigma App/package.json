@@ -1,16 +1,29 @@
 {
-  "name": "bolt",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "rizzbot",
+  "version": "0.0.1",
+  "description": "A Slack App that streamlines TMS surveys",
+  "main": "app.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "npm run build && node -r dotenv/config dist/app.js",
+    "start:dev": "nodemon -r dotenv/config src/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ewi.tudelft.nl/cse2000-software-project/2022-2023-q4/cluster-15/transactive-memory-system/transactive-memory-system"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^3.13.0",
     "dotenv": "^16.0.3",
-    "ngrok": "^4.3.3"
+    "typescript": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1"
   }
 }
