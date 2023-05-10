@@ -10,7 +10,7 @@ enum QuestionFocus {
 interface Question {
   focus : QuestionFocus
   number : number
-  text : String
+  text : string
   reversed : boolean
 }
 
