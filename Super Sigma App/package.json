@@ -10,7 +10,9 @@
     "start": "npm run build && node -r dotenv/config dist/app.js",
     "start:dev": "nodemon -w src -e ts,tsx --ignore 'dist/*' --exec 'npm start'",
     "lint": "eslint . --ext .ts,.tsx",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "migration:generate": "npm run build && node generate-migration.js",
+    "migration:run": "npm run build && npx typeorm migration:run -d dist/data-source.js"
   },
   "repository": {
     "type": "git",
@@ -20,14 +22,19 @@
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^3.13.0",
+    "class-transformer": "^0.5.1",
     "dotenv": "^16.0.3",
     "jsx-slack": "^6.0.0",
+    "pg": "^8.10.0",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.16",
     "typescript": "^5.0.4"
   },
   "devDependencies": {
     "@types/node": "^18.16.2",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
+    "cross-var": "^1.1.0",
     "eslint": "^8.39.0",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1"
