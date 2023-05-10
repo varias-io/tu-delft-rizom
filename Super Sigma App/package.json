@@ -5,10 +5,12 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"no test specified\"",
     "build": "tsc",
     "start": "npm run build && node -r dotenv/config dist/app.js",
-    "start:dev": "nodemon -w src -e ts,tsx --ignore 'dist/*' --exec 'npm start'"
+    "start:dev": "nodemon -w src -e ts,tsx --ignore 'dist/*' --exec 'npm start'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
