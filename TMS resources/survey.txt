@@ -1,0 +1,24 @@
+Transactive Memory System Scale Items
+
+Specialization
+1. Each team member has specialized knowledge of some aspect of our project.
+2. I have knowledge about an aspect of the project that no other team member has.
+3. Different team members are responsible for expertise in different areas.
+4. The specialized knowledge of several different team members was needed to complete the project
+deliverables.
+5. I know which team members have expertise in specific areas.
+Credibility
+1. I was comfortable accepting procedural suggestions from other team members.
+2. I trusted that other members’ knowledge about the project was credible.
+3. I was confident relying on the information that other team members brought to the discussion.
+4. When other members gave information, I wanted to double-check it for myself. (reversed)
+5. I did not have much faith in other members’ “expertise.” (reversed)
+Coordination
+1. Our team worked together in a well-coordinated fashion.
+2. Our team had very few misunderstandings about what to do.
+3. Our team needed to backtrack and start over a lot. (reversed)
+4. We accomplished the task smoothly and efficiently.
+5. There was much confusion about how we would accomplish the task. (reversed)
+
+Note. All items use a 5-point disagree-agree response format, in which | = strongly disagree, 2 = disagree,
+3 = neutral, 4 = agree, and 5 = strongly agree.
