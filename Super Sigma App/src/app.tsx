@@ -1,6 +1,5 @@
 import pkg from '@slack/bolt';
-import { Divider, Header, Home, JSXSlack, Section, Select, Option, Mrkdwn,  } from 'jsx-slack';
-import { CustomActions } from './components/CustomActions.js';
+import { Header, Home, JSXSlack,  } from 'jsx-slack';
 import { entityManager } from './utils.js';
 import { User } from './entity/User.js';
 import { Channel } from './entity/Channel.js';
@@ -49,17 +48,18 @@ const exampleUsersAndChannels = async () => {
 // Start your app
 await app.start(process.env.PORT || 9000);
 
-app.client.views.publish({
-  user_id: "U0550F2EP35",
-  view: JSXSlack(
-    <Home>
-      <Header>Welcome back to my home! :house_with_garden:</Header>
-      <Divider />
-      <Section>What's bruh?</Section>
-      <CustomActions first_button_b='New BEEEEs' second_button_b="i don't care i already saw it" />
-      <Select multiple label='kringe'><Option > <Mrkdwn>Haha *hehe*</Mrkdwn> </Option></Select>
-    </Home>
-  )
+app.event("app_home_opened", async ({payload}) => {
+  console.log(payload)
+  if (payload.tab == "home") {
+    app.client.views.publish({
+      user_id: payload.user,
+      view: JSXSlack(
+        <Home>
+          <Header>{(await app.client.users.info({user: payload.user})).user?.color}</Header>
+        </Home>
+      )
+    })
+  }
 })
 
 console.log('⚡️ Bolt app is running!');
