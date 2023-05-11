@@ -1,5 +1,12 @@
-import { Header, Home, JSXSlack,  } from 'jsx-slack';
 import { app, getUsersFromChannels, sendDM } from './utils/index.js';
+import { Header, Home, JSXSlack,  } from 'jsx-slack';
+
+app.message('hello', async ({ message, say }) => {
+  // say() sends a message to the channel where the event was triggered
+  if (message.subtype == undefined || message.subtype == "bot_message") {
+    await say(`hello there <@${message.user}>!`);
+  }
+});
 
 // Start your app
 await app.start(process.env.PORT || 9000);

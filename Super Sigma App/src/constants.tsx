@@ -1,22 +1,14 @@
-/** @jsxImportSource jsx-slack */
-import {RadioButton, Modal, Header, RadioButtonGroup, Divider} from 'jsx-slack'
-
 enum QuestionFocus {
   Specialization = "Specialization :bulb:",
   Coordination = "Coordination :dancers:",
   Credibility = "Credibility :guardsman:"
 }
 
-interface Question {
+export interface Question {
   focus : QuestionFocus,
   number : number,
   text : string,
   reversed : boolean
-}
-
-interface QuestionModalParams {
-  question : Question,
-  channelNames : string[]
 }
 
 export const survey : Question[] = [
@@ -111,42 +103,3 @@ export const survey : Question[] = [
     reversed: true 
   },
 ]
-
-function valueIfReversed(value: number, reversed: boolean) : string {
-  return reversed ? 
-    (6 - value).toString() : 
-    value.toString()
-}
-
-interface ReversedParam {
-  reversed : boolean
-}
-
-function optionsWithValues({reversed} : ReversedParam) : any {return ( // It is not clear to me what the return type should be here
-  <>
-    <RadioButton value={valueIfReversed(5, reversed)}>Strongly agree</RadioButton>
-    <RadioButton value={valueIfReversed(4, reversed)}>Agree</RadioButton>
-    <RadioButton value={valueIfReversed(3, reversed)}>Neither agree nor disagree</RadioButton>
-    <RadioButton value={valueIfReversed(2, reversed)}>Disagree</RadioButton>
-    <RadioButton value={valueIfReversed(1, reversed)}>Strongly disagree</RadioButton>
-  </>
-)}
-
-function channelNamesToString(channelNames: string[]): string {
-  return channelNames.join(", ")
-}
-
-export const surveyModalBlock = ({question : {focus, number, text, reversed}, channelNames} : QuestionModalParams) => (
-  <Modal title={`TMS survey for ${channelNamesToString(channelNames)}`} close="Previous" submit="Next">
-  <Header>${focus}</Header>
-  <Divider />
-
-  <RadioButtonGroup
-    label={`${number.toString()}. ${text}`}
-    required
-  >
-    ${optionsWithValues({reversed})}
-  </RadioButtonGroup>
-
-  </Modal>
-)
