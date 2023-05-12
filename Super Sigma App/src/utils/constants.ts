@@ -1,4 +1,4 @@
-import { AppDataSource } from "../data-source.js";
+import { AppDataSource } from "./data-source.js";
 import pkg from "@slack/bolt";
 const { App } = pkg;
 
