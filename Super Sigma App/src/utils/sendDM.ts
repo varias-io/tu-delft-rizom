@@ -3,12 +3,12 @@ import { app } from "./index.js"
 interface SendDMProps {
     users: string[],
     message: string
-
 }
 
+//Sends a direct message to each user in the users array
 export const sendDM = ({users, message}: SendDMProps) => {
     users.forEach(async (user) => {
-        //opens a conversation with all members
+      //opens a conversation with all members
       const dm = await app.client.conversations.open({
         token: process.env.SLACK_BOT_TOKEN ?? "",
         users: user
