@@ -1,9 +1,5 @@
-import { Exclude } from "class-transformer"
 import {
   BaseEntity,
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -13,33 +9,21 @@ export class TimestampedBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @CreateDateColumn()
-  @Column("timestamp", {
-    name: "created_at",
-    default: new Date(),
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    name: 'created_at',
+    precision: 6,
   })
-  createdAt: Date
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  @Exclude()
-  @Column("timestamp", {
-    name: "updated_at",
-    default: new Date(),
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+    precision: 6,
+    name: 'updated_at',
   })
-  updatedAt: Date
+  updatedAt: Date;
 
-  @BeforeInsert()
-  setInitialValues() {
-    if (!this.createdAt) {
-      this.createdAt = new Date()
-    }
-    if (!this.updatedAt) {
-      this.updatedAt = new Date()
-    }
-  }
-
-  @BeforeUpdate()
-  updateTimestamps() {
-    this.updatedAt = new Date()
-  }
 }
