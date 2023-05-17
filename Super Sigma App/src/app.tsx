@@ -27,13 +27,12 @@ app.event("app_home_opened", async ({context, payload}) => {
   }
 })
 
-app.command("/testmodal", async ({ command, ack, say, client }) => {
-  console.log("jdjdjd")
+app.command("/testmodal", async ({ command, ack, say, client, context }) => {
   await ack();
 
   try {
     const result = await client.views.open({
-      token: process.env.SLACK_BOT_TOKEN ?? "",
+      token: context.botToken ?? "",
       trigger_id: command.trigger_id,
       view: JSXSlack(<SurveyModalBlock question={survey[0]} channelNames={["sad"]}/>)
     });
