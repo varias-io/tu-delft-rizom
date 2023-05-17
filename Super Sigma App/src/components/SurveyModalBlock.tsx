@@ -28,7 +28,7 @@ const channelNamesToString = (channelNames: string[]): string => channelNames.jo
 
 export const SurveyModalBlock = ({question : {focus, number, text, reversed}, channelNames} : QuestionModalProps) : JSX.Element => (
   <Modal title={`TMS survey for ${channelNamesToString(channelNames)}`} close="Previous" submit="Next">
-  <Header>${focus}</Header>
+  <Header>{focus}</Header>
   <Divider />
 
   <RadioButtonGroup
