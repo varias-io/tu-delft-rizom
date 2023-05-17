@@ -10,7 +10,7 @@
     "start": "npm run build && node -r dotenv/config dist/app.js",
     "start:dev": "nodemon -w src -e ts,tsx --ignore 'dist/*' --exec 'npm start'",
     "lint": "eslint . --ext .ts,.tsx",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit --project tsconfig.prod.json",
     "migration:generate": "npm run build && node generate-migration.js",
     "migration:run": "npm run build && npx typeorm migration:run -d dist/data-source.js"
   },
