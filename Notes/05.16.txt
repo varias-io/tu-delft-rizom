@@ -1,0 +1,5 @@
+We could do 1-week subsprints - for this sprint it was not necessary but for the next ones it could be useful - gonna think of that during next sprint planning
+
+We should test things - Testing workshop next week? 
+
+Taking notes of meetings? We probably should, we'll figure out a way to document our process
