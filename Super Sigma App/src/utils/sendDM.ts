@@ -5,8 +5,11 @@ interface SendDMProps {
     message: string
 }
 
-//Sends a direct message to each user in the users array
-//If a user is a bot it will catch the exception and log which user it was
+/*
+*Sends a direct message to each user in the users array.
+*If a user is a bot it will catch the exception and log which user it was,
+*this is to avoid sending a request for each user to check if they are a bot.
+*/
 export const sendDM = ({users, message}: SendDMProps) => {
     users.forEach(async (user) => {
       

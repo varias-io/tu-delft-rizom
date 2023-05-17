@@ -18,6 +18,6 @@ app.event("app_home_opened", async ({payload}) => {
 })
 
 const users = await getUsersFromChannels({channels: ["C0576HMBEJG"]})
-sendDM({users: users, message: "Hello World"})
+sendDM({users: Array.from(users), message: "Hello World"})
 
 console.log('⚡️ Bolt app is running!');
