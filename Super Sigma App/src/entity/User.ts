@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToMany, JoinTable } from "typeorm"
+import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate } from "typeorm"
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js"
 import { Channel } from "./Channel.js"
 
@@ -9,21 +9,16 @@ export class User extends TimestampedBaseEntity {
     slackId: string
 
     @ManyToMany(() => Channel, channel => channel.managers)
-    @JoinTable({
-        name: "user_managed_channels", // name of the table that will be created
-        joinColumns: [
-            { 
-                name: "userId",
-                referencedColumnName: "id",
-            },
-        ],
-        inverseJoinColumns: [
-            {
-                name: "channelId",
-                referencedColumnName: "id",
-            },
-        ],
-    })
     managedChannels: Channel[]
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    @AfterLoad()
+    @AfterInsert()
+    @AfterUpdate()
+    async nullChecks() {
+        if (!this.managedChannels) {
+        this.managedChannels = []
+        }
+    }
 
 }

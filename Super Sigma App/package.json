@@ -8,7 +8,7 @@
     "test": "echo \"no test specified\"",
     "build": "tsc",
     "start": "npm run build && node -r dotenv/config dist/app.js",
-    "start:dev": "nodemon -w src -e ts,tsx --ignore 'dist/*' --exec 'npm start'",
+    "start:dev": "nodemon -w src -e ts,tsx --ignore \"dist/*\" --exec \"npm start\"",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit --project tsconfig.prod.json",
     "migration:generate": "npm run build && node generate-migration.js",
