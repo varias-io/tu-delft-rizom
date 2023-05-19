@@ -63,7 +63,7 @@ export const SurveyData = ({ surveys }: { surveys: Survey[] }) => (
     {surveys.map((survey) => (
       <Section >
         {`#${survey.channel_Name}`}<br />
-        {`Survey ${survey.Survey_num}: Completed ${survey.completed_amount}/${survey.participants}`} <br />
+        {`Completed ${survey.completed_amount}/${survey.participants}`} <br />
         {`TMS: ${survey.TMS_Score}`}<br />
         {survey.date.toLocaleDateString("nl-NL")}
         <br />

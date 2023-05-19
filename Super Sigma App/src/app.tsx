@@ -20,7 +20,7 @@ app.event("app_home_opened", async ({context, payload}) => {
           <Header> Active Surveys</Header>
           <Divider />
           <SurveyData surveys = 
-          {[new Survey("foo", "1", 1, 2, 3, new Date(2021, 1, 1)), new Survey("bar", "2", 1, 2, 3, new Date(2021, 1, 1))].sort(function(a, b) {
+          {[new Survey("foo", 1, 2, 3, new Date(2021, 1, 1)), new Survey("bar", 1, 2, 3, new Date(2021, 1, 1))].sort(function(a, b) {
             return a.channel_Name.localeCompare(b.channel_Name);
           })}/>
         </Home>
