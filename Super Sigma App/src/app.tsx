@@ -1,6 +1,6 @@
-import { SurveyModalBlock } from './components/SurveyModalBlock.js';
-import { survey } from './constants.js';
-import { app, getUsersFromChannels, sendDM } from './utils/index.js';
+import { SurveyModalBlock, showSurveyModal } from './components/SurveyModalBlock.js';
+import { surveyTemplate } from './constants.js';
+import { app } from './utils/index.js';
 import { Header, Home, JSXSlack,  } from 'jsx-slack';
 
 // Start your app
@@ -27,18 +27,24 @@ app.event("app_home_opened", async ({context, payload}) => {
   }
 })
 
-app.command("/testmodal", async ({ command, ack, say, client, context }) => {
+app.command("/testmodal", async ({ command, ack, client, context }) => {
   await ack();
 
-  try {
-    const result = await client.views.open({
-      token: context.botToken ?? "",
-      trigger_id: command.trigger_id,
-      view: JSXSlack(<SurveyModalBlock question={survey[0]} channelNames={["sad"]}/>)
-    });
-  } catch (error) {
-    console.error(error);
+  await showSurveyModal(client, context.botToken ?? "", command.trigger_id, 0);
+});
+
+app.view('survey_modal_submission', async ({ ack, view,}) => {
+  const questionInfo = JSON.parse(view.private_metadata)
+
+  if(questionInfo.questionIndex < surveyTemplate.length - 1){
+    //show next question
+    await ack({response_action: "update", view: JSXSlack(<SurveyModalBlock questionIndex={questionInfo.questionIndex+1} channelNames={questionInfo.channelNames} />)});
+  } else {
+    //this was last question
+    await ack()
   }
 });
 
 console.log('⚡️ Bolt app is running!');
+
+

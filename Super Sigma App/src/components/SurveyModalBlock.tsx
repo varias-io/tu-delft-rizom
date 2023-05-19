@@ -1,9 +1,10 @@
-import {RadioButton, Modal, Header, RadioButtonGroup, Divider} from 'jsx-slack'
-import { Question } from '../constants.js'
+import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack} from 'jsx-slack'
+import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
+import { AllMiddlewareArgs } from '@slack/bolt'
 
 interface QuestionModalProps {
-  question : Question,
+  questionIndex : number,
   channelNames : string[]
 }
 
@@ -26,8 +27,28 @@ const OptionsWithValues = ({reversed} : OptionsWithValuesProps) : JSX.Element =>
 
 const channelNamesToString = (channelNames: string[]): string => channelNames.join(", ")
 
-export const SurveyModalBlock = ({question : {focus, number, text, reversed}, channelNames} : QuestionModalProps) : JSX.Element => (
-  <Modal title={`TMS survey for ${channelNamesToString(channelNames)}`} close="Previous" submit="Next">
+
+export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, index: number) => {
+  try {
+    await client.views.open({
+      token: token,
+      trigger_id: trigger_id,
+      view: JSXSlack(<SurveyModalBlock questionIndex={index} channelNames={["sad", "das"]} />)
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export const SurveyModalBlock = ({questionIndex, channelNames} : QuestionModalProps) : JSX.Element => {
+  const {focus, number, text, reversed} = surveyTemplate[questionIndex];
+  return <Modal 
+    title={`TMS survey for ${channelNamesToString(channelNames)}`} 
+    close="Previous" 
+    submit="Next" 
+    callbackId='survey_modal_submission' 
+    privateMetadata={JSON.stringify({channelNames, questionIndex})}
+  >
   <Header>{focus}</Header>
   <Divider />
 
@@ -39,4 +60,4 @@ export const SurveyModalBlock = ({question : {focus, number, text, reversed}, ch
   </RadioButtonGroup>
 
   </Modal>
-)
+}
