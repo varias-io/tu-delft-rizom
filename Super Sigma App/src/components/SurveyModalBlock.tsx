@@ -1,5 +1,5 @@
 import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack} from 'jsx-slack'
-import { Question, QuestionFocus, surveyTemplate } from '../constants.js'
+import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 
@@ -30,7 +30,7 @@ const channelNamesToString = (channelNames: string[]): string => channelNames.jo
 
 export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, index: number) => {
   try {
-    const result = await client.views.open({
+    await client.views.open({
       token: token,
       trigger_id: trigger_id,
       view: JSXSlack(<SurveyModalBlock questionIndex={index} channelNames={["sad", "das"]} />)
