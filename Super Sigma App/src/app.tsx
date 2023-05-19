@@ -1,5 +1,5 @@
 import { Divider, Header, Home, JSXSlack, Mrkdwn, Option, Select,  } from 'jsx-slack';
-import { app, getUsersFromChannels, sendDM } from './utils/index.js';
+import { app } from './utils/index.js';
 import { CustomActions2, SurveyData } from './components/CustomActions.js';
 import { Survey } from './entity/Survey.js';
 
