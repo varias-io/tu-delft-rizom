@@ -1,16 +1,20 @@
-export class Survey{
-    channel_Name: string ;
-    completed_amount: number; 
-    participants: number ;
-    TMS_Score: number ;
-    date: Date ;
+import { Column, Entity } from "typeorm";
+import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 
-    constructor(channel_Name: string, completed_amount: number, participants: number, TMS_Score: number, date: Date) {
-        this.channel_Name = channel_Name;
-        this.completed_amount = completed_amount;
-        this.participants = participants;
-        this.TMS_Score = TMS_Score;
-        this.date = date;
-    }
-    
+@Entity()
+export class Survey extends TimestampedBaseEntity {
+    @Column()
+    channelName: string;
+
+    @Column()
+    completedAmount: number;
+
+    @Column()
+    participants: number;
+
+    @Column()
+    TMSScore: number;
+
+    @Column()
+    date: Date; 
 }
