@@ -1,4 +1,4 @@
-enum QuestionFocus {
+export enum QuestionFocus {
   Specialization = "Specialization :bulb:",
   Coordination = "Coordination :dancers:",
   Credibility = "Credibility :guardsman:"
@@ -11,7 +11,7 @@ export interface Question {
   reversed : boolean
 }
 
-export const survey : Question[] = [
+export const surveyTemplate : Question[] = [
   {
     focus:  QuestionFocus.Specialization,
     number: 1,
