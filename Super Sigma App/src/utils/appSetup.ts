@@ -22,6 +22,9 @@ export const app = new App({
   receiver: expressReceiver,
   signingSecret: process.env.SLACK_SIGNING_SECRET ?? "",
   clientSecret: process.env.SLACK_CLIENT_SECRET ?? "",
+  scopes: [
+    "users:read",
+  ]
 });
 
 const app_express = expressReceiver.app;
