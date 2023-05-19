@@ -7,7 +7,7 @@ if (!migrationName) {
     process.exit(1);
 }
 
-const command = `npx typeorm migration:generate -d dist/data-source.js src/migrations/${migrationName}`;
+const command = `npx typeorm migration:generate -d dist/utils/data-source.js src/migrations/${migrationName}`;
 
 exec(command, (error, stdout, stderr) => {
     if (error) {
