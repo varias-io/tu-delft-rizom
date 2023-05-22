@@ -24,6 +24,7 @@
     "@slack/bolt": "^3.13.0",
     "class-transformer": "^0.5.1",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "jsx-slack": "^6.0.0",
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",

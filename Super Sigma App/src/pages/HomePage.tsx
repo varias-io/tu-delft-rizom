@@ -1,4 +1,4 @@
-import { Home, Header, Divider, Section, Button, Actions } from "jsx-slack";
+import { Home, Header, Divider, Section, Button, Actions, Image } from "jsx-slack";
 import { ChannelSelect } from "../components/ChannelSelect.js";
 import { CreateSurvey } from "../components/CreateSurvey.js";
 import { SurveyData } from "../components/SurveyDisplay.js";
@@ -33,6 +33,7 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         {[entityManager.create(Survey, {channelName: "foo", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)}), entityManager.create(Survey, {channelName: "bar", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)})].sort(function(a, b) {
         return a.channelName.localeCompare(b.channelName);
         })}/>
+        <Image src="https://ilse.rizom.test.varias.dev/table.jpeg" alt="TABLE" />
     </Home>
 )
 

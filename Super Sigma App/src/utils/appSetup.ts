@@ -1,6 +1,7 @@
 import pkg from "@slack/bolt";
 import { entityManager } from "./database.js";
 import { Installation } from "../entity/Installation.js";
+import express from "express";
 const { App, ExpressReceiver } = pkg;
 
 const expressReceiver = new ExpressReceiver({
@@ -28,6 +29,8 @@ export const app = new App({
 });
 
 const app_express = expressReceiver.app;
+
+app_express.use(express.static('src/assets'))
 
 /* Page with add button, can be implemented in website instead */
 app_express.get('/auth/add', (_req, res, _next) => {
