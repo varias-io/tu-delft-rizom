@@ -33,6 +33,9 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         {[entityManager.create(Survey, {channelName: "foo", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)}), entityManager.create(Survey, {channelName: "bar", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)})].sort(function(a, b) {
         return a.channelName.localeCompare(b.channelName);
         })}/>
+        <Divider/>
+        <Actions><Button style="primary" actionId="fillSurvey">Fill in Survey</Button></Actions>
+
     </Home>
 )
 
