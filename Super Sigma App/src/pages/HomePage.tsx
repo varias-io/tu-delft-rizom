@@ -22,7 +22,7 @@ const canvasRenderService = new CanvasRenderService.ChartJSNodeCanvas({
 });
 
 
-const createImage = async () => {
+const createImage1 = async () => {
   const dataUrl = await canvasRenderService.renderToDataURL({
     type: "bar",
     data: {
@@ -31,10 +31,12 @@ const createImage = async () => {
             {
                 label: 'Retweets',
                 data: [12, 5, 40, 5],
+                backgroundColor: '#9BD0F5',
             },
             {
                 label: 'Likes',
                 data: [80, 42, 215, 30],
+                backgroundColor: '#FF6384',
             },
         ],
     },
@@ -42,11 +44,33 @@ const createImage = async () => {
   return dataUrl;
 }
 
-const chart = createImage() ?? "";
+const createImage2 = async () => {
+    const dataUrl = await canvasRenderService.renderToDataURL({
+        type: "line",
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [
+                {
+                    label: 'My First dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    fill: false,
+                    borderColor: '#9BD0F5',
+                    backgroundColor: '#9BD0F5',
+                    tension: 0.1
+                },
+            ]
+        }
+    })
+    return dataUrl
+}
+
+const barChart = createImage1() ?? "";
+const lineChart = createImage2() ?? "";
 
 import {writeFile} from "node:fs/promises"
 
-writeFile("./src/assets/out.png", (await chart).replace(/^data:image\/png;base64,/, ""), "base64")
+writeFile("./src/assets/barChart.png", (await barChart).replace(/^data:image\/png;base64,/, ""), "base64")
+writeFile("./src/assets/lineChart.png", (await lineChart).replace(/^data:image\/png;base64,/, ""), "base64")
 
 export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
     <Home>
@@ -70,7 +94,8 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         return a.channelName.localeCompare(b.channelName);
         })}/>
         <Image src="https://ilse.rizom.test.varias.dev/table.jpeg" alt="TABLE" />
-        <Image src="https://ilse.rizom.test.varias.dev/out.png" alt="chart" />  
+        <Image src="https://ilse.rizom.test.varias.dev/barChart.png" alt="chart" />  
+        <Image src="https://ilse.rizom.test.varias.dev/lineChart.png" alt="chart" />  
         </Home>
 )
 
