@@ -6,13 +6,13 @@ import { Channel } from "./Channel.js";
 
 @Entity()
 export class Survey extends TimestampedBaseEntity {
-    @ManyToMany(() => Channel, channel => channel.surveys)
+    @ManyToMany(() => Channel, channel => channel.surveys, { eager: true })
     channels: Channel[];
 
-    @ManyToMany(() => User, user => user.eligibleSurveys)
+    @ManyToMany(() => User, user => user.eligibleSurveys, { eager: true })
     participants: User[];
 
-    @OneToMany(() => SurveyAnswer, answer => answer.survey)
+    @OneToMany(() => SurveyAnswer, answer => answer.survey, { eager: true })
     answers: Relation<SurveyAnswer>[];
 
     // eslint-disable-next-line @typescript-eslint/require-await

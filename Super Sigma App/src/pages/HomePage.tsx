@@ -3,7 +3,7 @@ import { ChannelSelect } from "../components/ChannelSelect.js";
 import { CreateSurvey } from "../components/CreateSurvey.js";
 import { SurveyDisplay } from "../components/SurveyDisplay.js";
 import { MembersSelect } from "../components/MembersSelect.js";
-import { surveyExample } from "../utils/index.js";
+import { surveyExample1, surveyExample2 } from "../utils/index.js";
 
 interface HomeProps {
     userId: string
@@ -28,9 +28,8 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         <Divider/>
         <Header>Create a survey:</Header>
         {await CreateSurvey({userId, token})}
-        {await SurveyDisplay( {surveys: [surveyExample], token})}
-        <Divider/>
-        <Actions><Button style="primary" actionId="fillSurvey">Fill in Survey</Button></Actions>
+        {await SurveyDisplay( {surveys: [surveyExample1, surveyExample2], token})}
+        
     </Home>
 )
 
