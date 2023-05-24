@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"no test specified\"",
     "build": "tsc",
+    "seed": "npm run build ; ts-node src/seeding/seed.ts",
     "start": "npm run build && node -r dotenv/config dist/app.js",
     "start:dev": "nodemon -w src -e ts,tsx --ignore \"dist/*\" --exec \"npm start\"",
     "lint": "eslint . --ext .ts,.tsx",
@@ -21,6 +22,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^8.0.1",
     "@slack/bolt": "^3.13.0",
     "class-transformer": "^0.5.1",
     "dotenv": "^16.0.3",
@@ -28,6 +30,7 @@
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.16",
+    "typeorm-extension": "^2.8.0",
     "typescript": "^5.0.4"
   },
   "devDependencies": {
