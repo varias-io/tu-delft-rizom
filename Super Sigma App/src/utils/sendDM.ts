@@ -2,6 +2,7 @@ import { app } from "./index.js"
 
 interface SendDMProps {
     users: string[],
+    token: string,
     message: string
 }
 
@@ -10,19 +11,19 @@ interface SendDMProps {
 *If a user is a bot it will catch the exception and log which user it was,
 *this is to avoid sending a request for each user to check if they are a bot.
 */
-export const sendDM = ({users, message}: SendDMProps) => {
+export const sendDM = ({users, token, message}: SendDMProps) => {
     users.forEach(async (user) => {
       
       //opens a conversation with all members
       try {
         const dm = await app.client.conversations.open({
-          token: process.env.SLACK_BOT_TOKEN ?? "",
+          token,
           users: user
         })
       
         //sends a message to the conversation
         app.client.chat.postMessage({
-          token: process.env.SLACK_BOT_TOKEN ?? "",
+          token,
           channel: dm.channel?.id ?? "",
           text: message
         })
