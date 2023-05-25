@@ -1,7 +1,7 @@
 import { JSXSlack } from "jsx-slack";
 import { SurveyModalBlock } from "../components/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
-import { app, entityManager, findUser } from "../utils/index.js";
+import { app, entityManager, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entity/SurveyAnswer.js";
 import { Survey } from "../entity/Survey.js";
 
@@ -28,7 +28,7 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
   // console.log(selectedOptionValue)
   await entityManager.create(SurveyAnswer, {
     survey: questionInfo.survey, 
-    user: await findUser(body.user.id),
+    user: await findUserBySlackId(body.user.id),
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
   }).save()

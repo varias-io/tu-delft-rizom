@@ -1,15 +1,19 @@
 import { Actions, Button, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
-import { computeTMS, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
+import { TMSScore, computeTMS, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
 
 export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], token: string }) => (
   <>
-    {await Promise.all(surveys.map(async (survey) => (
-      <>
+    {await Promise.all(surveys.map(async (survey) => {
+      const tms: TMSScore = await computeTMS(survey);
+      return <>
         <Section>
           {`#${await surveyToTitle(survey, token)}`}<br />
           {`Completed ${(await usersWhoCompletedSurvey(survey)).length}/${survey.participants.length}`} <br />
-          {`TMS: ${computeTMS(survey)}`}<br />
+          {`Overall TMS: ${((tms.specialization+tms.credibility+tms.coordination)/3).toFixed(2)}`}<br />
+          {`- Specialization: ${tms.specialization.toFixed(2)}`}<br />
+          {`- Credibility: ${tms.credibility.toFixed(2)}`}<br />
+          {`- Coordination: ${tms.coordination.toFixed(2)}`}<br />
           {survey.createdAt.toLocaleDateString("nl-NL")}
           <br />
         </Section>
@@ -18,6 +22,6 @@ export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], tok
           <Button actionId="view_participation">View Participation </Button>
         </Actions>
       </>
-    )))}
+    }))}
   </>
 );
