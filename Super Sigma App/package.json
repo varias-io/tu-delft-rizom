@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"no test specified\"",
     "build": "rimraf dist; tsc",
-    "seed": "npm run build ; ts-node src/seeding/seed.ts",
+    "seed": "npm run build ; node dist/seeding/seed.js",
     "start": "npm run build && node -r dotenv/config dist/app.js",
     "start:dev": "nodemon -w src -e ts,tsx --ignore \"dist/*\" --exec \"npm start\"",
     "lint": "eslint . --ext .ts,.tsx",
