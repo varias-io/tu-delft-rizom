@@ -8,18 +8,18 @@ import { Survey } from "../entity/Survey.js";
 import { User } from "../entity/User.js";
 
 interface HomeProps {
-    userId: string
+    userSlackId: string
     token: string
     selectedChannel?: string
 }
 
-export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
+export const HomePage = async ({userSlackId, token, selectedChannel}: HomeProps) => (
     <Home>   
         <Header>Welcome back to my home! :house_with_garden:</Header>
         <Header>Make members Channel Managers here:</Header>
         <Divider/>
         <Section><b>Select a channel</b></Section>
-        {await ChannelSelect({userId, token})}
+        {await ChannelSelect({userSlackId, token})}
         {(selectedChannel && 
             <>
                 {await MembersSelect(selectedChannel, token)}
@@ -29,15 +29,15 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         || <></>}
         <Divider/>
         <Header>Create a survey:</Header>
-        {await CreateSurvey({userId, token})}
+        {await CreateSurvey({userSlackId, token})}
         {await SurveyDisplay( {surveys: await (async () => {
             const user = await entityManager.getRepository(User)
             .createQueryBuilder("user")
-            .where("user.slackId = :slackId", { slackId: userId })
+            .where("user.slackId = :slackId", { slackId: userSlackId })
             .getOne();
           
           if (!user) {
-            throw new Error(`No user found with slackId: ${userId}`);
+            throw new Error(`No user found with slackId: ${userSlackId}`);
           }
 
           const surveyIds = user.eligibleSurveys.map(survey => survey.id)
@@ -53,7 +53,7 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
           }
             
           return surveys.getMany();
-        })(), token})}
+        })(), token, userSlackId})}
     </Home>
 )
 

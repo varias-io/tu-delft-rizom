@@ -4,7 +4,7 @@ import { JSX } from 'jsx-slack/jsx-runtime';
 import { app } from '../utils/index.js';
 
 interface ChannelSelectProps {
-    userId: string,
+    userSlackId: string,
     selected?: Channel["id"]
     token: string
 }
@@ -12,20 +12,20 @@ interface ChannelSelectProps {
 /**
  * Get all channels the given user is the creator of.
  */
-export const getManagedChannels = async (userId: string, token: string) => {
+export const getManagedChannels = async (userSlackId: string, token: string) => {
     const managedChannels: Channel[] = [];
     
         // Get all conversations the user is part of
         const conversationsResponse = await app.client.users.conversations({
             token,
-            user: userId,
+            user: userSlackId,
             types: "private_channel, public_channel"
         });
 
         const channels = conversationsResponse.channels ?? [];
         
         channels.forEach((channel) => {
-            if (channel?.creator == userId) {
+            if (channel?.creator == userSlackId) {
                 managedChannels.push(channel);
             }
         })
@@ -35,8 +35,8 @@ export const getManagedChannels = async (userId: string, token: string) => {
 /**
  * Show a dropdown menu with all channels the user is the creator of.
  */
-export const ChannelSelect = async ({userId, selected, token}: ChannelSelectProps): Promise<JSX.Element> => {
-    const channels = await getManagedChannels(userId, token)
+export const ChannelSelect = async ({userSlackId, selected, token}: ChannelSelectProps): Promise<JSX.Element> => {
+    const channels = await getManagedChannels(userSlackId, token)
 
     return (
         <Actions id="channels">
