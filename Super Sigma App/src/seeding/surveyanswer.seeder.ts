@@ -22,8 +22,8 @@ export default class SurveyAnswerSeeder implements Seeder {
       }
 
       await Promise.all(users.map(async (user) => {
-        const max = Math.random() < 0.5 ? (Math.floor(Math.random()*16)+1): 16
-        for (let questionNumber = 1; questionNumber < max; questionNumber++) {
+        const max = Math.random() < 0.5 ? (Math.floor(Math.random()*15)+1): 15
+        for (let questionNumber = 0; questionNumber < max; questionNumber++) {
           const value = Math.floor(Math.random() * 5) + 1; // Generate random value between 1 and 5
           const answer = dataSource.manager.create(SurveyAnswer, {
             survey,
