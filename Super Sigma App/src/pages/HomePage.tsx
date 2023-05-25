@@ -3,7 +3,7 @@ import { ChannelSelect } from "../components/ChannelSelect.js";
 import { CreateSurvey } from "../components/CreateSurvey.js";
 import { SurveyData } from "../components/SurveyDisplay.js";
 import { Survey } from "../entity/Survey.js";
-import { entityManager } from "../utils/database.js";
+import { entityManager } from "../utils/index.js";
 import { MembersSelect } from "../components/MembersSelect.js";
 
 interface HomeProps {
@@ -33,6 +33,6 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         {[entityManager.create(Survey, {channelName: "foo", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)}), entityManager.create(Survey, {channelName: "bar", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)})].sort(function(a, b) {
         return a.channelName.localeCompare(b.channelName);
         })}/>
-    </Home>
+        </Home>
 )
 
