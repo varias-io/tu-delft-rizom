@@ -3,7 +3,6 @@ import { SurveyModalBlock } from "../components/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
 import { app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entity/SurveyAnswer.js";
-import { Survey } from "../entity/Survey.js";
 import { openHome } from "./homeOpenedAction.js";
 
 interface PrivateMetadataQuestion {

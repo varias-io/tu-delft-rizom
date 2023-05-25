@@ -29,7 +29,6 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         <Header>Create a survey:</Header>
         {await CreateSurvey({userId, token})}
         {await SurveyDisplay( {surveys: [surveyExample1, surveyExample2], token})}
-        
     </Home>
 )
 

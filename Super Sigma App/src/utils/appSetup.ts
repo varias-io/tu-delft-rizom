@@ -4,6 +4,7 @@ import { Installation } from "../entity/Installation.js";
 import { Survey } from "../entity/Survey.js";
 import { Channel } from "../entity/Channel.js";
 import { User } from "../entity/User.js";
+import express from "express";
 const { App, ExpressReceiver } = pkg;
 
 const expressReceiver = new ExpressReceiver({
@@ -45,6 +46,8 @@ export const surveyExample2: Survey = await entityManager.create(Survey, {channe
 })
 
 const app_express = expressReceiver.app;
+
+app_express.use(express.static('src/assets'))
 
 /* Page with add button, can be implemented in website instead */
 app_express.get('/auth/add', (_req, res, _next) => {
