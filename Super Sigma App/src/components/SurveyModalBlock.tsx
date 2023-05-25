@@ -23,8 +23,8 @@ interface OptionsWithValuesProps {
 
 const OptionsWithValues = ({reversed} : OptionsWithValuesProps) : JSX.Element => (
   <>
-    {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"].map((option, index) => 
-      <RadioButton value={valueIfReversed(index+1, reversed)}>{option}</RadioButton>)}
+    {["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"].map((option, index) => 
+      <RadioButton value={valueIfReversed(5-index, reversed)}>{option}</RadioButton>)}
   </>
 )
 
@@ -46,7 +46,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
   return <Modal 
     title={`TMS survey for ${await surveyToTitle(survey, token)}`} 
     close="Previous" 
-    submit="Next" 
+    submit={questionIndex == 14 ? "Submit" : "Next"}
     callbackId='survey_modal_submission' 
     privateMetadata={JSON.stringify({survey, questionIndex})}
   >
