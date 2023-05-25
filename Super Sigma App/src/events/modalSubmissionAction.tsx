@@ -4,6 +4,7 @@ import { surveyTemplate } from "../constants.js";
 import { app, entityManager, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entity/SurveyAnswer.js";
 import { Survey } from "../entity/Survey.js";
+import { openHome } from "./homeOpenedAction.js";
 
 interface PrivateMetadataQuestion {
   survey: Survey
@@ -46,6 +47,8 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
       }))});
   } else {
     //this was last question
+    openHome(body.user.id, context)
     await ack()
+    
   }
 });
