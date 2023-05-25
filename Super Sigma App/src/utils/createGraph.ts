@@ -2,13 +2,6 @@ import CanvasRenderService from 'chartjs-node-canvas';
 
 import { writeFileSync } from "node:fs"
 
-const width = 1000;   // define width and height of canvas 
-const height = 1000;   
-const canvasRenderService = new CanvasRenderService.ChartJSNodeCanvas({
-    width,
-    height
-});
-
 interface GraphProps {
     filename: string,
     type: string,
@@ -20,7 +13,9 @@ interface GraphProps {
                 data: number[],
                 backgroundColor: string,
             }[]
-    }
+    },
+    width?: number,
+    height?: number
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -45,7 +40,8 @@ interface LineGraphProps extends GraphProps {
     }        
 }
 
-export const createGraph = async ({filename, type, data}: GraphProps) => {
+export const createGraph = async ({filename, type, data, width=1000, height=1000}: GraphProps) => {
+    const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height,});
     const dataUrl = await canvasRenderService.renderToDataURL({
         type: (type as any), 
         data: data
