@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"no test specified\"",
-    "build": "tsc",
+    "build": "rimraf dist; tsc",
     "seed": "npm run build ; ts-node src/seeding/seed.ts",
     "start": "npm run build && node -r dotenv/config dist/app.js",
     "start:dev": "nodemon -w src -e ts,tsx --ignore \"dist/*\" --exec \"npm start\"",
@@ -41,6 +41,7 @@
     "@typescript-eslint/parser": "^5.59.2",
     "eslint": "^8.39.0",
     "nodemon": "^2.0.22",
+    "rimraf": "^5.0.1",
     "ts-node": "^10.9.1"
   }
 }
