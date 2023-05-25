@@ -1,9 +1,6 @@
 import pkg from "@slack/bolt";
 import { entityManager } from "./database.js";
 import { Installation } from "../entity/Installation.js";
-import { Survey } from "../entity/Survey.js";
-import { Channel } from "../entity/Channel.js";
-import { User } from "../entity/User.js";
 import express from "express";
 const { App, ExpressReceiver } = pkg;
 
