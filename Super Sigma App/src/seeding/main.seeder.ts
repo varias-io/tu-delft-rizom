@@ -5,14 +5,15 @@ import { app } from "../utils/appSetup.js";
 import { entityManager, getUsersFromChannels } from "../utils/index.js";
 import { Installation } from "../entity/Installation.js";
 import { User } from "../entity/User.js";
-import SurveySeeder from "./survey.seeder.js";
+import "./survey.factory.js";
 import SurveyAnswerSeeder from "./surveyanswer.seeder.js";
+import { Survey } from "../entity/Survey.js";
 
 export default class MainSeeder implements Seeder {
   public async run(
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
-  ): Promise<any> {
+  ) {
     const botToken = (await entityManager.findOneByOrFail(Installation, {teamId: "T055Q9UHP5W"})).botToken
 
     const channels = (await app.client.conversations.list({
@@ -35,10 +36,11 @@ export default class MainSeeder implements Seeder {
     }))
 
   
-    const surveySeeder = new SurveySeeder();
-    await surveySeeder.run(dataSource, factoryManager);
+    const surveyFactory = factoryManager.get(Survey);
+    await surveyFactory.saveMany(10)
 
     const surveyAnswerSeeder = new SurveyAnswerSeeder();
-    surveyAnswerSeeder.run(dataSource, factoryManager);
+    await surveyAnswerSeeder.run(dataSource, factoryManager);
+
   }
 }
