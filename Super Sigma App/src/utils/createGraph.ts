@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs"
 
 interface GraphProps {
     filename: string,
-    type: string,
+    type: "bar" | "line" | "scatter" | "bubble" | "pie" | "doughnut" | "polarArea" | "radar",
     data: {
         labels: string[],
         datasets:
@@ -20,13 +20,16 @@ interface GraphProps {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-interface BarGraphProps extends GraphProps {}
+interface BarGraphProps extends GraphProps {
+    type: "bar"
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 interface LineGraphProps extends GraphProps {
     data: {
         labels: string[],
+        type: "line"
         datasets:
             {
                 label: string,
@@ -43,7 +46,7 @@ interface LineGraphProps extends GraphProps {
 export const createGraph = async ({filename, type, data, width=1000, height=1000}: GraphProps) => {
     const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height,});
     const dataUrl = await canvasRenderService.renderToDataURL({
-        type: (type as any), 
+        type: type, 
         data: data
     });
     writeFileSync("./src/assets/"+filename+".png", (dataUrl).replace(/^data:image\/png;base64,/, ""), "base64")
