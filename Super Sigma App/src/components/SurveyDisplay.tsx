@@ -20,6 +20,7 @@ export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], tok
         <Actions>
           <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>
           <Button actionId="view_participation">View Participation </Button>
+          <Button actionId="show_graphs" value={JSON.stringify(tms)} >Show TMS score breakdown</Button>
         </Actions>
       </>
     }))}
