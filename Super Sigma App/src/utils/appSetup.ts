@@ -31,20 +31,6 @@ export const app = new App({
   ]
 });
 
-const channelRandom: Channel = await entityManager.create(Channel, {slackId: "C0563D81NGY"}).save()
-const channelBruhh: Channel = await entityManager.create(Channel, {slackId: "C0591FD5MGW"}).save()
-const user: User = await entityManager.create(User, {slackId: "U0553478PFW"}).save()
-export const surveyExample1: Survey = await entityManager.create(Survey, {channels: [channelRandom], participants: [user]}).save().then(survey => {
-  channelRandom.surveys.push(survey)
-  channelRandom.save()
-  return survey
-})
-export const surveyExample2: Survey = await entityManager.create(Survey, {channels: [channelBruhh], participants: [user]}).save().then(survey => {
-  channelBruhh.surveys.push(survey)
-  channelBruhh.save()
-  return survey
-})
-
 const app_express = expressReceiver.app;
 
 app_express.use(express.static('src/assets'))
