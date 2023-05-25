@@ -48,7 +48,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
     close="Previous" 
     submit={questionIndex == 14 ? "Submit" : "Next"}
     callbackId='survey_modal_submission' 
-    privateMetadata={JSON.stringify({survey, questionIndex})}
+    privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex})}
   >
   <Header>{focus}</Header>
   <Divider />

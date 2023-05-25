@@ -1,13 +1,13 @@
 import { JSXSlack } from "jsx-slack";
 import { SurveyModalBlock } from "../components/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
-import { app, entityManager, findUserBySlackId } from "../utils/index.js";
+import { app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entity/SurveyAnswer.js";
 import { Survey } from "../entity/Survey.js";
 import { openHome } from "./homeOpenedAction.js";
 
 interface PrivateMetadataQuestion {
-  survey: Survey
+  surveyId: string
   questionIndex: number
 }
 
@@ -28,7 +28,7 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
   
   // console.log(selectedOptionValue)
   await entityManager.create(SurveyAnswer, {
-    survey: questionInfo.survey, 
+    survey: await findSurvey(questionInfo.surveyId), 
     user: await findUserBySlackId(body.user.id),
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
@@ -42,7 +42,7 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
       response_action: "update", 
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex+1, 
-        survey: questionInfo.survey,
+        survey: await findSurvey(questionInfo.surveyId),
         token: context.botToken ?? "",
       }))});
   } else {
