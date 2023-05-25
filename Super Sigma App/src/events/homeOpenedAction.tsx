@@ -6,8 +6,7 @@ import { Context } from "vm"
 import { StringIndexed } from "@slack/bolt/dist/types/helpers.js"
 
 
-export const openHome = async (userId: AppHomeOpenedEvent["user"], context: Context & StringIndexed) =>{
-  //console.log("app_home_opened")
+export const updateHome = async (userId: AppHomeOpenedEvent["user"], context: Context & StringIndexed) =>{
   app.client.views.publish({
     user_id: userId,
     token: context.botToken ?? "",
@@ -17,7 +16,7 @@ export const openHome = async (userId: AppHomeOpenedEvent["user"], context: Cont
 
 app.event("app_home_opened", ({payload, context}) => {
   if (payload.tab == "home") {
-    return openHome(payload.user, context)
+    return updateHome(payload.user, context)
   } 
   return Promise.resolve()
 })

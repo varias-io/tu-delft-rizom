@@ -13,7 +13,11 @@ interface TMSUserScore {
   user: User
 }
 
+/**
+ * Returns the TMS score for each user in the survey
+ */
 export const computeTMSPerUser = async (survey: Survey): Promise<TMSUserScore[]> => {
+  //Get the scores of each user broken down by question focus
   const result = await entityManager
   .createQueryBuilder(User, 'user')
   .leftJoin('user.answers', 'answer', 'answer.survey.id = :surveyId', { surveyId: survey.id })
@@ -25,6 +29,7 @@ export const computeTMSPerUser = async (survey: Survey): Promise<TMSUserScore[]>
   .having("COUNT(*) >= 15")
   .getRawMany();
 
+  //Map the result to the correct format
   return Promise.all(result.map(async x => ({
     user: await findUserByEntityId(x.userId),
     score: {
@@ -36,8 +41,14 @@ export const computeTMSPerUser = async (survey: Survey): Promise<TMSUserScore[]>
 
 } 
 
+/**
+ * Returns the TMS score for the survey
+ */
 export const computeTMS = async (survey: Survey): Promise<TMSScore> => {
+  //Get the scores of each user
   const userScores = (await computeTMSPerUser(survey)).map(x => x.score);
+
+  //Compute the average of each score
   return userScores.reduce((previousValue, currentValue) => ({
     specialization : previousValue.specialization + currentValue.specialization/userScores.length,
     credibility : previousValue.credibility + currentValue.credibility/userScores.length,

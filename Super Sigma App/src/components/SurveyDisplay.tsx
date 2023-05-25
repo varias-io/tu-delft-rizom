@@ -1,6 +1,6 @@
 import { Actions, Button, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
-import { TMSScore, computeTMS, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
+import { TMSScore, computeTMS, participantsOf, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
 
 export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], token: string }) => (
   <>
@@ -9,7 +9,7 @@ export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], tok
       return <>
         <Section>
           {`#${await surveyToTitle(survey, token)}`}<br />
-          {`Completed ${(await usersWhoCompletedSurvey(survey)).length}/${survey.participants.length}`} <br />
+          {`Completed ${(await usersWhoCompletedSurvey(survey.id)).length}/${(await participantsOf(survey.id)).length}`} <br />
           {`Overall TMS: ${((tms.specialization+tms.credibility+tms.coordination)/3).toFixed(2)}`}<br />
           {`- Specialization: ${tms.specialization.toFixed(2)}`}<br />
           {`- Credibility: ${tms.credibility.toFixed(2)}`}<br />

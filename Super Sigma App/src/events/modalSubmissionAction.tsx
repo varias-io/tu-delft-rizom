@@ -3,7 +3,7 @@ import { SurveyModalBlock } from "../components/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
 import { app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entity/SurveyAnswer.js";
-import { openHome } from "./homeOpenedAction.js";
+import { updateHome } from "./homeOpenedAction.js";
 
 interface PrivateMetadataQuestion {
   surveyId: string
@@ -25,7 +25,6 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
     return;
   }
   
-  // console.log(selectedOptionValue)
   await entityManager.create(SurveyAnswer, {
     survey: await findSurvey(questionInfo.surveyId), 
     user: await findUserBySlackId(body.user.id),
@@ -33,7 +32,6 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
     value: parseInt(selectedOptionValue)
   }).save()
 
-  // console.log(`Saved answer: ${JSON.stringify(answer)}`)
 
   if(questionInfo.questionIndex < surveyTemplate.length - 1){
     //show next question
@@ -46,8 +44,7 @@ app.view('survey_modal_submission', async ({ ack, view, context, body }) => {
       }))});
   } else {
     //this was last question
-    openHome(body.user.id, context)
+    updateHome(body.user.id, context)
     await ack()
-    
   }
 });
