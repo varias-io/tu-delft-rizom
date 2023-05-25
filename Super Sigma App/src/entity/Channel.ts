@@ -5,7 +5,7 @@ import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 @Entity()
 export class Channel extends TimestampedBaseEntity { 
   
-  @Column({nullable: false, })
+  @Column({nullable: false, unique: true})
   slackId: string;
 
   @ManyToMany(() => User, user => user.managedChannels)
