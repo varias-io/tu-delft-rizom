@@ -27,7 +27,7 @@ app.action("channel", async ({ ack, payload, context, body}) => {
       app.client.views.publish({
         user_id: body.user.id,
         token: context.botToken ?? "",
-        view: JSXSlack(await HomePage({userId: body.user.id ?? "", token: context.botToken ?? "", selectedChannel: storedChannel.slackId}))
+        view: JSXSlack(await HomePage({userSlackId: body.user.id ?? "", token: context.botToken ?? "", selectedChannel: storedChannel.slackId}))
     })
   }
 })

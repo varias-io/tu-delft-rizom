@@ -6,11 +6,11 @@ import { Context } from "vm"
 import { StringIndexed } from "@slack/bolt/dist/types/helpers.js"
 
 
-export const updateHome = async (userId: AppHomeOpenedEvent["user"], context: Context & StringIndexed) =>{
+export const updateHome = async (userSlackId: AppHomeOpenedEvent["user"], context: Context & StringIndexed) =>{
   app.client.views.publish({
-    user_id: userId,
+    user_id: userSlackId,
     token: context.botToken ?? "",
-    view: JSXSlack(await HomePage({ userId: userId, token: context.botToken ?? "" }))
+    view: JSXSlack(await HomePage({ userSlackId, token: context.botToken ?? "" }))
   })
 }
 

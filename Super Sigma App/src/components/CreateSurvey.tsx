@@ -7,7 +7,7 @@ import { Channel } from '../entity/Channel.js';
 import { getManagedChannels } from './ChannelSelect.js';
 
 interface ChannelSelectProps {
-    userId: string,
+    userSlackId: string,
     selected?: Channel["id"]
     token: string
 }
@@ -15,7 +15,7 @@ interface ChannelSelectProps {
 /**
  * Create survey component.
  */
-export const CreateSurvey = async ({userId, selected, token}: ChannelSelectProps): Promise<JSX.Element> => {
+export const CreateSurvey = async ({userSlackId, selected, token}: ChannelSelectProps): Promise<JSX.Element> => {
     /**
      * Get all channels the given user is channel manager for. 
      * So the user is either the creator of the channel or is marked Channel Manager in the database. 
@@ -23,13 +23,13 @@ export const CreateSurvey = async ({userId, selected, token}: ChannelSelectProps
     async function getAuthorizedChannels(): Promise<string[]> {
         const conversationsResponse = await app.client.users.conversations({
             token,
-            user: userId,
+            user: userSlackId,
             types: "private_channel, public_channel"
         });
 
         const channelNames = conversationsResponse.channels ?? [];
 
-        const managerChannels: Channel[] = await (entityManager.findOneBy(User, { slackId: userId }).then((foundUser) => {
+        const managerChannels: Channel[] = await (entityManager.findOneBy(User, { slackId: userSlackId }).then((foundUser) => {
             if (foundUser == null) {
                 return []
             
@@ -48,7 +48,7 @@ export const CreateSurvey = async ({userId, selected, token}: ChannelSelectProps
             }
         }
 
-        const createdSlackChannels = await getManagedChannels(userId, token)
+        const createdSlackChannels = await getManagedChannels(userSlackId, token)
 
         const promises: (Promise<string> | string)[] = []
 
