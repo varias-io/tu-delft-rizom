@@ -1,9 +1,6 @@
 import pkg from "@slack/bolt";
 import { entityManager } from "./database.js";
 import { Installation } from "../entity/Installation.js";
-import { Survey } from "../entity/Survey.js";
-import { Channel } from "../entity/Channel.js";
-import { User } from "../entity/User.js";
 import express from "express";
 const { App, ExpressReceiver } = pkg;
 
@@ -30,20 +27,6 @@ export const app = new App({
     "users:read",
   ]
 });
-
-const channelRandom: Channel = await entityManager.create(Channel, {slackId: "C0563D81NGY"}).save()
-const channelBruhh: Channel = await entityManager.create(Channel, {slackId: "C0591FD5MGW"}).save()
-const user: User = await entityManager.create(User, {slackId: "U0553478PFW"}).save()
-export const surveyExample1: Survey = await entityManager.create(Survey, {channels: [channelRandom], participants: [user]}).save().then(survey => {
-  channelRandom.surveys.push(survey)
-  channelRandom.save()
-  return survey
-})
-export const surveyExample2: Survey = await entityManager.create(Survey, {channels: [channelBruhh], participants: [user]}).save().then(survey => {
-  channelBruhh.surveys.push(survey)
-  channelBruhh.save()
-  return survey
-})
 
 const app_express = expressReceiver.app;
 

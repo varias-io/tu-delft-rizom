@@ -3,7 +3,9 @@ import { ChannelSelect } from "../components/ChannelSelect.js";
 import { CreateSurvey } from "../components/CreateSurvey.js";
 import { SurveyDisplay } from "../components/SurveyDisplay.js";
 import { MembersSelect } from "../components/MembersSelect.js";
-import { surveyExample1, surveyExample2 } from "../utils/index.js";
+import { entityManager } from "../utils/index.js";
+import { Survey } from "../entity/Survey.js";
+import { User } from "../entity/User.js";
 
 interface HomeProps {
     userId: string
@@ -28,7 +30,30 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         <Divider/>
         <Header>Create a survey:</Header>
         {await CreateSurvey({userId, token})}
-        {await SurveyDisplay( {surveys: [surveyExample1, surveyExample2], token})}
+        {await SurveyDisplay( {surveys: await (async () => {
+            const user = await entityManager.getRepository(User)
+            .createQueryBuilder("user")
+            .where("user.slackId = :slackId", { slackId: userId })
+            .getOne();
+          
+          if (!user) {
+            throw new Error(`No user found with slackId: ${userId}`);
+          }
+
+          const surveyIds = user.eligibleSurveys.map(survey => survey.id)
+
+          
+          const surveys = await entityManager.getRepository(Survey)
+          .createQueryBuilder("survey")
+          .leftJoinAndSelect("survey.participants", "participants")
+          .leftJoinAndSelect("survey.channels", "channel")
+          
+          if(surveyIds.length) {
+              surveys.where("survey.id IN (:...surveyIds)", { surveyIds: user.eligibleSurveys.map(survey => survey.id) })
+          }
+            
+          return surveys.getMany();
+        })(), token})}
     </Home>
 )
 
