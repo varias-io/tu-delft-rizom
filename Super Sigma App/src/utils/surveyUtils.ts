@@ -43,6 +43,6 @@ export const findSurvey = async (surveyId: Survey["id"]): Promise<Survey> => (
 
 export const surveyToTitle = async (survey: Survey, token: string): Promise<string> => {
   const promises = (await channelsOf(survey.id)).map((value) => app.client.conversations.info({channel: value.slackId, token}))
-  const channelNames = (await Promise.all(promises)).map(channel => channel.channel?.name)
+  const channelNames = (await Promise.all(promises)).map(channel => `#${channel.channel?.name}`)
   return channelNames.join(", ")
 }
