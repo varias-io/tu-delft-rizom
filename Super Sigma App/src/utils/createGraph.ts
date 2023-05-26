@@ -11,7 +11,7 @@ interface GraphProps {
             {
                 label: string,
                 data: number[],
-                backgroundColor: string,
+                backgroundColor: string[],
             }[]
     },
     width?: number,
@@ -36,7 +36,7 @@ interface LineGraphProps extends GraphProps {
                 data: number[],
                 fill: false,
                 borderColor: string
-                backgroundColor: string,
+                backgroundColor: string[],
                 tension: 0.1
             }[]
 
@@ -44,7 +44,7 @@ interface LineGraphProps extends GraphProps {
 }
 
 export const createGraph = async ({filename, type, data, width=1000, height=1000}: GraphProps) => {
-    const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height,});
+    const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height, chartCallback: (ChartJS) => { ChartJS.defaults.font.size = 30; } });
     const dataUrl = await canvasRenderService.renderToDataURL({
         type: type, 
         data: data
