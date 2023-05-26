@@ -1,4 +1,4 @@
-import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack} from 'jsx-slack'
+import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack, Section} from 'jsx-slack'
 import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
@@ -44,7 +44,7 @@ export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token
 export const SurveyModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
-    title={`TMS survey for ${await surveyToTitle(survey, token)}`} 
+    title={`TMS survey`} 
     close="Previous" 
     submit={questionIndex == 14 ? "Submit" : "Next"}
     callbackId='survey_modal_submission' 
@@ -60,6 +60,8 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
   >
   <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
+  <Divider/>
+  <Section>{await surveyToTitle(survey, token)}</Section>
 
   </Modal>
 }
