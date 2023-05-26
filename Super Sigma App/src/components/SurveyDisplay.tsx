@@ -1,19 +1,27 @@
-import { Button, Section } from "jsx-slack";
+import { Actions, Button, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
+import { TMSScore, computeTMS, participantsOf, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
 
-export const SurveyData = ({ surveys }: { surveys: Survey[] }) => (
+export const SurveyDisplay = async ({ surveys, token }: { surveys: Survey[], token: string }) => (
   <>
-    {surveys.map((survey) => (
-      <Section >
-        {`#${survey.channelName}`}<br />
-        {`Completed ${survey.completedAmount}/${survey.participants}`} <br />
-        {`TMS: ${survey.TMSScore}`}<br />
-        {survey.date.toLocaleDateString("nl-NL")}
-        <br />
-        <Button actionId="view_participation" style="primary">
-          view participation 
-        </Button>
-      </Section>
-    ))}
+    {await Promise.all(surveys.map(async (survey) => {
+      const tms: TMSScore = await computeTMS(survey);
+      return <>
+        <Section>
+          {`#${await surveyToTitle(survey, token)}`}<br />
+          {`Completed ${(await usersWhoCompletedSurvey(survey.id)).length}/${(await participantsOf(survey.id)).length}`} <br />
+          {`Overall TMS: ${((tms.specialization+tms.credibility+tms.coordination)/3).toFixed(2)}`}<br />
+          {`- Specialization: ${tms.specialization.toFixed(2)}`}<br />
+          {`- Credibility: ${tms.credibility.toFixed(2)}`}<br />
+          {`- Coordination: ${tms.coordination.toFixed(2)}`}<br />
+          {survey.createdAt.toLocaleDateString("nl-NL")}
+          <br />
+        </Section>
+        <Actions>
+          <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>
+          <Button actionId="view_participation">View Participation </Button>
+        </Actions>
+      </>
+    }))}
   </>
 );

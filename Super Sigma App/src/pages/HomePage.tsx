@@ -1,10 +1,9 @@
 import { Home, Header, Divider, Section, Button, Actions } from "jsx-slack";
 import { ChannelSelect } from "../components/ChannelSelect.js";
 import { CreateSurvey } from "../components/CreateSurvey.js";
-import { SurveyData } from "../components/SurveyDisplay.js";
-import { Survey } from "../entity/Survey.js";
-import { entityManager } from "../utils/index.js";
+import { SurveyDisplay } from "../components/SurveyDisplay.js";
 import { MembersSelect } from "../components/MembersSelect.js";
+import { surveyExample1, surveyExample2 } from "../utils/index.js";
 
 interface HomeProps {
     userId: string
@@ -13,7 +12,7 @@ interface HomeProps {
 }
 
 export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
-    <Home>
+    <Home>   
         <Header>Welcome back to my home! :house_with_garden:</Header>
         <Header>Make members Channel Managers here:</Header>
         <Divider/>
@@ -29,10 +28,7 @@ export const HomePage = async ({userId, token, selectedChannel}: HomeProps) => (
         <Divider/>
         <Header>Create a survey:</Header>
         {await CreateSurvey({userId, token})}
-        <SurveyData surveys = 
-        {[entityManager.create(Survey, {channelName: "foo", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)}), entityManager.create(Survey, {channelName: "bar", completedAmount: 1, participants: 2, TMSScore: 3, date: new Date(2021, 1, 1)})].sort(function(a, b) {
-        return a.channelName.localeCompare(b.channelName);
-        })}/>
-        </Home>
+        {await SurveyDisplay( {surveys: [surveyExample1, surveyExample2], token})}
+    </Home>
 )
 
