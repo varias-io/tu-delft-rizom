@@ -9,7 +9,7 @@ export default class SurveyAnswerSeeder implements Seeder {
     _factoryManager: SeederFactoryManager,
   ) {
 
-    const surveys = await dataSource.manager.find(Survey);
+    const surveys = await dataSource.manager.find(Survey, {relations: ["participants"]});
 
     await Promise.all(surveys.map(async (survey) => {
       const users = survey.participants;
