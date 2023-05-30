@@ -1,4 +1,4 @@
-import { Home, Header, Divider } from "jsx-slack";
+import { Home, Header } from "jsx-slack";
 import { CreateSurvey } from "../components/CreateSurvey.js";
 import { SurveyDisplay } from "../components/SurveyDisplay.js";
 import { entityManager } from "../utils/index.js";
@@ -13,12 +13,8 @@ interface HomeProps {
 
 export const HomePage = async ({userSlackId, token}: HomeProps) => (
     <Home>   
-        <Header>Welcome back to my home! :house_with_garden:</Header>
-        <Divider/>
         <Header>Create a survey:</Header>
         {await CreateSurvey({userSlackId, token})}
-        <Divider/>
-        <Header>Your surveys:</Header>
         {await SurveyDisplay( {surveys: await (async () => {
             const user = await entityManager.getRepository(User)
             .createQueryBuilder("user")
