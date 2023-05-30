@@ -9,7 +9,7 @@ interface GraphProps {
         labels: string[],
         datasets:
             {
-                label: string,
+                label?: string,
                 data: number[],
                 backgroundColor: string[],
             }[]

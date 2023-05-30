@@ -28,7 +28,6 @@ export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
     data: {
       labels: ["Specialication", "Credibility", "Coordination"],
       datasets: [{
-        label: "TMS score",
         data: [spec, cred, coor],
         backgroundColor: ["#035efc", "#de34eb", "#e8eb34"]
       }]
