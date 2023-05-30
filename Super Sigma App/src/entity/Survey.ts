@@ -1,4 +1,4 @@
-import { AfterInsert, AfterLoad, AfterUpdate, Entity, ManyToMany, OneToMany, Relation } from "typeorm";
+import { AfterInsert, AfterLoad, AfterUpdate, Entity, ManyToMany, ManyToOne, OneToMany, Relation } from "typeorm";
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 import { User } from "./User.js";
 import { SurveyAnswer } from "./SurveyAnswer.js";
@@ -8,12 +8,16 @@ import { Channel } from "./Channel.js";
 export class Survey extends TimestampedBaseEntity {
     @ManyToMany(() => Channel, channel => channel.surveys)
     channels: Channel[];
+    
+    @ManyToOne(() => User, user => user.managedSurveys)
+    manager: User;
 
     @ManyToMany(() => User, user => user.eligibleSurveys)
     participants: User[];
 
     @OneToMany(() => SurveyAnswer, answer => answer.survey)
     answers: Relation<SurveyAnswer>[];
+
 
     // eslint-disable-next-line @typescript-eslint/require-await
     @AfterLoad()

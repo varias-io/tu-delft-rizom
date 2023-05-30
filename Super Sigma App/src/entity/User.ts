@@ -1,6 +1,5 @@
-import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable } from "typeorm"
+import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable, Relation } from "typeorm"
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js"
-import { Channel } from "./Channel.js"
 import { Survey } from "./Survey.js"
 import { SurveyAnswer } from "./SurveyAnswer.js"
 
@@ -9,9 +8,9 @@ export class User extends TimestampedBaseEntity {
 
     @Column({nullable: false, unique: true})
     slackId: string
-
-    @ManyToMany(() => Channel, channel => channel.managers)
-    managedChannels: Channel[]
+    
+    @OneToMany(() => Survey, survey => survey.manager)
+    managedSurveys: Relation<Survey>[];
 
     @ManyToMany(() => Survey, survey => survey.participants)
     @JoinTable({
@@ -39,14 +38,14 @@ export class User extends TimestampedBaseEntity {
     @AfterInsert()
     @AfterUpdate()
     async nullChecks() {
-        if (!this.managedChannels) {
-        this.managedChannels = []
-        }
         if (!this.eligibleSurveys) {
         this.eligibleSurveys = []
         }
         if (!this.answers) {
         this.answers = []
+        }
+        if (!this.managedSurveys) {
+        this.managedSurveys = []
         }
     }
 

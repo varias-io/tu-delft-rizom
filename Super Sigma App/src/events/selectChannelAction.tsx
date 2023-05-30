@@ -16,8 +16,7 @@ app.action("channel", async ({ ack, payload, context, body}) => {
       const storedChannel = await entityManager.findOneBy(Channel, { slackId: channel }).then((foundChannel) => {
         if (foundChannel == null) {
           return entityManager.create(Channel, {
-            slackId: channel,
-            managers: []
+            slackId: channel
           }).save()
         } else {
           return foundChannel
