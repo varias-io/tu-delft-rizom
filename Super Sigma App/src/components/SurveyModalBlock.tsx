@@ -52,10 +52,11 @@ export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token
 export const SurveyModalBlock = async ({survey, questionIndex, token, userSlackId} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
-    title={`TMS survey`} 
-    close={questionIndex == 0 ? "Close" : "Previous"} 
+    title='TMS survey'
+    close='Close'
     submit={questionIndex == 14 ? "Submit" : "Next"}
     callbackId='survey_modal' 
+    notifyOnClose
     privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex})}
   >
   <Header>{focus}</Header>

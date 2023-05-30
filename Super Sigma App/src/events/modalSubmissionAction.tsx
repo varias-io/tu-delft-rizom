@@ -12,25 +12,16 @@ interface PrivateMetadataQuestion {
   questionIndex: number
 }
 
+app.view({callback_id:"survey_modal", type:"view_closed"}, async ({ ack, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
+  //handle closing
+  await ack();
+  updateHome(body.user.id, context)
+})
+
 
 app.view("survey_modal", async ({ ack, view, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
-  switch(body.type){
-    case "view_submission":{
-      handleSubmission({ ack, view, context, body })
-      break;
-    }
-    case "view_closed":{
-      if(body.is_cleared){ 
-        //user clicked the x button
-        handleClose({ ack, view, context, body })
-      } else{ 
-        //user clicked the "" button
-        handlePrev({ ack, view, context, body })
-      }
-      break;
-    }
-  }
-  
+  //handle submission
+  handleSubmission({ ack, view, context, body })
 });
 
 const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>, "ack" |"view" | "context" | "body">) => {
@@ -38,7 +29,7 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
   const selectedOptionValue = Object.entries(view.state.values.radio_buttons)[0][1].selected_option?.value
 
   if(!selectedOptionValue){
-    //no answer
+    //no answer => error
     await ack({
       response_action: "errors",
       errors: {
@@ -48,6 +39,7 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
     return;
   }
   
+  //save answer
   await entityManager.create(SurveyAnswer, {
     survey: await findSurvey(questionInfo.surveyId), 
     user: await findUserBySlackId(body.user.id),
@@ -70,53 +62,5 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
     //this was last question
     updateHome(body.user.id, context)
     await ack()
-  }
-}
-
-const handleClose = async ({ ack, view, context, body }: Pick<SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>, "ack" |"view" | "context" | "body">) => {
-  const questionInfo = JSON.parse(view.private_metadata) as PrivateMetadataQuestion
-  const selectedOptionValue = Object.entries(view.state.values.radio_buttons)[0][1].selected_option?.value
-
-  await ack();
-
-  if(selectedOptionValue){
-    await entityManager.create(SurveyAnswer, {
-      survey: await findSurvey(questionInfo.surveyId), 
-      user: await findUserBySlackId(body.user.id),
-      questionNumber: questionInfo.questionIndex,
-      value: parseInt(selectedOptionValue)
-    }).save()
-  }
-
-  updateHome(body.user.id, context)
-}
-
-const handlePrev = async ({ ack, view, context, body }: Pick<SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>, "ack" |"view" | "context" | "body">) => {
-  const questionInfo = JSON.parse(view.private_metadata) as PrivateMetadataQuestion
-  const selectedOptionValue = Object.entries(view.state.values.radio_buttons)[0][1].selected_option?.value
-  
-  if(selectedOptionValue){
-    await entityManager.create(SurveyAnswer, {
-      survey: await findSurvey(questionInfo.surveyId), 
-      user: await findUserBySlackId(body.user.id),
-      questionNumber: questionInfo.questionIndex,
-      value: parseInt(selectedOptionValue)
-    }).save()
-  }
-
-
-  if(questionInfo.questionIndex > 0){
-    //show previous question
-    await ack({
-      response_action: "update", 
-      view: JSXSlack(await SurveyModalBlock({
-        questionIndex: questionInfo.questionIndex-1, 
-        survey: await findSurvey(questionInfo.surveyId),
-        token: context.botToken ?? "",
-        userSlackId: body.user.id
-      }))});
-  } else {
-    //this was first question
-    updateHome(body.user.id, context)
   }
 }
