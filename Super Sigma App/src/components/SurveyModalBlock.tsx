@@ -44,10 +44,10 @@ export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token
 export const SurveyModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
-    title={`TMS survey`} 
-    close="Previous" 
+    title='TMS survey'
     submit={questionIndex == 14 ? "Submit" : "Next"}
-    callbackId='survey_modal_submission' 
+    callbackId='survey_modal' 
+    notifyOnClose
     privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex})}
   >
   <Header>{focus}</Header>
@@ -58,7 +58,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
     label={`${number.toString()}. ${text}`}
     required
   >
-  <OptionsWithValues {...{reversed}} />
+    <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
   <Divider/>
   <Section>{await surveyToTitle(survey, token)}</Section>
