@@ -3,14 +3,12 @@ import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entity/Survey.js'
-import { getAnswer, surveyToTitle } from '../utils/index.js'
-import { User } from '../entity/User.js'
+import { surveyToTitle } from '../utils/index.js'
 
 interface QuestionModalProps {
   questionIndex : number,
   survey : Survey,
   token: string,
-  userSlackId: User["id"]
 }
 
 const valueIfReversed = (value: number, reversed: boolean) : string => (
@@ -21,39 +19,32 @@ const valueIfReversed = (value: number, reversed: boolean) : string => (
 
 interface OptionsWithValuesProps {
   reversed : boolean
-  surveyId: Survey["id"]
-  userSlackId: User["slackId"]
-  questionIndex: number
 }
 
-const OptionsWithValues = async ({reversed, surveyId, userSlackId, questionIndex} : OptionsWithValuesProps) : Promise<JSX.Element> => (
+const OptionsWithValues = ({reversed} : OptionsWithValuesProps) : JSX.Element => (
   <>
-    {await Promise.all(["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"].map(async (option, index) => {
-      const value = valueIfReversed(5-index, reversed)
-      const answer = await getAnswer(surveyId, userSlackId, questionIndex)
-      return <RadioButton checked={answer.toString()==value} value={value}>{option}</RadioButton>}))
-    }
+    {["Strongly agree", "Agree", "Neutral", "Disagree", "Strongly disagree"].map((option, index) => 
+      <RadioButton value={valueIfReversed(5-index, reversed)}>{option}</RadioButton>)}
   </>
 )
 
 
-export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number, userSlackId: User["id"]) => {
+export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
   try {
     await client.views.open({
       token: token,
       trigger_id: trigger_id,
-      view: JSXSlack(await SurveyModalBlock({survey, questionIndex, token, userSlackId}))
+      view: JSXSlack(await SurveyModalBlock({survey, questionIndex, token}))
     });
   } catch (error) {
     console.error(error);
   }
 }
 
-export const SurveyModalBlock = async ({survey, questionIndex, token, userSlackId} : QuestionModalProps) : Promise<JSX.Element> => {
+export const SurveyModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
     title='TMS survey'
-    close='Close'
     submit={questionIndex == 14 ? "Submit" : "Next"}
     callbackId='survey_modal' 
     notifyOnClose
@@ -67,7 +58,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token, userSlackI
     label={`${number.toString()}. ${text}`}
     required
   >
-  {await OptionsWithValues ({reversed, surveyId: survey.id, userSlackId, questionIndex})}
+    <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
   <Divider/>
   <Section>{await surveyToTitle(survey, token)}</Section>

@@ -56,7 +56,6 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
         questionIndex: questionInfo.questionIndex+1, 
         survey: await findSurvey(questionInfo.surveyId),
         token: context.botToken ?? "",
-        userSlackId: body.user.id
       }))});
   } else {
     //this was last question

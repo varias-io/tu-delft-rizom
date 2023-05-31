@@ -1,6 +1,5 @@
 import { Channel } from "../entity/Channel.js";
 import { Survey } from "../entity/Survey.js";
-import { SurveyAnswer } from "../entity/SurveyAnswer.js";
 import { User } from "../entity/User.js";
 import { entityManager } from "./database.js";
 import { app } from "./index.js";
@@ -47,14 +46,3 @@ export const surveyToTitle = async (survey: Survey, token: string): Promise<stri
   const channelNames = (await Promise.all(promises)).map(channel => `#${channel.channel?.name}`)
   return channelNames.join(", ")
 }
-
-export const getAnswer = (surveyId: Survey["id"], userSlackId: User["slackId"], questionIndex: number): Promise<number> => (
-  entityManager
-    .createQueryBuilder(SurveyAnswer, "answer")
-    .leftJoinAndSelect("answer.user", "user")
-    .where("user.slackId = :userSlackId", { userSlackId })
-    .andWhere("answer.survey.id = :surveyId", { surveyId })
-    .andWhere("answer.questionNumber = :questionIndex", { questionIndex })
-    .getOne()
-    .then((answer) => (answer ? answer.value : 0))
-)

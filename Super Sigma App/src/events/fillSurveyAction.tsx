@@ -10,6 +10,6 @@ app.action("fillSurvey", async ({ ack, client, context, body, action}) => {
     await ack();
     const surveyId = action.value;
     const surveyToFill = await findSurvey(surveyId)
-    await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId), body.user.id);
+    await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId));
 })
 
