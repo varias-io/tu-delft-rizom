@@ -23,7 +23,7 @@ export interface BarGraphProps extends GraphProps {
     options: {
         plugins: {
             legend: {
-                display: false
+                display: boolean
             }
         },
         scales: {
