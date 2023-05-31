@@ -1,6 +1,6 @@
-import { Actions, Button, ChannelsSelect } from "jsx-slack";
+import { Actions, Button, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
-import { getChannelsFromUser } from '../utils/index.js';
+import { ChannelInfo, getChannelsFromUser } from '../utils/index.js';
 import { Channel } from '../entity/Channel.js';
 
 interface ChannelSelectProps {
@@ -18,11 +18,13 @@ export const CreateSurvey = async ({userSlackId}: ChannelSelectProps): Promise<J
      * Show a dropdown menu with all channels the user is a member of.
      * Will also show a pop up confirming you want to create a survey for the selected channel.
      */
-    const channels = await getChannelsFromUser(userSlackId)
+    const channels: ChannelInfo[] = await getChannelsFromUser(userSlackId)
     if(channels.length) {
         return (
             <>
-                <ChannelsSelect placeholder="Select channels" multiple blockId="channelsSelect" label="Laebel"/>
+                <Select placeholder="Select channels" multiple blockId="channelsSelect" label="Channels:" >
+                    {channels.map(channel => <option value={channel.slackId}>{channel.name}</option>)}
+                </Select>
                 <Actions>
                     <Button style="primary" actionId="createSurvey">Create survey</Button>
                 </Actions>
