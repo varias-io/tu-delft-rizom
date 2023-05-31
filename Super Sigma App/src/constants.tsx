@@ -44,61 +44,61 @@ export const surveyTemplate : Question[] = [
   },
   {
     focus:  QuestionFocus.Credibility,
-    number: 1,
+    number: 6,
     text: "I was comfortable accepting procedural suggestions from other team members.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Credibility,
-    number: 2,
+    number: 7,
     text: "I trusted that other members' knowledge about the project was credible.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Credibility,
-    number: 3,
+    number: 8,
     text: "I was confident relying on the information that other team members brought to the discussion.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Credibility,
-    number: 4,
+    number: 9,
     text: "When other members gave information, I wanted to double-check it for myself.",
     reversed: true 
   },
   {
     focus:  QuestionFocus.Credibility,
-    number: 5,
+    number: 10,
     text: "I did not have much faith in other members' \"expertise\".",
     reversed: true 
   },
   {
     focus:  QuestionFocus.Coordination,
-    number: 1,
+    number: 11,
     text: "Our team worked together in a well-coordinated fashion.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Coordination,
-    number: 2,
+    number: 12,
     text: "Our team had very few misunderstandings about what to do.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Coordination,
-    number: 3,
+    number: 13,
     text: "Our team needed to backtrack and start over a lot.",
     reversed: true 
   },
   {
     focus:  QuestionFocus.Coordination,
-    number: 4,
+    number: 14,
     text: "We accomplished the task smoothly and efficiently.",
     reversed: false 
   },
   {
     focus:  QuestionFocus.Coordination,
-    number: 5,
+    number: 15,
     text: "There was much confusion about how we would accomplish the task.",
     reversed: true 
   },

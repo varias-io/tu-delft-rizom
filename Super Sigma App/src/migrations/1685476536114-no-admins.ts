@@ -9,17 +9,6 @@ export class NoAdmins1685476536114 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "channel" ADD CONSTRAINT "UQ_ef22ba7f8eab981a19835cc6ea0" UNIQUE ("slackId")`);
         await queryRunner.query(`ALTER TABLE "survey" ADD CONSTRAINT "FK_08910a84cf2f37bff60f19938ba" FOREIGN KEY ("managerId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         
-        //reverse new owner
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" DROP CONSTRAINT "FK_75200b98470fcc16a8af650d0b4"`);
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" DROP CONSTRAINT "FK_12fffbfda39e7652458eb81c150"`);
-
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" ADD CONSTRAINT "FK_12fffbfda39e7652458eb81c150" FOREIGN KEY ("channelId") REFERENCES "channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" ADD CONSTRAINT "FK_75200b98470fcc16a8af650d0b4" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE`);
-
-        //reverse setup
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" DROP CONSTRAINT "FK_12fffbfda39e7652458eb81c150"`);
-        await queryRunner.query(`ALTER TABLE "user_managed_channels" DROP CONSTRAINT "FK_75200b98470fcc16a8af650d0b4"`);
-
         await queryRunner.query(`DROP TABLE "user_managed_channels"`);
 
     }

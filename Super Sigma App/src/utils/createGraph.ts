@@ -9,7 +9,7 @@ interface GraphProps {
         labels: string[],
         datasets:
             {
-                label: string,
+                label?: string,
                 data: number[],
                 backgroundColor: string[],
             }[]
@@ -18,15 +18,41 @@ interface GraphProps {
     height?: number
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-interface BarGraphProps extends GraphProps {
+export interface BarGraphProps extends GraphProps {
     type: "bar"
+    options: {
+        plugins: {
+            legend: {
+                display: boolean
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: boolean
+                max: number
+            }
+        }
+    }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-interface LineGraphProps extends GraphProps {
+export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
+    type: "bar",
+    options: {
+        plugins: {
+            legend: {   
+                display: false
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 5
+            }
+        }
+    },
+}
+
+export interface LineGraphProps extends GraphProps {
     data: {
         labels: string[],
         type: "line"
@@ -43,11 +69,10 @@ interface LineGraphProps extends GraphProps {
     }        
 }
 
-export const createGraph = async ({filename, type, data, width=1000, height=1000}: GraphProps) => {
+export const createGraph = async ({filename, width=1000, height=1000, ...props}: GraphProps) => {
     const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height, chartCallback: (ChartJS) => { ChartJS.defaults.font.size = 30; } });
     const dataUrl = await canvasRenderService.renderToDataURL({
-        type: type, 
-        data: data
+        ...props
     });
     writeFileSync("./src/assets/"+filename+".png", (dataUrl).replace(/^data:image\/png;base64,/, ""), "base64")
     return filename

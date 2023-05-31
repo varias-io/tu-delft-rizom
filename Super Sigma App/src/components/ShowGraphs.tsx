@@ -1,7 +1,7 @@
 import {Modal, JSXSlack, Image} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
-import { createGraph } from '../utils/createGraph.js';
+import { createGraph, defaultBarGraphProps } from '../utils/createGraph.js';
 import { TMSScore } from '../utils/computeTMS.js';
 
 
@@ -23,16 +23,15 @@ export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
   const coor: number = tms.coordination
 
   const barGraph = createGraph({
+    ...defaultBarGraphProps,
     filename: "bar" + new Date().getTime(), 
-    type: "bar", 
     data: {
       labels: ["Specialication", "Credibility", "Coordination"],
       datasets: [{
-        label: "TMS score",
         data: [spec, cred, coor],
         backgroundColor: ["#035efc", "#de34eb", "#e8eb34"]
       }]
-    }
+    },
   })
 
 
