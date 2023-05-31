@@ -4,7 +4,7 @@ import { findSurvey, getSmallestMissingQuestionIndex,  } from "../utils/index.js
 
 app.action("fillSurvey", async ({ ack, client, context, body, action}) => {
     if(action.type != "button" || body.type != "block_actions"){
-        console.log(`Unexpected action type: ${action.type}}`)
+        console.error(`Unexpected action type: ${action.type}}`)
         return;
     }
     await ack();

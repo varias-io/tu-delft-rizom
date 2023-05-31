@@ -32,7 +32,7 @@ export const sendDM = ({users, token, message}: SendDMProps) => {
       //catches the error if the user is a bot
       catch (error: any) {
         if (error.data.error === 'cannot_dm_bot') {
-          console.log("Couldn't send message to user " + user + " because user is bot.")
+          console.error("Couldn't send message to user " + user + " because user is bot.")
         } else {
           throw error
         }
