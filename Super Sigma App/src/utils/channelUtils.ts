@@ -48,9 +48,9 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"], token: s
         user: userSlackId, 
         exclude_archived: true,
         types: "public_channel" // types of conversations
-    })).channels ?? []).map(x => ({
-        slackId: x.id ?? "",
-        name: x.name ?? ""
+    })).channels ?? []).map(channel => ({
+        slackId: channel.id ?? "",
+        name: channel.name ?? ""
     }));
 }
 
