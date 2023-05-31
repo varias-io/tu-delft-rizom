@@ -16,5 +16,7 @@ export const SurveyFactory = setSeederFactory(Survey, async () => {
 
   survey.participants = users.slice(0, Math.floor(Math.random() * users.length) + 1);
 
+  survey.manager = survey.participants[Math.floor(Math.random() * survey.participants.length)];
+
   return survey
 })

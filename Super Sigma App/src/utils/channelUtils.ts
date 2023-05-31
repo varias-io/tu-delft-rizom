@@ -1,3 +1,4 @@
+import { User } from "../entity/User.js"
 import { app } from "./index.js"
 
 interface GetUsersFromChannelsProps {
@@ -26,4 +27,17 @@ export const getUsersFromChannels = async ({channels, token}: GetUsersFromChanne
     })
     
     return users
+}
+
+/**
+ * From a list of channel ids return a set of unique user ids from those channels.
+ */
+export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string): Promise<string[]> => {
+    return (await app.client.users.conversations({
+        token,
+        user: userSlackId, 
+        exclude_archived: true,
+        types: "public_channel,private_channel" // types of conversations
+    })).channels?.map((channel) => channel.name ?? "") ?? [];
+
 }
