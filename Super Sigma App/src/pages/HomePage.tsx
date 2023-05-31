@@ -27,10 +27,10 @@ export const HomePage = async ({userSlackId, token}: HomeProps) => (
 
           const surveyIds = user.eligibleSurveys.map(survey => survey.id)
 
-          
           const surveys = await entityManager.getRepository(Survey)
           .createQueryBuilder("survey")
           .leftJoinAndSelect("survey.participants", "participants")
+          .where("participants.slackId = :userSlackId", { userSlackId })
           .leftJoinAndSelect("survey.channels", "channel")
           
           if(surveyIds.length) {
