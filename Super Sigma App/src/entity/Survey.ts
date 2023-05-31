@@ -10,7 +10,7 @@ export class Survey extends TimestampedBaseEntity {
     channels: Channel[];
     
     @ManyToOne(() => User, user => user.managedSurveys)
-    manager: User;
+    manager: Relation<User>;
 
     @ManyToMany(() => User, user => user.eligibleSurveys)
     participants: User[];
