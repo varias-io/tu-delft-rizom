@@ -9,7 +9,7 @@ interface GraphProps {
         labels: string[],
         datasets:
             {
-                label: string,
+                label?: string,
                 data: number[],
                 backgroundColor: string[],
             }[]
@@ -21,6 +21,11 @@ interface GraphProps {
 export interface BarGraphProps extends GraphProps {
     type: "bar"
     options: {
+        plugins: {
+            legend: {
+                display: boolean
+            }
+        },
         scales: {
             y: {
                 beginAtZero: boolean
@@ -33,6 +38,11 @@ export interface BarGraphProps extends GraphProps {
 export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
     type: "bar",
     options: {
+        plugins: {
+            legend: {   
+                display: false
+            },
+        },
         scales: {
             y: {
                 beginAtZero: true,
