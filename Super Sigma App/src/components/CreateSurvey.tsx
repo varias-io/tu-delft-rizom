@@ -1,4 +1,4 @@
-import { Option, Select, Actions, Confirm } from "jsx-slack";
+import { Actions, Button, ChannelsSelect } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
 import { getChannelsFromUser } from '../utils/index.js';
 import { Channel } from '../entity/Channel.js';
@@ -12,7 +12,7 @@ interface ChannelSelectProps {
 /**
  * Create survey component.
  */
-export const CreateSurvey = async ({userSlackId, selectedChannel}: ChannelSelectProps): Promise<JSX.Element> => {
+export const CreateSurvey = async ({userSlackId}: ChannelSelectProps): Promise<JSX.Element> => {
 
     /**
      * Show a dropdown menu with all channels the user is a member of.
@@ -21,17 +21,12 @@ export const CreateSurvey = async ({userSlackId, selectedChannel}: ChannelSelect
     const channels = await getChannelsFromUser(userSlackId)
     if(channels.length) {
         return (
-            <Actions>
-                <Select actionId="createSurvey" placeholder="Select a channel" confirm ={
-                    <Confirm title="Are you sure?" confirm="Yes, please" deny="Cancel">
-                        Do you really want to create a survey for this channel?
-                    </Confirm>
-                }>
-                    {
-                        channels.map((channel) => (<Option selected={channel == selectedChannel} value={channel.toString()}>{channel}</Option>))
-                    }
-                </Select>
-            </Actions>
+            <>
+                <ChannelsSelect placeholder="Select channels" multiple blockId="channelsSelect" label="Laebel"/>
+                <Actions>
+                    <Button style="primary" actionId="createSurvey">Create survey</Button>
+                </Actions>
+            </>
         )
     } else {
         return <></>

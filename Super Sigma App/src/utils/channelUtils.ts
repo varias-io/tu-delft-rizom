@@ -1,5 +1,6 @@
+import { Channel } from "../entity/Channel.js"
 import { User } from "../entity/User.js"
-import { app } from "./index.js"
+import { app, entityManager } from "./index.js"
 
 interface GetUsersFromChannelsProps {
     channels: string[]
@@ -40,4 +41,12 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"]): Promise
         types: "public_channel,private_channel" // types of conversations
     })).channels?.map((channel) => channel.name ?? "") ?? [];
 
+}
+
+export const getChannelFromSlackId = async (slackId: string): Promise<Channel> => {
+    return entityManager.findOneByOrFail(Channel, {slackId})
+}
+
+export const getChannelsFromSlackIds = async (slackIds: string[]): Promise<Channel[]> => {
+    return Promise.all(slackIds.map(x => getChannelFromSlackId(x)))
 }
