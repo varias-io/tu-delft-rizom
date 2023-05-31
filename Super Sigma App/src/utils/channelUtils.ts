@@ -42,12 +42,12 @@ export interface ChannelInfo {
     name: string,
 }
 
-export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string): Promise<string[]> => {
-    return (await app.client.users.conversations({
+export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string): Promise<ChannelInfo[]> => {
+    return ((await app.client.users.conversations({
         token,
         user: userSlackId, 
         exclude_archived: true,
-        types: "public_channel,private_channel" // types of conversations
+        types: "public_channel" // types of conversations
     })).channels ?? []).map(x => ({
         slackId: x.id ?? "",
         name: x.name ?? ""

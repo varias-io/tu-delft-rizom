@@ -1,7 +1,6 @@
 import { Actions, Button, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
 import { ChannelInfo, getChannelsFromUser } from '../utils/index.js';
-import { Channel } from '../entity/Channel.js';
 
 interface ChannelSelectProps {
     userSlackId: string,
