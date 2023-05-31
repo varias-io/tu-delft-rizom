@@ -6,7 +6,7 @@ import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
 
 const selectionBlockNotFound = (): object => {
-  console.log("Selection block not found")
+  console.error("Selection block not found")
   return {}
 }
 
@@ -15,7 +15,7 @@ const selectionBlockNotFound = (): object => {
  */
 app.action("createSurvey", async ({ ack, body, context, client }) => {
     if(body.type != "block_actions"){
-        console.log(`Unexpected body type: ${body.type}}`)
+        console.error(`Unexpected body type: ${body.type}}`)
         return;
     }
     
