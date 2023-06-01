@@ -6,8 +6,8 @@ import { Channel } from "./Channel.js";
 
 @Entity()
 export class Survey extends TimestampedBaseEntity {
-    @ManyToMany(() => Channel, channel => channel.surveys)
-    channels: Channel[];
+    @ManyToOne(() => Channel, channel => channel.surveys)
+    channel: Relation<Channel>;
     
     @ManyToOne(() => User, user => user.managedSurveys)
     manager: Relation<User>;
@@ -24,9 +24,6 @@ export class Survey extends TimestampedBaseEntity {
     @AfterInsert()
     @AfterUpdate()
     async nullChecks() {
-        if (!this.channels) {
-        this.channels = []
-        }
         if (!this.participants) {
         this.participants = []
         }

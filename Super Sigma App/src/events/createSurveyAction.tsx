@@ -1,6 +1,5 @@
-import { JSX } from "jsx-slack/jsx-runtime"
 import { Survey } from "../entity/Survey.js"
-import { app, entityManager, findUserBySlackId, getChannelsFromSlackIds, getUsersFromChannels } from "../utils/index.js"
+import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -11,7 +10,7 @@ const selectionBlockNotFound = (): object => {
 }
 
 /**
- * TODO: Action that happens when you click the button for creating a survey
+ * Action that happens when you click the button for creating a survey
  */
 app.action("createSurvey", async ({ ack, body, context, client }) => {
     if(body.type != "block_actions"){
@@ -19,8 +18,9 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
         return;
     }
     
-    const selectedChannelSlackIds = Object.entries(body.view?.state.values.channelsSelect ?? selectionBlockNotFound())[0][1].selected_options.map((option: JSX.IntrinsicElements["option"]) => option.value)
-    if(!selectedChannelSlackIds.length) {
+    const selection = Object.entries(body.view?.state.values.channelSelect ?? selectionBlockNotFound())[0][1].selected_option
+
+    if(!selection) {
       client.views.update({
         token: context.botToken ?? "",
         view_id: body.view?.id ?? "",
@@ -32,14 +32,16 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
       await ack();
       return;
     }
+
+    const selectedChannelSlackId = selection.value
     await ack()
 
-    const channels = await getChannelsFromSlackIds(selectedChannelSlackIds)
+    const channel = await getChannelFromSlackId(selectedChannelSlackId)
     const manager = await findUserBySlackId(body.user.id)
-    const participants = await getUsersFromChannels({channels: selectedChannelSlackIds, token: context.botToken ?? ""})
+    const participants = await getUsersFromChannel({channel: selectedChannelSlackId, token: context.botToken ?? ""})
 
     await entityManager.create(Survey, {
-      channels,
+      channel,
       manager,
       participants
     }).save()
@@ -51,7 +53,7 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
     JSXSlack(
     <Section>
       <Mrkdwn>
-        :warning: Please select at least one channel to continue!
+        :warning: Please select a channel to continue!
       </Mrkdwn>
     </Section>)
   )

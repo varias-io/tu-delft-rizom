@@ -31,7 +31,7 @@ export const HomePage = async ({userSlackId, token}: HomeProps) => (
           .createQueryBuilder("survey")
           .leftJoinAndSelect("survey.participants", "participants")
           .where("participants.slackId = :userSlackId", { userSlackId })
-          .leftJoinAndSelect("survey.channels", "channel")
+          .leftJoinAndSelect("survey.channel", "channel")
           
           if(surveyIds.length) {
               surveys.where("survey.id IN (:...surveyIds)", { surveyIds: user.eligibleSurveys.map(survey => survey.id) })
