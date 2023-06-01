@@ -1,17 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { app } from "../utils/index.js";
-import { channel } from "node:diagnostics_channel";
+import { app } from "./test-setup.js"
 
 test("conversationOpen", async () => {
 
-  const user = process.env.USER_ID ?? ""
-  const botToken = process.env.SLACK_BOT_TOKEN ?? ""
-
     const dm = await app.client.conversations.open({
-        token: botToken,
-        users: user
+        token: "xoxb-5194334601200-5257291564646-Eie1fpeQbMkbeAuNVbdvavMF",
+        users: "U0550FJR0UB"
       })
     assert.strictEqual(dm.ok, true)
     assert.ok(dm.channel)
-})  
+})

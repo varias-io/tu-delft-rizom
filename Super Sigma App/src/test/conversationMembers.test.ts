@@ -1,11 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { app } from "../utils/index.js"
+import { app } from "./test-setup.js"
 
 test("conversationMembers", async () => {
-    const botToken = process.env.SLACK_BOT_TOKEN ?? ""
+
     const event = await app.client.conversations.members({
-        token: botToken,
+        token: "xoxb-5194334601200-5257291564646-Eie1fpeQbMkbeAuNVbdvavMF",
         channel: "C055D7ZGWJV"
     })
     assert.strictEqual(event.ok, true)
