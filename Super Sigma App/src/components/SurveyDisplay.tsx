@@ -1,6 +1,6 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
-import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
+import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey } from "../utils/index.js";
 
 export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: Survey[], token: string, userSlackId: string }) => (
   <>
@@ -25,6 +25,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: 
         </Section>
         <Actions>
           {personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
+          <Button actionId="show_all_surveys" value={JSON.stringify(groupSurvey(userSlackId, survey.id))}>Show All Surveys</Button>
           <Button actionId="view_participation">View Participation </Button>
           <Button actionId="show_graphs" value={JSON.stringify(tms)} >Show TMS score breakdown</Button>
         </Actions>
