@@ -11,8 +11,7 @@ app.action("show_graphs", async ({ ack, client, context, body, action}) => {
         console.error("body type is not block_actions")
         return;
     }
-    const graphModalProps = JSON.parse(action.value);
-const { tms, openFromModal } = JSON.parse(action.value);
+    const { tms, openFromModal } = JSON.parse(action.value);
     await showGraphsModal(client, context.botToken ?? "", body.trigger_id ?? "", {tms, openFromModal});
     //I trust that tms will always be a TMSScore, so I cast it to one.
 })
