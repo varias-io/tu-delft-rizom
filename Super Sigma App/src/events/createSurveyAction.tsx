@@ -26,7 +26,7 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
         view_id: body.view?.id ?? "",
         view: {
           type: "home",
-          blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") ? 
+          blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") != undefined ? 
             (body?.view?.blocks ?? []) : 
             [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
         }
