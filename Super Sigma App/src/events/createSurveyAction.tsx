@@ -1,5 +1,5 @@
 import { Survey } from "../entity/Survey.js"
-import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel } from "../utils/index.js"
+import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel, sendDM } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -45,6 +45,10 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
       manager,
       participants
     }).save()
+
+    //TODO: Make message contain a link that directly triggers the fill in survey modal.
+    const message = `A new TMS survey has just been created in <#${channel.slackId}>. Go to the home tab to fill it out.`
+    sendDM({users: participants.map((p) => p.slackId), token: context.botToken ?? "", message})
 
     updateHome(body.user.id, context)
   })
