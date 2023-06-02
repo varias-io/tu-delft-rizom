@@ -12,6 +12,10 @@ export const participantsOf = async (surveyId: string): Promise<User[]> => {
     .getMany();
 };
 
+/**
+ * Returns the channel that the survey is associated with.
+ * @throws {Error} If the survey is not associated with a channel, which should never happen. 
+ */
 export const channelOf = async (surveyId: string): Promise<Channel> => {
   return entityManager
     .createQueryBuilder(Channel, "channel")
