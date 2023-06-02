@@ -11,19 +11,11 @@ export interface GraphsModalProps {
 
 export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, openFromModal}: GraphsModalProps) => {
   try {
-    if(openFromModal == false){
-      await client.views.open({
-        token: token,
-        trigger_id: trigger_id,
-        view: JSXSlack(await GraphsModalBlock(tms))
-      });
-    } else {
-      await client.views.push({
-        token: token,
-        trigger_id: trigger_id,
-        view: JSXSlack(await GraphsModalBlock(tms))
-      });
-    }
+            await client.views[openFromModal? "push" : "open"]({
+      token: token,
+      trigger_id: trigger_id,
+      view: JSXSlack(await GraphsModalBlock(tms))
+    })```
   } catch (error) {
     console.error(error);
   }
