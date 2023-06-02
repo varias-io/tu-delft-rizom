@@ -28,7 +28,7 @@ export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
 
   const barGraph = createGraph({
     ...defaultBarGraphProps,
-    filename: "bar" + new Date().getTime(), 
+    filename: `bar${new Date().getTime()}`, 
     data: {
       labels: ["Specialication", "Credibility", "Coordination"],
       datasets: [{

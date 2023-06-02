@@ -74,7 +74,7 @@ export const createGraph = async ({filename, width=1000, height=1000, ...props}:
     const dataUrl = await canvasRenderService.renderToDataURL({
         ...props
     });
-    writeFileSync("./src/assets/"+filename+".png", (dataUrl).replace(/^data:image\/png;base64,/, ""), "base64")
+    writeFileSync(`./src/assets/${filename}.png`, (dataUrl).replace(/^data:image\/png;base64,/, ""), "base64")
     return filename
 }
 
