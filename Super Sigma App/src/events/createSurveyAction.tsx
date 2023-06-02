@@ -26,7 +26,9 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
         view_id: body.view?.id ?? "",
         view: {
           type: "home",
-          blocks: [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
+          blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") ? 
+            (body?.view?.blocks ?? []) : 
+            [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
         }
       })
       await ack();
@@ -51,7 +53,7 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
 
   const noChannelSelectedErrorBlock = (): Block => (
     JSXSlack(
-    <Section>
+    <Section id="noChannelSelectedError">
       <Mrkdwn>
         :warning: Please select a channel to continue!
       </Mrkdwn>
