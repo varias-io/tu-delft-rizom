@@ -1,12 +1,22 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
 import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey } from "../utils/index.js";
+import { GraphsModalProps } from "./ShowGraphs.js";
 
-export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: Survey[], token: string, userSlackId: string }) => (
-  <>
+interface SurveyDisplayProps { 
+  surveys: Survey[], 
+  token: string, 
+  userSlackId: string
+  showButtons?: boolean
+  openFromModal?: boolean
+}
+
+export const SurveyDisplay = async ({ surveys, token, userSlackId, showButtons = true, openFromModal = false }: SurveyDisplayProps) => {
+  return (<>
     {await Promise.all(surveys.map(async (survey) => {
       const tms: TMSScore = await computeTMS(survey);
       const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id);
+      const graphModalProps: GraphsModalProps = {tms, openFromModal}
       return <>
         <Divider/>
         <Section>
@@ -24,12 +34,12 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: 
           </Mrkdwn>
         </Section>
         <Actions>
-          {personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
-          <Button actionId="show_all_surveys" value={JSON.stringify(groupSurvey(userSlackId, survey.id))}>Show All Surveys</Button>
+          {!showButtons || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
+          {!showButtons ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Show All Surveys</Button>}
           <Button actionId="view_participation">View Participation </Button>
-          <Button actionId="show_graphs" value={JSON.stringify(tms)} >Show TMS score breakdown</Button>
+          <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >Show TMS score breakdown</Button>
         </Actions>
       </>
     }))}
-  </>
-);
+  </>)
+};
