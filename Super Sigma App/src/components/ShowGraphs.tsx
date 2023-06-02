@@ -9,7 +9,7 @@ export interface GraphsModalProps {
   openFromModal: boolean
 }
 
-export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, tms: TMSScore, openFromModal: boolean) => {
+export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, openFromModal}: GraphsModalProps) => {
   try {
     if(openFromModal == false){
       await client.views.open({
