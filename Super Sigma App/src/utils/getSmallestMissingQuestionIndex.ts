@@ -14,7 +14,7 @@ export const getSmallestMissingQuestionIndex = async (userSlackId: string, surve
     .getRawOne();
 
   // If there is no entry, return 0
-  if (!highestQuestionIndex.maxIndex) {
+  if (highestQuestionIndex.maxIndex === null) {
     return 0;
   }
 
