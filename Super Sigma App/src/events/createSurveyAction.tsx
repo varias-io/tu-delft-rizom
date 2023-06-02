@@ -1,5 +1,5 @@
 import { Survey } from "../entity/Survey.js"
-import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel } from "../utils/index.js"
+import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel, sendDM } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -26,7 +26,9 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
         view_id: body.view?.id ?? "",
         view: {
           type: "home",
-          blocks: [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
+          blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") != undefined ? 
+            (body?.view?.blocks ?? []) : 
+            [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
         }
       })
       await ack();
@@ -46,12 +48,16 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
       participants
     }).save()
 
+    //TODO: Make message contain a link that directly triggers the fill in survey modal.
+    const message = `A new TMS survey has just been created in <#${channel.slackId}>. Go to the home tab to fill it out.`
+    sendDM({users: participants.map((p) => p.slackId), token: context.botToken ?? "", message})
+
     updateHome(body.user.id, context)
   })
 
   const noChannelSelectedErrorBlock = (): Block => (
     JSXSlack(
-    <Section>
+    <Section id="noChannelSelectedError">
       <Mrkdwn>
         :warning: Please select a channel to continue!
       </Mrkdwn>
