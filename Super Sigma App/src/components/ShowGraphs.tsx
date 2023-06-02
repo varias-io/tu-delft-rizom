@@ -4,14 +4,18 @@ import { AllMiddlewareArgs } from '@slack/bolt'
 import { createGraph, defaultBarGraphProps } from '../utils/createGraph.js';
 import { TMSScore } from '../utils/computeTMS.js';
 
+export interface GraphsModalProps {
+  tms: TMSScore
+  displayedInModal: boolean
+}
 
-export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, tms: TMSScore) => {
+export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, displayedInModal}: GraphsModalProps) => {
   try {
-    await client.views.open({
+      await client.views[displayedInModal? "push" : "open"]({
       token: token,
       trigger_id: trigger_id,
       view: JSXSlack(await GraphsModalBlock(tms))
-    });
+    })
   } catch (error) {
     console.error(error);
   }
