@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, AfterLoad, AfterInsert, AfterUpdate } from "typeorm";
+import { Column, Entity, AfterLoad, AfterInsert, AfterUpdate, OneToMany } from "typeorm";
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 import { Survey } from "./Survey.js";
 
@@ -8,22 +8,7 @@ export class Channel extends TimestampedBaseEntity {
   @Column({nullable: false, unique: true})
   slackId: string;
 
-  @ManyToMany(() => Survey, survey => survey.channels)
-  @JoinTable({
-    name: "channel_surveys", // name of the table that will be created
-    joinColumns: [
-        { 
-            name: "channelId",
-            referencedColumnName: "id",
-        },
-    ],
-    inverseJoinColumns: [
-        {
-            name: "surveyId",
-            referencedColumnName: "id",
-        },
-    ],
-  })
+  @OneToMany(() => Survey, survey => survey.channel)
   surveys: Survey[];
 
   // eslint-disable-next-line @typescript-eslint/require-await

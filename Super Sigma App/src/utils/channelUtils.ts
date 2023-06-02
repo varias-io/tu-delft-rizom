@@ -7,6 +7,11 @@ interface GetUsersFromChannelsProps {
     token: string
 }
 
+interface GetUsersFromChannelProps {
+    channel: string
+    token: string
+}
+
 /**
  * From a list of channel ids return a set of unique user ids from those channels.
  */
@@ -32,6 +37,23 @@ export const getUserSlackIdsFromChannels = async ({channels, token}: GetUsersFro
 
 export const getUsersFromChannels = async ({channels, token}: GetUsersFromChannelsProps): Promise<User[]> => {
     const userSlackIds = await getUserSlackIdsFromChannels({channels, token})
+    return (await Promise.all([...userSlackIds].map(async (slackId) => (
+        entityManager.findOneBy(User, {slackId})
+    )))).filter((user) => user != null) as User[]
+}
+
+/**
+ * From a channel id return a set of unique user ids from those channels.
+ */
+export const getUserSlackIdsFromChannel = async ({channel, token}: GetUsersFromChannelProps) => {
+    return (await app.client.conversations.members({
+        token,
+        channel
+    })).members ?? []
+}
+
+export const getUsersFromChannel = async ({channel, token}: GetUsersFromChannelProps): Promise<User[]> => {
+    const userSlackIds = await getUserSlackIdsFromChannel({channel, token})
     return (await Promise.all([...userSlackIds].map(async (slackId) => (
         entityManager.findOneBy(User, {slackId})
     )))).filter((user) => user != null) as User[]

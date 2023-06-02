@@ -20,7 +20,7 @@ export const CreateSurvey = async ({userSlackId, token}: ChannelSelectProps): Pr
     if(channels.length) {
         return (
             <>
-                <Select placeholder="Select channels" multiple blockId="channelsSelect" label="Channels:" >
+                <Select placeholder="Select channel" blockId="channelSelect" label="Channel:" >
                     {channels.map(channel => <option value={channel.slackId}>{channel.name}</option>)}
                 </Select>
                 <Actions>

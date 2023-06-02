@@ -12,12 +12,16 @@ export const participantsOf = async (surveyId: string): Promise<User[]> => {
     .getMany();
 };
 
-export const channelsOf = async (surveyId: string): Promise<Channel[]> => {
+/**
+ * Returns the channel that the survey is associated with.
+ * @throws {Error} If the survey is not associated with a channel, which should never happen. 
+ */
+export const channelOf = async (surveyId: string): Promise<Channel> => {
   return entityManager
     .createQueryBuilder(Channel, "channel")
     .innerJoin("channel.surveys", "survey")
     .where("survey.id = :surveyId", { surveyId })
-    .getMany();
+    .getOneOrFail();
 };
 
 
@@ -42,7 +46,7 @@ export const findSurvey = async (surveyId: Survey["id"]): Promise<Survey> => (
 )
 
 export const surveyToTitle = async (survey: Survey, token: string): Promise<string> => {
-  const promises = (await channelsOf(survey.id)).map((value) => app.client.conversations.info({channel: value.slackId, token}))
-  const channelNames = (await Promise.all(promises)).map(channel => `#${channel.channel?.name}`)
-  return channelNames.join(", ")
+  const channel = await channelOf(survey.id)
+  const slackChannel = await app.client.conversations.info({channel: channel.slackId, token})
+  return `#${slackChannel.channel?.name}`
 }

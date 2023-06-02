@@ -10,9 +10,7 @@ export const SurveyFactory = setSeederFactory(Survey, async () => {
 
   const survey = new Survey()
 
-  const channelNumber = Math.random() < 0.5? Math.floor(Math.random() * channels.length) + 1: 1;
-
-  survey.channels = channels.slice(0, channelNumber);
+  survey.channel = channels[Math.floor(Math.random() * channels.length)];
 
   survey.participants = users.slice(0, Math.floor(Math.random() * users.length) + 1);
 
