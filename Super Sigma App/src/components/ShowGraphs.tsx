@@ -6,16 +6,16 @@ import { TMSScore } from '../utils/computeTMS.js';
 
 export interface GraphsModalProps {
   tms: TMSScore
-  openFromModal: boolean
+  displayedInModal: boolean
 }
 
-export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, openFromModal}: GraphsModalProps) => {
+export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, displayedInModal}: GraphsModalProps) => {
   try {
-            await client.views[openFromModal? "push" : "open"]({
+      await client.views[displayedInModal? "push" : "open"]({
       token: token,
       trigger_id: trigger_id,
       view: JSXSlack(await GraphsModalBlock(tms))
-    })```
+    })
   } catch (error) {
     console.error(error);
   }

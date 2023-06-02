@@ -19,6 +19,6 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
 
 export const AllSurveysBlock = async(surveys: Survey[], token: string, userSlackId: string) : Promise<JSX.Element> => {
   return <Modal title="Survey History">
-    {await SurveyDisplay({surveys: surveys, token: token, userSlackId: userSlackId, showButtons: false, openFromModal: true})}
+    {await SurveyDisplay({surveys, token, userSlackId, displayedInModal: true})}
     </Modal>
 }

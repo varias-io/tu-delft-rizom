@@ -22,6 +22,5 @@ app.action("show_all_surveys", async ({ ack, client, context, body, action}) => 
         .getMany();
 
     await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", surveys, body.user.id);
-    //I trust that tms will always be a TMSScore, so I cast it to one.
 })
 

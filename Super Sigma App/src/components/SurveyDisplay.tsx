@@ -7,16 +7,15 @@ interface SurveyDisplayProps {
   surveys: Survey[], 
   token: string, 
   userSlackId: string
-  showButtons?: boolean
-  openFromModal?: boolean
+  displayedInModal?: boolean
 }
 
-export const SurveyDisplay = async ({ surveys, token, userSlackId, showButtons = true, openFromModal = false }: SurveyDisplayProps) => {
+export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInModal = false}: SurveyDisplayProps) => {
   return (<>
     {await Promise.all(surveys.map(async (survey) => {
       const tms: TMSScore = await computeTMS(survey);
       const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id);
-      const graphModalProps: GraphsModalProps = {tms, openFromModal}
+      const graphModalProps: GraphsModalProps = {tms, displayedInModal}
       return <>
         <Divider/>
         <Section>
@@ -34,8 +33,8 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, showButtons =
           </Mrkdwn>
         </Section>
         <Actions>
-          {!showButtons || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
-          {!showButtons ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Show All Surveys</Button>}
+          {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
+          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Show All Surveys</Button>}
           <Button actionId="view_participation">View Participation </Button>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >Show TMS score breakdown</Button>
         </Actions>
