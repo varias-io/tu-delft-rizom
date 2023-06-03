@@ -65,6 +65,7 @@ export interface LineGraphProps extends GraphProps {
                 backgroundColor: string[],
                 tension?: 0.1
                 borderDash?: number[]
+                borderWidth?: 7
             }[]
         },
         options: {
