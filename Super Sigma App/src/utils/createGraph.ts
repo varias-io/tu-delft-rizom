@@ -11,15 +11,28 @@ interface GraphProps {
             {
                 label?: string,
                 data: number[],
-                backgroundColor: string[],
+                backgroundColor: string,
             }[]
     },
     width?: number,
     height?: number
 }
 
-export interface BarGraphProps extends GraphProps {
-    type: "bar"
+export interface RadarGraphProps extends GraphProps {
+    type: "radar"
+    data: {
+        labels: string[],
+        datasets:{
+            label?: string,
+            data: number[],
+            backgroundColor: string,              
+            borderWidth: number,
+            borderColor: string,
+            pointBorderWidth: number,
+            pointBackgroundColor: string,
+            pointBorderColor: string,
+        }[]
+    }
     options: {
         plugins: {
             legend: {
@@ -27,16 +40,25 @@ export interface BarGraphProps extends GraphProps {
             }
         },
         scales: {
-            y: {
-                beginAtZero: boolean
+            r: {
+                pointLabels: {
+                    font: {
+                        size: number
+                    }
+                }
+                beginAtZero: boolean,
+                min: number,
                 max: number
+                ticks: {
+                    stepSize: number
+                }
             }
         }
     }
 }
 
-export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
-    type: "bar",
+export const defaultRadarGraphProps: Pick<RadarGraphProps, "type" | "options"> = {
+    type: "radar",
     options: {
         plugins: {
             legend: {   
@@ -44,9 +66,18 @@ export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
             },
         },
         scales: {
-            y: {
+            r: {
+                pointLabels: {
+                    font: {
+                        size: 30
+                    }
+                },
                 beginAtZero: true,
-                max: 5
+                min: 0,
+                max: 5,
+                ticks: {
+                    stepSize: 1
+                }
             }
         }
     },
@@ -62,7 +93,7 @@ export interface LineGraphProps extends GraphProps {
                 data: number[],
                 fill?: false,
                 borderColor: string
-                backgroundColor: string[],
+                backgroundColor: string,
                 tension?: 0.1
                 borderDash?: number[]
                 borderWidth?: 7

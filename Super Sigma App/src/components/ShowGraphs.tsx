@@ -1,7 +1,7 @@
 import {Modal, JSXSlack, Image} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
-import { createGraph, defaultBarGraphProps} from '../utils/createGraph.js';
+import { createGraph, defaultRadarGraphProps, RadarGraphProps} from '../utils/createGraph.js';
 import { TMSScore } from '../utils/computeTMS.js';
 
 export interface GraphsModalProps {
@@ -27,19 +27,26 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
   const cred: number = latestSurvey.credibility
   const coor: number = latestSurvey.coordination
 
-  const barGraph = createGraph({
-    ...defaultBarGraphProps,
+  const radarGraphProps: RadarGraphProps = {
+    ...defaultRadarGraphProps,
     filename: "bar" + new Date().getTime(), 
     data: {
       labels: ["Specialication", "Credibility", "Coordination"],
       datasets: [{
         data: [spec, cred, coor],
-        backgroundColor: ["#035efc", "#de34eb", "#e8eb34"]
+        backgroundColor: "rgba(3, 94, 252, 0.4)", 
+        borderWidth: 5,
+        borderColor: "rgba(3, 94, 252, 0.8)",
+        pointBorderWidth: 15, 
+        pointBackgroundColor: "rgba(3, 94, 252, 0.4)",
+        pointBorderColor: "rgba(3, 94, 252, 0.8)"
       }]
     },
-  })
+  }
+
+  const radarGraph = createGraph(radarGraphProps)
 
   return <Modal title="TMS Score Breakdown">
-    <Image src={`${process.env.ENDPOINT}${await barGraph}.png`} alt="bar graph" />
+    <Image src={`${process.env.ENDPOINT}${await radarGraph}.png`} alt="bar graph" />
     </Modal>
 }
