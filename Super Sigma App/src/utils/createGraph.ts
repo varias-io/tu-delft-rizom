@@ -53,21 +53,42 @@ export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
 }
 
 export interface LineGraphProps extends GraphProps {
+    type: "line"
     data: {
         labels: string[],
-        type: "line"
         datasets:
             {
                 label: string,
                 data: number[],
-                fill: false,
+                fill?: false,
                 borderColor: string
                 backgroundColor: string[],
-                tension: 0.1
+                tension?: 0.1
+                borderDash?: number[]
             }[]
-
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: boolean
+                    max: number
+                }
+            }
+        }
     }        
-}
+
+    export const defaultLineGraphsProps: Pick<LineGraphProps, "type" | "options"> = {
+        type: "line",
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        },
+    }
+
 
 export const createGraph = async ({filename, width=1000, height=1000, ...props}: GraphProps) => {
     const canvasRenderService =  new CanvasRenderService.ChartJSNodeCanvas({ width: width, height: height, chartCallback: (ChartJS) => { ChartJS.defaults.font.size = 30; } });
