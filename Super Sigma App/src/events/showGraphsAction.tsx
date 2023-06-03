@@ -13,6 +13,5 @@ app.action("show_graphs", async ({ ack, client, context, body, action}) => {
     }
     const graphModalProps = JSON.parse(action.value);
     await showGraphsModal(client, context.botToken ?? "", body.trigger_id ?? "", graphModalProps);
-    //I trust that tms will always be a TMSScore, so I cast it to one.
 })
 

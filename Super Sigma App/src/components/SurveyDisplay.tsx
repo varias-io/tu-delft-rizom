@@ -15,12 +15,6 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
     {await Promise.all(surveys.map(async (survey) => {
       const tmsScore: TMSScore = await computeTMS(survey);
       const surveyDate: [TMSScore[], string[]] = [[], []]; 
-      //dummy data 
-      surveyDate[0].push({specialization: 1, credibility: 2, coordination: 3});
-      surveyDate[1].push("23-4-2023")
-      surveyDate[0].push({specialization: 4, credibility: 3, coordination: 2});
-      surveyDate[1].push("1-5-2023")
-
       
       surveyDate[0].push(tmsScore);
       surveyDate[1].push(survey.createdAt.toLocaleDateString("nl-NL"));
