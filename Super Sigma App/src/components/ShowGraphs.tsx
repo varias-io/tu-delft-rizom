@@ -40,6 +40,6 @@ export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
 
 
   return <Modal title="TMS Score Breakdown">
-    <Image src={`${process.env.ENDPOINT}${await barGraph}.png`} alt="bar graph" />
+    <Image src={`${process.env.ENDPOINT}${await barGraph}.png`} alt="TMS Score Breakdown" />
     </Modal>
 }
