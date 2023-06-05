@@ -2,8 +2,18 @@ import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entity/Survey.js";
 import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey } from "../utils/index.js";
 
-export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: Survey[], token: string, userSlackId: string }) => (
-  <>
+export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: Survey[], token: string, userSlackId: string }) => {
+  if (surveys.length == 0) {
+    return <>
+      <Divider/>
+      <Section>
+        <Mrkdwn>
+          You are currently not a part of any surveys. <br />
+        </Mrkdwn>
+      </Section>
+    </>
+  }
+  return <>
     {await Promise.all(surveys.map(async (survey) => {
       const tms: TMSScore = await computeTMS(survey);
       const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id);
@@ -31,4 +41,4 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId }: { surveys: 
       </>
     }))}
   </>
-);
+};
