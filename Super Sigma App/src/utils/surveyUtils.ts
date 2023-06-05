@@ -36,7 +36,7 @@ export const usersWhoCompletedSurvey = async (surveyId: string): Promise<User[]>
           .groupBy("answer.user.id")
           .having("COUNT(*) >= 15")
           .getQuery();
-      return "user.id IN " + subQuery;
+      return `user.id IN ${ subQuery }`;
   })
   .getMany();
 }
@@ -56,7 +56,7 @@ export const latestSurveys = async (userSlackId: User["slackId"]): Promise<Surve
   const latestSurveysQuery = entityManager.createQueryBuilder()
     .select("survey")
     .from(Survey, "survey")
-    .innerJoin("(" + subQuery + ")", "subQuery", '"subQuery"."latestDate" = survey.createdAt AND "subQuery"."channelId" = survey.channel.id', { userSlackId })
+    .innerJoin(`(${ subQuery })`, "subQuery", '"subQuery"."latestDate" = survey.createdAt AND "subQuery"."channelId" = survey.channel.id', { userSlackId })
     .distinctOn(["survey.channel.id"])
     .leftJoinAndSelect("survey.channel", "channel")
     .leftJoinAndSelect("survey.participants", "participant")
