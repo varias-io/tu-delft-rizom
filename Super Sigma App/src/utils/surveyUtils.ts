@@ -41,6 +41,39 @@ export const usersWhoCompletedSurvey = async (surveyId: string): Promise<User[]>
   .getMany();
 }
 
+export const latestSurveys = async (userSlackId: User["slackId"]): Promise<Survey[]> => {
+  const queryBuilder = entityManager.createQueryBuilder()
+    .select("MAX(survey.createdAt)", "latestDate")
+    .addSelect("channel.id", "channelId")
+    .from(Survey, "survey")
+    .innerJoin("survey.channel", "channel")
+    .innerJoin("survey.participants", "participant")
+    .where("participant.slackId = :userSlackId", { userSlackId })
+    .groupBy("channel.id");
+
+  const subQuery = queryBuilder.getQuery();
+
+  const latestSurveysQuery = entityManager.createQueryBuilder()
+    .select("survey")
+    .from(Survey, "survey")
+    .innerJoin("(" + subQuery + ")", "subQuery", '"subQuery"."latestDate" = survey.createdAt AND "subQuery"."channelId" = survey.channel.id', { userSlackId })
+    .distinctOn(["survey.channel.id"])
+    .leftJoinAndSelect("survey.channel", "channel")
+    .leftJoinAndSelect("survey.participants", "participant")
+
+  const latestSurveys = await latestSurveysQuery.getMany();
+
+  return latestSurveys;
+
+}
+
+export const groupSurvey = async (userSlackId: User["slackId"], channelId: Channel["id"]): Promise<Survey[]> => {
+
+  const surveys = entityManager.find(Survey, {where: { participants: { slackId: userSlackId } , channel: { id: channelId } }, relations: ["channel", "participants"], order: { createdAt: "ASC" }})
+  return surveys
+}
+
+
 export const findSurvey = async (surveyId: Survey["id"]): Promise<Survey> => (
   entityManager.findOneByOrFail(Survey, { id: surveyId })
 )
