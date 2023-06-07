@@ -11,7 +11,17 @@ interface SurveyDisplayProps {
 }
 
 export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInModal = false}: SurveyDisplayProps) => {
-  return (<>
+  if (surveys.length == 0) {
+    return <>
+      <Divider/>
+      <Section>
+        <Mrkdwn>
+          You are currently not a part of any surveys. <br />
+        </Mrkdwn>
+      </Section>
+    </>
+  }
+  return <>
     {await Promise.all(surveys.map(async (survey) => {
       const tmsScore: TMSScore = await computeTMS(survey);
       const surveyDate: [TMSScore[], string[]] = [[], []]; 
@@ -48,5 +58,5 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         </Actions>
       </>
     }))}
-  </>)
+  </>
 };

@@ -45,7 +45,8 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
           borderDash: [10, 5],
           borderWidth: 7
         }]
-      }
+      },
+      height: 800
     }
     
     const lineGraph = createGraph(lineGraphProps)
