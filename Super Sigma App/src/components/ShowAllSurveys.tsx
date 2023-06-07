@@ -63,7 +63,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
 
 export const AllSurveysBlock = async(surveys: Survey[], token: string, userSlackId: string, lineGraph: string ) : Promise<JSX.Element> => {
   return <Modal title="Survey History">
-    <Image src={`${process.env.ENDPOINT}${lineGraph}.png`} alt="line graph" />
+    <Image src={`${process.env.ENDPOINT}${lineGraph}.png`} alt="Line graph visualizing the history of TMS scores for a channel." />
     {await SurveyDisplay({surveys, token, userSlackId, displayedInModal: true})}
     </Modal>
 }

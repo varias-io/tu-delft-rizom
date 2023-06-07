@@ -49,6 +49,6 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
   const radarGraph = createGraph(radarGraphProps)
 
   return <Modal title="TMS Score Breakdown">
-    <Image src={`${process.env.ENDPOINT}${await radarGraph}.png`} alt="bar graph" />
+    <Image src={`${process.env.ENDPOINT}${await radarGraph}.png`} alt="Radar chart showing the TMS score for a survey." />
     </Modal>
 }
