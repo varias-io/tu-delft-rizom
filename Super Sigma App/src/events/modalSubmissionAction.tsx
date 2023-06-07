@@ -1,7 +1,7 @@
 import { JSXSlack } from "jsx-slack";
 import { SurveyModalBlock } from "../pages/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
-import { app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
+import { ViewCallback, app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entities/SurveyAnswer.js";
 import { updateHome } from "./homeOpenedAction.js";
 import { SlackViewMiddlewareArgs, SlackViewAction, AllMiddlewareArgs } from "@slack/bolt";
@@ -19,12 +19,12 @@ app.view({callback_id:"survey_modal", type:"view_closed"}, async ({ ack, context
 })
 
 
-app.view("survey_modal", async ({ ack, view, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
+app.view("survey_modal", async (params) => {
   //handle submission
-  handleSubmission({ ack, view, context, body })
+  handleSubmission(params, entityManager)
 });
 
-const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>, "ack" |"view" | "context" | "body">) => {
+const handleSubmission: ViewCallback = async ({ ack, view, context, body }, entityManager) => {
   const questionInfo = JSON.parse(view.private_metadata) as PrivateMetadataQuestion
   const selectedOptionValue = Object.entries(view.state.values.radio_buttons)[0][1].selected_option?.value
 
@@ -39,7 +39,7 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
     return;
   }
 
-  const survey = await findSurvey(questionInfo.surveyId)
+  const survey = await findSurvey(questionInfo.surveyId, entityManager)
 
   if(!survey) {
     await ack({

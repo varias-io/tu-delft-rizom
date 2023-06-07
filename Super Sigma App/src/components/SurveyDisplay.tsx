@@ -1,6 +1,6 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entities/Survey.js";
-import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey } from "../utils/index.js";
+import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
 import { GraphsModalProps } from "../pages/ShowGraphs.js";
 
 interface SurveyDisplayProps { 
@@ -38,9 +38,9 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         <Divider/>
         <Section>
           <Mrkdwn>
-          {await surveyToTitle(survey, token)}<br />
+          {await surveyToTitle(survey, token, entityManager)}<br />
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
-          Completed by {(await usersWhoCompletedSurvey(survey.id)).length}/{(await participantsOf(survey.id)).length} users <br />
+          Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users <br />
           <br />
           Overall TMS: {((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3).toFixed(2)}<br />
           - Specialization: {latestSurvey.specialization.toFixed(2)}<br />
@@ -52,7 +52,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         </Section>
         <Actions>
           {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
-          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Survey History</Button>}
+          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>}
           <Button actionId="view_participation">View Participation </Button>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >Show TMS score breakdown</Button>
         </Actions>

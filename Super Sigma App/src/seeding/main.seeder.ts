@@ -32,7 +32,7 @@ export default class MainSeeder implements Seeder {
       return existing
     }) ?? [])
 
-    const users = (await getUserSlackIdsFromChannels({token: botToken, channelSlackIds: ["C055D7ZGWJV"]}))
+    const users = (await getUserSlackIdsFromChannels({token: botToken, channelSlackIds: ["C055D7ZGWJV"]}, app))
     await Promise.all(Array.from(users).map(async (slackId) => {
         if (!await entityManager.exists(User, {where: {slackId, workspaces: { teamId: "T055Q9UHP5W" }}})) {
             return entityManager.create(User, {slackId, workspaces: [workspace], channels: allChannels}).save()
@@ -42,7 +42,7 @@ export default class MainSeeder implements Seeder {
 
   
     const surveyFactory = factoryManager.get(Survey);
-    await surveyFactory.saveMany(10)
+    await surveyFactory.saveMany(0)
 
     const surveyAnswerSeeder = new SurveyAnswerSeeder();
     await surveyAnswerSeeder.run(dataSource, factoryManager);

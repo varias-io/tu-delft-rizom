@@ -1,10 +1,10 @@
+import { EntityManager } from "typeorm";
 import { Channel } from "../entities/Channel.js";
 import { Survey } from "../entities/Survey.js";
 import { User } from "../entities/User.js";
-import { entityManager } from "./database.js";
 import { app } from "./index.js";
 
-export const participantsOf = async (surveyId: string): Promise<User[]> => {
+export const participantsOf = async (surveyId: string, entityManager: EntityManager): Promise<User[]> => {
   return entityManager
     .createQueryBuilder(User, "user")
     .innerJoin("user.eligibleSurveys", "survey")
@@ -16,7 +16,7 @@ export const participantsOf = async (surveyId: string): Promise<User[]> => {
  * Returns the channel that the survey is associated with.
  * @throws {Error} If the survey is not associated with a channel, which should never happen. 
  */
-export const channelOf = async (surveyId: string): Promise<Channel | null> => {
+export const channelOf = async (surveyId: string, entityManager: EntityManager): Promise<Channel | null> => {
   return entityManager
     .createQueryBuilder(Channel, "channel")
     .innerJoin("channel.surveys", "survey")
@@ -25,7 +25,7 @@ export const channelOf = async (surveyId: string): Promise<Channel | null> => {
 };
 
 
-export const usersWhoCompletedSurvey = async (surveyId: string): Promise<User[]> => {
+export const usersWhoCompletedSurvey = async (surveyId: string, entityManager: EntityManager): Promise<User[]> => {
   return entityManager
   .createQueryBuilder(User, 'user')
   .where(qb => {
@@ -41,7 +41,7 @@ export const usersWhoCompletedSurvey = async (surveyId: string): Promise<User[]>
   .getMany();
 }
 
-export const latestSurveys = async (userSlackId: User["slackId"]): Promise<Survey[]> => {
+export const latestSurveys = async (userSlackId: User["slackId"], entityManager: EntityManager): Promise<Survey[]> => {
   const queryBuilder = entityManager.createQueryBuilder()
     .select("MAX(survey.createdAt)", "latestDate")
     .addSelect("channel.id", "channelId")
@@ -67,7 +67,7 @@ export const latestSurveys = async (userSlackId: User["slackId"]): Promise<Surve
 
 }
 
-export const groupSurvey = async (userSlackId: User["slackId"], channelId: Channel["id"]): Promise<Survey[]> => {
+export const groupSurvey = async (userSlackId: User["slackId"], channelId: Channel["id"], entityManager: EntityManager): Promise<Survey[]> => {
 
   const surveys = entityManager.find(Survey, {where: { 
     participants: { slackId: userSlackId } , channel: { id: channelId } }, 
@@ -76,12 +76,12 @@ export const groupSurvey = async (userSlackId: User["slackId"], channelId: Chann
 }
 
 
-export const findSurvey = async (surveyId: Survey["id"]): Promise<Survey | null> => (
+export const findSurvey = async (surveyId: Survey["id"], entityManager: EntityManager): Promise<Survey | null> => (
   entityManager.findOneBy(Survey, { id: surveyId })
 )
 
-export const surveyToTitle = async (survey: Survey, token: string): Promise<string> => {
-  const channel = await channelOf(survey.id)
+export const surveyToTitle = async (survey: Survey, token: string, entityManager: EntityManager): Promise<string> => {
+  const channel = await channelOf(survey.id, entityManager)
   if(!channel) {
     console.error(`Survey ${survey.id} has no associated channel`)
     return `Survey ${survey.id} has no associated channel`

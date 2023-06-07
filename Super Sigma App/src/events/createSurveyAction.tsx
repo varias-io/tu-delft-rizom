@@ -1,7 +1,7 @@
 import { Survey } from "../entities/Survey.js"
-import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendDM, usersWhoCompletedSurvey } from "../utils/index.js"
+import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendDM, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
-import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
+import { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
 
 const selectionBlockNotFound = (): object => {
@@ -12,70 +12,75 @@ const selectionBlockNotFound = (): object => {
 /**
  * Action that happens when you click the button for creating a survey
  */
-app.action("createSurvey", async ({ ack, body, context, client }) => {
-    if(body.type != "block_actions"){
-        console.error(`Unexpected body type: ${body.type}}`)
-        return;
-    }
-    
-    const selection = Object.entries(body.view?.state.values.channelSelect ?? selectionBlockNotFound())[0][1].selected_option
+app.action("createSurvey", async (params) => {
+  createSurvey(params, entityManager)
+})
 
-    if(!selection) {
-      client.views.update({
-        token: context.botToken ?? "",
-        view_id: body.view?.id ?? "",
-        view: {
-          type: "home",
-          blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") != undefined ? 
-            (body?.view?.blocks ?? []) : 
-            [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
-        }
-      })
-      await ack();
-      return;
-    }
 
-    const selectedChannelSlackId = selection.value
-    await ack()
 
-    const latestSurvey = await getLatestSurveyFromChannelSlackId(selectedChannelSlackId)
+export const createSurvey: ActionCallback = async ({ ack, body, context, client }, entityManager) => {
+  if (body.type != "block_actions") {
+    console.error(`Unexpected body type: ${body.type}}`)
+    return;
+  }
 
-    if(latestSurvey != null) {	
-      const participation = (await usersWhoCompletedSurvey(latestSurvey.id)).length/(await participantsOf(latestSurvey.id)).length *100
+  const selection = Object.entries(body.view?.state.values.channelSelect ?? selectionBlockNotFound())[0][1].selected_option
 
-      await entityManager.update(Survey, {id: latestSurvey.id}, {
-        participation: Number(participation.toFixed(0))
-      })
-    }
+  if(!selection) {
+    client.views.update({
+      token: context.botToken ?? "",
+      view_id: body.view?.id ?? "",
+      view: {
+        type: "home",
+        blocks: body?.view?.blocks.find(block => block.block_id == "noChannelSelectedError") != undefined ?
+          (body?.view?.blocks ?? []) :
+          [noChannelSelectedErrorBlock(), ...(body?.view?.blocks ?? [])]
+      }
+    })
+    await ack();
+    return;
+  }
 
-    const channel = await getChannelFromSlackId(selectedChannelSlackId, context.teamId ?? "")
+  const selectedChannelSlackId = selection.value
+  await ack()
 
-    if(!channel) {
-      console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
-      return
-    }
-    
-    const manager = await findUserBySlackId(body.user.id)
-    const participants = await getUsersFromChannel({channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? ""})
+  const latestSurvey = await getLatestSurveyFromChannelSlackId(selectedChannelSlackId, entityManager)
+  if(latestSurvey != null) {
+    const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length/(await participantsOf(latestSurvey.id, entityManager)).length *100
 
-    await entityManager.create(Survey, {
-      channel,
-      manager,
-      participants
-    }).save()
+    await entityManager.update(Survey, { id: latestSurvey.id }, {
+      participation: Number(participation.toFixed(0))
+    })
+  }
 
-    //TODO: Make message contain a link that directly triggers the fill in survey modal.
-    const message = `A new TMS survey has just been created in <#${channel.slackId}>. Go to the home tab to fill it out.`
-    sendDM({users: participants.map((p) => p.slackId), token: context.botToken ?? "", message})
+  const channel = await getChannelFromSlackId(selectedChannelSlackId, context.teamId ?? "", entityManager)
 
-    updateHome(body.user.id, context)
-  })
+  if(!channel) {
+    console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
+    return
+  }
 
-  const noChannelSelectedErrorBlock = (): Block => (
-    JSXSlack(
+  const manager = await findUserBySlackId(body.user.id)
+  const participants = await getUsersFromChannel({ channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? "" }, app, entityManager)
+
+  await entityManager.create(Survey, {
+    channel,
+    manager,
+    participants
+  }).save()
+
+  //TODO: Make message contain a link that directly triggers the fill in survey modal.
+  const message = `A new TMS survey has just been created in <#${channel.slackId}>. Go to the home tab to fill it out.`
+  sendDM({ users: participants.map((p) => p.slackId), token: context.botToken ?? "", message })
+
+  updateHome(body.user.id, context)
+}
+
+const noChannelSelectedErrorBlock = (): Block => (
+  JSXSlack(
     <Section id="noChannelSelectedError">
       <Mrkdwn>
         :warning: Please select a channel to continue!
       </Mrkdwn>
     </Section>)
-  )
+)

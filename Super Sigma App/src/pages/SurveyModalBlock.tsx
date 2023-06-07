@@ -3,7 +3,7 @@ import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js'
-import { surveyToTitle } from '../utils/index.js'
+import { entityManager, surveyToTitle } from '../utils/index.js'
 
 interface QuestionModalProps {
   questionIndex : number,
@@ -61,7 +61,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
     <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
   <Divider/>
-  <Section>{await surveyToTitle(survey, token)}</Section>
+  <Section>{await surveyToTitle(survey, token, entityManager)}</Section>
 
   </Modal>
 }
