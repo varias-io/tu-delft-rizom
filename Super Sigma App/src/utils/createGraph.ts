@@ -1,38 +1,17 @@
-import CanvasRenderService from 'chartjs-node-canvas';
+import CanvasRenderService, { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 import { writeFileSync } from "node:fs"
 
-interface GraphProps {
+type Props = Parameters<typeof ChartJSNodeCanvas.prototype.renderToDataURL>[0]
+
+interface GraphProps extends Props {
     filename: string,
-    type: "bar" | "line" | "scatter" | "bubble" | "pie" | "doughnut" | "polarArea" | "radar",
-    data: {
-        labels: string[],
-        datasets:
-            {
-                label?: string,
-                data: number[],
-                backgroundColor: string[],
-            }[]
-    },
     width?: number,
     height?: number
 }
 
 export interface BarGraphProps extends GraphProps {
     type: "bar"
-    options: {
-        plugins: {
-            legend: {
-                display: boolean
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: boolean
-                max: number
-            }
-        }
-    }
 }
 
 export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
@@ -54,41 +33,19 @@ export const defaultBarGraphProps: Pick<BarGraphProps, "type" | "options"> = {
 
 export interface LineGraphProps extends GraphProps {
     type: "line"
-    data: {
-        labels: string[],
-        datasets:
-            {
-                label: string,
-                data: number[],
-                fill?: false,
-                borderColor: string
-                backgroundColor: string[],
-                tension?: 0.1
-                borderDash?: number[]
-                borderWidth?: 7
-            }[]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: boolean
-                    max: number
-                }
+} 
+
+export const defaultLineGraphsProps: Pick<LineGraphProps, "type" | "options"> = {
+    type: "line",
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 5
             }
         }
-    }        
-
-    export const defaultLineGraphsProps: Pick<LineGraphProps, "type" | "options"> = {
-        type: "line",
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5
-                }
-            }
-        },
-    }
+    },
+}
 
 
 export const createGraph = async ({filename, width=1000, height=1000, ...props}: GraphProps) => {
