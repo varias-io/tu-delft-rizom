@@ -29,7 +29,7 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
 
   const radarGraphProps: RadarGraphProps = {
     ...defaultRadarGraphProps,
-    filename: "bar" + new Date().getTime(), 
+    filename: `bar${  new Date().getTime()}`, 
     data: {
       labels: ["Specialication", "Credibility", "Coordination"],
       datasets: [{

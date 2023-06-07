@@ -16,7 +16,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
 
     const lineGraphProps: LineGraphProps = {
       ...defaultLineGraphsProps,
-      filename: "line" + new Date().getTime(),
+      filename: `line${  new Date().getTime()}`,
       data: {
         labels: tms[1], 
         datasets: [{
@@ -63,7 +63,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
 
 export const AllSurveysBlock = async(surveys: Survey[], token: string, userSlackId: string, lineGraph: string ) : Promise<JSX.Element> => {
   return <Modal title="Survey History">
-    <Image src={`${process.env.ENDPOINT}${await lineGraph}.png`} alt="line graph" />
+    <Image src={`${process.env.ENDPOINT}${lineGraph}.png`} alt="line graph" />
     {await SurveyDisplay({surveys, token, userSlackId, displayedInModal: true})}
     </Modal>
 }
