@@ -29,17 +29,19 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
 
   const radarGraphProps: RadarGraphProps = {
     ...defaultRadarGraphProps,
+    width: 1300, 
+    height: 1300,
     filename: `bar${  new Date().getTime()}`, 
     data: {
-      labels: ["Specialication", "Credibility", "Coordination"],
+      labels: [["Specialization", `${spec}`], ["Credibility", `${cred}`], ["Coordination", `${coor}`]],
       datasets: [{
         data: [spec, cred, coor],
         backgroundColor: "rgba(3, 94, 252, 0.4)", 
         borderWidth: 5,
         borderColor: "rgba(3, 94, 252, 0.8)",
-        pointBorderWidth: 15, 
-        pointBackgroundColor: "rgba(3, 94, 252, 0.4)",
-        pointBorderColor: "rgba(3, 94, 252, 0.8)"
+        pointBorderWidth: 10, 
+        pointBackgroundColor: "rgba(3, 94, 252, 1)",
+        pointBorderColor: "rgba(3, 94, 252, 1)"
       }]
     },
   }

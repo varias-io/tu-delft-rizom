@@ -29,11 +29,12 @@ export const defaultRadarGraphProps: Pick<RadarGraphProps, "type" | "options"> =
                     lineWidth: 5
                 }, 
                 angleLines: {
-                    lineWidth: 5
+                    lineWidth: 1
                 },
                 pointLabels: {
                     font: {
-                        size: 30
+                        size: 40,
+                        weight: "bold"
                     }
                 },
                 beginAtZero: true,
