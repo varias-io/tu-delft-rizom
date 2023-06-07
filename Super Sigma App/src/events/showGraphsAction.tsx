@@ -1,5 +1,5 @@
-import { app } from "../utils/appSetup.js"
-import { showGraphsModal } from "../components/ShowGraphs.js";
+import { app } from "../utils/index.js"
+import { showGraphsModal } from "../pages/ShowGraphs.js";
 
 app.action("show_graphs", async ({ ack, client, context, body, action}) => {
     await ack();
@@ -11,7 +11,8 @@ app.action("show_graphs", async ({ ack, client, context, body, action}) => {
         console.error("body type is not block_actions")
         return;
     }
-    const graphModalProps = JSON.parse(action.value);
-    await showGraphsModal(client, context.botToken ?? "", body.trigger_id ?? "", graphModalProps);
+    const { tms, displayedInModal } = JSON.parse(action.value);
+    await showGraphsModal(client, context.botToken ?? "", body.trigger_id ?? "", {tms, displayedInModal});
+    //I trust that tms will always be a TMSScore, so I cast it to one.
 })
 

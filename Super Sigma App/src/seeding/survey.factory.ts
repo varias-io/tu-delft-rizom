@@ -1,7 +1,7 @@
 import { setSeederFactory } from "typeorm-extension";
-import { Survey } from "../entity/Survey.js";
-import { Channel } from "../entity/Channel.js";
-import { User } from "../entity/User.js";
+import { Survey } from "../entities/Survey.js";
+import { Channel } from "../entities/Channel.js";
+import { User } from "../entities/User.js";
 import { entityManager, shuffleArray } from "../utils/index.js";
 
 export const SurveyFactory = setSeederFactory(Survey, async () => {

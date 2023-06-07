@@ -1,8 +1,8 @@
 import { JSXSlack } from "jsx-slack";
-import { SurveyModalBlock } from "../components/SurveyModalBlock.js";
+import { SurveyModalBlock } from "../pages/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
 import { app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
-import { SurveyAnswer } from "../entity/SurveyAnswer.js";
+import { SurveyAnswer } from "../entities/SurveyAnswer.js";
 import { updateHome } from "./homeOpenedAction.js";
 import { SlackViewMiddlewareArgs, SlackViewAction, AllMiddlewareArgs } from "@slack/bolt";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers.js";

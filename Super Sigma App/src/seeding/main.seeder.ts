@@ -1,13 +1,13 @@
 import { DataSource } from "typeorm";
 import { Seeder, SeederFactoryManager } from "typeorm-extension";
-import { Channel } from "../entity/Channel.js";
+import { Channel } from "../entities/Channel.js";
 import { app } from "../utils/appSetup.js";
 import { entityManager, getUserSlackIdsFromChannels } from "../utils/index.js";
-import { Installation } from "../entity/Installation.js";
-import { User } from "../entity/User.js";
+import { Installation } from "../entities/Installation.js";
+import { User } from "../entities/User.js";
 import "./survey.factory.js";
 import SurveyAnswerSeeder from "./surveyanswer.seeder.js";
-import { Survey } from "../entity/Survey.js";
+import { Survey } from "../entities/Survey.js";
 
 export default class MainSeeder implements Seeder {
   public async run(
