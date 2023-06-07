@@ -1,6 +1,6 @@
-import { Channel } from "../entity/Channel.js";
-import { Survey } from "../entity/Survey.js";
-import { User } from "../entity/User.js";
+import { Channel } from "../entities/Channel.js";
+import { Survey } from "../entities/Survey.js";
+import { User } from "../entities/User.js";
 import { entityManager } from "./database.js";
 import { app } from "./index.js";
 
