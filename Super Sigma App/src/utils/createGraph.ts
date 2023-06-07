@@ -25,6 +25,12 @@ export const defaultRadarGraphProps: Pick<RadarGraphProps, "type" | "options"> =
         },
         scales: {
             r: {
+                grid: {
+                    lineWidth: 5
+                }, 
+                angleLines: {
+                    lineWidth: 5
+                },
                 pointLabels: {
                     font: {
                         size: 30
