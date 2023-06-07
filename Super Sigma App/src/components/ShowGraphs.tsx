@@ -1,11 +1,11 @@
 import {Modal, JSXSlack, Image} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
-import { createGraph, defaultBarGraphProps } from '../utils/createGraph.js';
+import { createGraph, defaultBarGraphProps} from '../utils/createGraph.js';
 import { TMSScore } from '../utils/computeTMS.js';
 
 export interface GraphsModalProps {
-  tms: TMSScore
+  tms: [TMSScore[], string[]]
   displayedInModal: boolean
 }
 
@@ -21,10 +21,11 @@ export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token
   }
 }
 
-export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
-  const spec: number = tms.specialization
-  const cred: number = tms.credibility
-  const coor: number = tms.coordination
+export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX.Element> => {
+  const latestSurvey: TMSScore = tms[0][tms[0].length-1]
+  const spec: number = latestSurvey.specialization
+  const cred: number = latestSurvey.credibility
+  const coor: number = latestSurvey.coordination
 
   const barGraph = createGraph({
     ...defaultBarGraphProps,
@@ -37,7 +38,6 @@ export const GraphsModalBlock = async(tms: TMSScore) : Promise<JSX.Element> => {
       }]
     },
   })
-
 
   return <Modal title="TMS Score Breakdown">
     <Image src={`${process.env.ENDPOINT}${await barGraph}.png`} alt="TMS Score Breakdown" />
