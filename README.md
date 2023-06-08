@@ -1,5 +1,5 @@
 # Rizom - Transactive Memory System scores for Slack
-This Slack app has been created to make it easier for teams to gauge their wellbeing using TMS (transactive memory system) scores. The app allows users to create TMS surveys for channels and groups of channels within their Slack workspace.
+This Slack app has been created to make it easier for teams to gauge their wellbeing using TMS (transactive memory system) scores. The app allows users to create TMS surveys for channels within their Slack workspace.
 
 # Features
 
