@@ -2,11 +2,13 @@ import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToM
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js"
 import { Survey } from "./Survey.js"
 import { SurveyAnswer } from "./SurveyAnswer.js"
+import { Installation } from "./Installation.js"
+import { Channel } from "./Channel.js"
 
 @Entity()
 export class User extends TimestampedBaseEntity {
 
-    @Column({nullable: false, unique: true})
+    @Column({nullable: false})
     slackId: string
     
     @OneToMany(() => Survey, survey => survey.manager)
@@ -33,6 +35,12 @@ export class User extends TimestampedBaseEntity {
     @OneToMany(() => SurveyAnswer, answer => answer.user)
     answers: SurveyAnswer[];
 
+    @ManyToMany(() => Installation, installation => installation.users)
+    workspaces!: Relation<Installation>[]
+
+    @ManyToMany(() => Channel, channel => channel.users)
+    channels: Relation<Channel>[]
+
     // eslint-disable-next-line @typescript-eslint/require-await
     @AfterLoad()
     @AfterInsert()
@@ -46,6 +54,12 @@ export class User extends TimestampedBaseEntity {
         }
         if (!this.managedSurveys) {
         this.managedSurveys = []
+        }
+        if (!this.workspaces) {
+        this.workspaces = []
+        }
+        if (!this.channels) {
+        this.channels = []
         }
     }
 
