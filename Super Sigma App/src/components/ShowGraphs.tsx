@@ -33,7 +33,7 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
     height: 1300,
     filename: `bar${  new Date().getTime()}`, 
     data: {
-      labels: [["Specialization", `${spec}`], ["Credibility", `${cred}`], ["Coordination", `${coor}`]],
+      labels: [["Specialization", `${Number(spec.toFixed(2))}`], ["Credibility", `${Number(cred.toFixed(2))}`], ["Coordination", `${Number(coor.toFixed(2))}`]],
       datasets: [{
         data: [spec, cred, coor],
         backgroundColor: "rgba(3, 94, 252, 0.4)", 
