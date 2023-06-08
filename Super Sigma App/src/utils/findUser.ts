@@ -1,4 +1,4 @@
-import { User } from "../entity/User.js";
+import { User } from "../entities/User.js";
 import { entityManager } from "./index.js";
 
 export const findUserBySlackId = async (slackId: string): Promise<User> => (

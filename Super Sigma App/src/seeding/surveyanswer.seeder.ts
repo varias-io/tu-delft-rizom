@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { Seeder, SeederFactoryManager } from "typeorm-extension";
-import { SurveyAnswer } from "../entity/SurveyAnswer.js";
-import { Survey } from "../entity/Survey.js";
+import { SurveyAnswer } from "../entities/SurveyAnswer.js";
+import { Survey } from "../entities/Survey.js";
 
 export default class SurveyAnswerSeeder implements Seeder {
   public async run(

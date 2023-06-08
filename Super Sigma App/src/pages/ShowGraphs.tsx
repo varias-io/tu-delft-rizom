@@ -33,7 +33,7 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
     height: 1300,
     filename: `bar${  new Date().getTime()}`, 
     data: {
-      labels: [["Specialization", `${spec}`], ["Credibility", `${cred}`], ["Coordination", `${coor}`]],
+      labels: [["Specialization", `${Number(spec.toFixed(2))}`], ["Credibility", `${Number(cred.toFixed(2))}`], ["Coordination", `${Number(coor.toFixed(2))}`]],
       datasets: [{
         data: [spec, cred, coor],
         backgroundColor: "rgba(3, 94, 252, 0.4)", 
@@ -49,6 +49,6 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
   const radarGraph = createGraph(radarGraphProps)
 
   return <Modal title="TMS Score Breakdown" callbackId='radar_graph_modal' notifyOnClose privateMetadata={JSON.stringify({filename: `${await radarGraph}.png`})}>
-    <Image src={`${process.env.ENDPOINT}${await radarGraph}.png`} alt="bar graph" />
+    <Image src={`${process.env.ENDPOINT}${await radarGraph}.png`} alt="Radar chart showing the TMS score for a survey." />
     </Modal>
 }

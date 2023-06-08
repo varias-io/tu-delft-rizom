@@ -2,7 +2,7 @@ import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack, Section
 import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
-import { Survey } from '../entity/Survey.js'
+import { Survey } from '../entities/Survey.js'
 import { surveyToTitle } from '../utils/index.js'
 
 interface QuestionModalProps {

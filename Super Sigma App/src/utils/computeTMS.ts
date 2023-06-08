@@ -1,5 +1,5 @@
-import { Survey } from "../entity/Survey.js"
-import { User } from "../entity/User.js"
+import { Survey } from "../entities/Survey.js"
+import { User } from "../entities/User.js"
 import { entityManager, findUserByEntityId } from "./index.js"
 
 export interface TMSScore {

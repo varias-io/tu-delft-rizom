@@ -1,5 +1,5 @@
-import { Channel } from "../entity/Channel.js"
-import { User } from "../entity/User.js"
+import { Channel } from "../entities/Channel.js"
+import { User } from "../entities/User.js"
 import { app, entityManager } from "./index.js"
 
 interface GetUsersFromChannelsProps {
