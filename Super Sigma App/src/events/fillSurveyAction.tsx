@@ -1,5 +1,5 @@
 import { app } from "../utils/appSetup.js"
-import { showSurveyModal } from "../components/SurveyModalBlock.js";
+import { showSurveyModal } from "../pages/SurveyModalBlock.js";
 import { findSurvey, getSmallestMissingQuestionIndex,  } from "../utils/index.js";
 
 app.action("fillSurvey", async ({ ack, client, context, body, action}) => {

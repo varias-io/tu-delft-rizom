@@ -1,7 +1,7 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
-import { Survey } from "../entity/Survey.js";
+import { Survey } from "../entities/Survey.js";
 import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey } from "../utils/index.js";
-import { GraphsModalProps } from "./ShowGraphs.js";
+import { GraphsModalProps } from "../pages/ShowGraphs.js";
 
 interface SurveyDisplayProps { 
   surveys: Survey[], 

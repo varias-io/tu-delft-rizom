@@ -1,4 +1,4 @@
-import { Survey } from "../entity/Survey.js"
+import { Survey } from "../entities/Survey.js"
 import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel, sendDM } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"

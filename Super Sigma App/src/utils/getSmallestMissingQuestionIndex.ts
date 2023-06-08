@@ -1,5 +1,5 @@
-import { SurveyAnswer } from "../entity/SurveyAnswer.js";
-import { User } from "../entity/User.js";
+import { SurveyAnswer } from "../entities/SurveyAnswer.js";
+import { User } from "../entities/User.js";
 import { entityManager } from "./database.js";
 
 export const getSmallestMissingQuestionIndex = async (userSlackId: string, surveyId: string): Promise<number> => {
