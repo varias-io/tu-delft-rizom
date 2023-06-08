@@ -16,7 +16,7 @@ const options: DataSourceOptions & SeederOptions = {
   username: DB_USER || "test",
   password: DB_PASSWORD || "test",
   database: DB_NAME || "test",
-  entities: ["dist/entity/*.js"],
+  entities: ["dist/entities/*.js"],
   // additional config options brought by typeorm-extension
   factories: ["dist/seeding/*.factory.js"],
   seeds: ["dist/seeding/*.seeder.js"],

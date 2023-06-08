@@ -52,7 +52,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         </Section>
         <Actions>
           {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
-          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Show All Surveys</Button>}
+          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id)).map(survey => survey.id))}>Survey History</Button>}
           <Button actionId="view_participation">View Participation </Button>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >Show TMS score breakdown</Button>
         </Actions>
