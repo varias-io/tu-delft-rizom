@@ -88,7 +88,8 @@ export const getChannelsFromSlackIds = async (slackIds: string[]): Promise<Chann
 export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string): Promise<Survey|null> => {
     return entityManager
     .createQueryBuilder(Survey, "surveys")
-    .where("surveys.channelId = :selectedChannelSlackId", { channelSlackId })
-    .andWhere("surveys.participation = null")
+    .leftJoin(Channel, "channel", "channel.id = surveys.channelId")
+    .where("channel.slackId = :channelSlackId", { channelSlackId })
+    .andWhere("surveys.participation IS NULL")
     .getOne();
 }
