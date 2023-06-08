@@ -1,7 +1,7 @@
 import { app } from "../utils/appSetup.js"
-import { Survey } from "../entity/Survey.js";
+import { Survey } from "../entities/Survey.js";
 import { entityManager } from "../utils/database.js";
-import { showAllSurveys } from "../components/ShowAllSurveys.js";
+import { showAllSurveys } from "../pages/ShowAllSurveys.js";
 
 app.action("show_all_surveys", async ({ ack, client, context, body, action}) => {
     await ack();

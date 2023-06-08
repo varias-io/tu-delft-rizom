@@ -1,4 +1,4 @@
-import { User } from "../entity/User.js"
+import { User } from "../entities/User.js"
 import { entityManager } from "./database.js"
 
 interface CreateUsersProps {

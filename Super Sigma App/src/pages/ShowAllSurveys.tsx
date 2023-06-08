@@ -1,10 +1,9 @@
 import {Modal, JSXSlack, Image} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
-import { Survey } from '../entity/Survey.js';
-import { SurveyDisplay } from './SurveyDisplay.js';
-import { LineGraphProps, createGraph, defaultLineGraphsProps } from '../utils/createGraph.js';
-import { TMSScore, computeTMS } from '../utils/computeTMS.js';
+import { Survey } from '../entities/Survey.js';
+import { SurveyDisplay } from '../components/SurveyDisplay.js';
+import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsProps } from '../utils/index.js';
 
 
 export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, surveys: Survey[], userSlackId: string) => {
@@ -16,7 +15,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
 
     const lineGraphProps: LineGraphProps = {
       ...defaultLineGraphsProps,
-      filename: `line${  new Date().getTime()}`,
+      filename: `line${new Date().getTime()}`,
       data: {
         labels: tms[1], 
         datasets: [{
