@@ -59,21 +59,28 @@ export const getUsersFromChannel = async ({channelSlackId, token, teamId}: GetUs
     const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token, teamId})
     const workspace = await entityManager.findOneBy(Installation, { teamId })
     const users = (await Promise.all(userSlackIds.map(async (slackId) => (
-        entityManager.findOneBy(User, {slackId})
-        .then(user => {
+        entityManager.findOne(User, {where: { slackId }, relations: ["workspaces"]})
+        .then(async user => {
             if (user == null) {
                 return entityManager.create(User, {
                     slackId,
                     workspaces: workspace? [workspace] : []
                 }).save()
             }
-            workspace && user.workspaces.push(workspace)
 
-            return user.save()
+            if(workspace && !user.workspaces.some(userWorkspace => userWorkspace.id === workspace.id)) {
+                await entityManager.createQueryBuilder(User, "user")
+                .relation("workspaces")
+                .of(user)
+                .add(workspace)
+            }
+
+
+            return user
         })
     ))))
 
-    const foundChannel = await getChannelFromSlackId(channelSlackId)
+    const foundChannel = await getChannelFromSlackId(channelSlackId, teamId)
 
     if (foundChannel != null) {
         foundChannel.users = users
@@ -103,12 +110,12 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"], token: s
     }));
 }
 
-export const getChannelFromSlackId = async (slackId: string): Promise<Channel | null> => {
-    return entityManager.findOneBy(Channel, {slackId})
+export const getChannelFromSlackId = async (slackId: string, teamId: string): Promise<Channel | null> => {
+    return entityManager.findOne(Channel, {where: {slackId, workspaces: { teamId }}, relations: ["users", "surveys", "workspaces"]})
 }
 
-export const getChannelsFromSlackIds = async (slackIds: string[]): Promise<Channel[]> => {
-    return (await Promise.all(slackIds.map(x => getChannelFromSlackId(x)))).filter(x => x != null) as Channel[]
+export const getChannelsFromSlackIds = async (slackIds: string[], teamId: string): Promise<Channel[]> => {
+    return (await Promise.all(slackIds.map(x => getChannelFromSlackId(x, teamId)))).filter(x => x != null) as Channel[]
 }
 
 export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string): Promise<Survey|null> => {

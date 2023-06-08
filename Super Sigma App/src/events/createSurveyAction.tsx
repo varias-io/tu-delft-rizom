@@ -48,7 +48,7 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
       })
     }
 
-    const channel = await getChannelFromSlackId(selectedChannelSlackId)
+    const channel = await getChannelFromSlackId(selectedChannelSlackId, context.teamId ?? "")
 
     if(!channel) {
       console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
