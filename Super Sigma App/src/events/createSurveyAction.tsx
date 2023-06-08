@@ -1,5 +1,5 @@
 import { Survey } from "../entities/Survey.js"
-import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendDM, usersWhoCompletedSurvey } from "../utils/index.js"
+import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -64,13 +64,13 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   const manager = await findUserBySlackId(body.user.id)
   const participants = await getUsersFromChannel({ channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? "" }, app, entityManager)
 
-  const survey = await entityManager.create(Survey, {
+  await entityManager.create(Survey, {
     channel,
     manager,
     participants
   }).save()
 
-  sendChannelMessageBlock({ channel: selectedChannelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurvey" value={JSON.stringify({ surveyId: survey.id, channelId: channel.slackId })}>Fill in Survey</Button></Actions>)] })
+  sendChannelMessageBlock({ channel: selectedChannelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
 
   updateHome(body.user.id, context)
 }
