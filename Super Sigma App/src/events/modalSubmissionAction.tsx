@@ -38,10 +38,22 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
     });
     return;
   }
+
+  const survey = await findSurvey(questionInfo.surveyId)
+
+  if(!survey) {
+    await ack({
+      response_action: "errors",
+      errors: {
+        radio_buttons: "Survey not found!"
+      }
+    })
+    return
+  }
   
   //save answer
   await entityManager.create(SurveyAnswer, {
-    survey: await findSurvey(questionInfo.surveyId), 
+    survey, 
     user: await findUserBySlackId(body.user.id),
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
@@ -54,7 +66,7 @@ const handleSubmission = async ({ ack, view, context, body }: Pick<SlackViewMidd
       response_action: "update", 
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex+1, 
-        survey: await findSurvey(questionInfo.surveyId),
+        survey,
         token: context.botToken ?? "",
       }))});
   } else {

@@ -49,8 +49,14 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
     }
 
     const channel = await getChannelFromSlackId(selectedChannelSlackId)
+
+    if(!channel) {
+      console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
+      return
+    }
+    
     const manager = await findUserBySlackId(body.user.id)
-    const participants = await getUsersFromChannel({channel: selectedChannelSlackId, token: context.botToken ?? ""})
+    const participants = await getUsersFromChannel({channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? ""})
 
     await entityManager.create(Survey, {
       channel,

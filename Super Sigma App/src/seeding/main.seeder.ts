@@ -27,7 +27,7 @@ export default class MainSeeder implements Seeder {
         }
     })
 
-    const users = (await getUserSlackIdsFromChannels({token: botToken, channels: ["C055D7ZGWJV"]}))
+    const users = (await getUserSlackIdsFromChannels({token: botToken, channelSlackIds: ["C055D7ZGWJV"]}))
     await Promise.all(Array.from(users).map(async (slackId) => {
         if (!await entityManager.exists(User, {where: {slackId}})) {
             return entityManager.create(User, {slackId}).save()

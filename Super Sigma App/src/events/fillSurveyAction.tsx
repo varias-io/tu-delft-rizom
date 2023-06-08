@@ -7,9 +7,13 @@ app.action("fillSurvey", async ({ ack, client, context, body, action}) => {
         console.error(`Unexpected action type: ${action.type}}`)
         return;
     }
-    await ack();
     const surveyId = action.value;
     const surveyToFill = await findSurvey(surveyId)
+    if(!surveyToFill){
+        console.error(`Survey not found: ${surveyId}`)
+        return;
+    }
     await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId));
+    await ack();
 })
 
