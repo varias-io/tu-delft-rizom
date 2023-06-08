@@ -7,21 +7,21 @@ This section describes the pieces of functionality that the app offers. All of t
 
 ## Creating surveys
 
-The user can choose a group of channels, and click the "Create Survey" button. The available channels are those public channels in the workspace that the user is a member of. A new survey will be created, the participants will be the users who are in at least one of the selected channels.
+The user can choose a channel, and click the "Create Survey" button. The available channels are those public channels in the workspace that the user is a member of. A new survey will be created, the participants will be the users who are in the selected channel.
 
-If the user tries to create a survey with no channels selected, a warning will be shown.
+If the user tries to create a survey with no channel selected, a warning will be shown.
 
- TODO: Each user will be notified in a direct message that a new survey has been created that they can now fill out.
+A message will be sent to the relevant channel with a button that lets users fill out the latest survey.
 
 ## List of surveys
 
 The surveys that the user is a part of are visible on the homepage.
 
-TODO: They are grouped by channels such that for any group of channels, only the latest one is displayed. The groups are ordered alphabetically.
+They are grouped by channels such that for any group of channels, only the latest one is displayed. The groups are ordered alphabetically.
 
-↪TODO: For each survey displayed, there is a button that, when pressed, displays a line chart showing the progress of each aspect of TMS as well as the overall score, over the course of the surveys done in this group of channels.
+For each survey displayed, there is a button that, when pressed, displays a line chart showing the progress of each aspect of TMS as well as the overall score, over the course of the surveys done in this channel.
 
-For every survey displayed, the channels and the starting date are clearly visible. The TMS score is also visible, with a bar chart showing the different aspects of TMS after clicking a button. The number of people eligible to fill out and the number of people who have completed the survey are shown. The user's own progress within the 15 questions of the survey are also displayed.
+For every survey displayed, the channel and the starting date are clearly visible. The TMS score is also visible, with a radar chart showing the different aspects of TMS after clicking a button. The number of people eligible to fill out and the number of people who have completed the survey are shown. The user's own progress within the 15 questions of the survey are also displayed.
 
 TODO: There is a "View Participation" button, which, when pressed, displays a list of the users eligible to fill in the survey, with indication of each user's progress.
 
@@ -33,7 +33,7 @@ TODO: The TMS score (and breakdown), participation ratio and "View Participation
 
 Each survey displayed on the homepage that hasn't been completed by the user has a "Fill in Survey" button, which leads to a series of modal elements popping up, each containing a single question for the survey.
 
-The question modal contains the number of the question, the question itself, and the aspect of TMS the question belongs to. It also displays the channels the survey is associated with. Beside the "X" and "Close" buttons which simply close the modal (not saving the answer given to the current question), there is also a green "Next" button (or "Submit" for the last question), which saves the answer given to the current question and displays the modal for the next question (or closes the modal for the last question).
+The question modal contains the number of the question, the question itself, and the aspect of TMS the question belongs to. It also displays the channel the survey is associated with. Beside the "X" and "Close" buttons which simply close the modal (not saving the answer given to the current question), there is also a green "Next" button (or "Submit" for the last question), which saves the answer given to the current question and displays the modal for the next question (or closes the modal for the last question).
 
 If anything causes the modal to close ("X" button, "Close" button or "Submit" button), the homepage is refreshed to reflect the current state of the system.
 
