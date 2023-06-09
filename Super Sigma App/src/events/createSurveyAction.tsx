@@ -42,8 +42,10 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
 
     if(latestSurvey != null) {	
       const participation = (await usersWhoCompletedSurvey(latestSurvey.id)).length/(await participantsOf(latestSurvey.id)).length *100
-      latestSurvey.participation = Number(participation.toFixed(0));
-      await latestSurvey.save();
+
+      await entityManager.update(Survey, {id: latestSurvey.id}, {
+        participation: Number(participation.toFixed(0))
+      })
     }
 
     const channel = await getChannelFromSlackId(selectedChannelSlackId)

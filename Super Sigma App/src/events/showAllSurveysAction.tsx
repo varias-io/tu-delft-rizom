@@ -19,7 +19,7 @@ app.action("show_all_surveys", async ({ ack, client, context, body, action}) => 
         .leftJoinAndSelect("survey.channel", "channel")
         .leftJoinAndSelect("survey.participants", "user")
         .where("survey.id IN (:...ids)", {ids: surveysIds})
-        .andWhere("survey.participation > 80")
+        .andWhere("survey.participation >= :threshold", {threshold: 80})
         .orderBy("survey.createdAt", "DESC")
         .getMany();
 
