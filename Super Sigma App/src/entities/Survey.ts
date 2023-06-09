@@ -6,10 +6,10 @@ import { Channel } from "./Channel.js";
 
 @Entity()
 export class Survey extends TimestampedBaseEntity {
-    @ManyToOne(() => Channel, channel => channel.surveys, {nullable: false})
+    @ManyToOne(() => Channel, channel => channel.surveys, { nullable: true })
     channel: Relation<Channel>;
     
-    @ManyToOne(() => User, user => user.managedSurveys)
+    @ManyToOne(() => User, user => user.managedSurveys, { nullable: false })
     manager: Relation<User>;
 
     @ManyToMany(() => User, user => user.eligibleSurveys)

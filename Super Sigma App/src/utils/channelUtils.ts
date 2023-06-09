@@ -1,26 +1,28 @@
 import { Channel } from "../entities/Channel.js"
 import { Survey } from "../entities/Survey.js"
+import { Installation } from "../entities/Installation.js"
 import { User } from "../entities/User.js"
 import { app, entityManager } from "./index.js"
 
 interface GetUsersFromChannelsProps {
-    channels: string[]
+    channelSlackIds: string[]
     token: string
 }
 
 interface GetUsersFromChannelProps {
-    channel: string
+    channelSlackId: string
     token: string
+    teamId: string
 }
 
 /**
  * From a list of channel ids return a set of unique user ids from those channels.
  */
-export const getUserSlackIdsFromChannels = async ({channels, token}: GetUsersFromChannelsProps) => {
+export const getUserSlackIdsFromChannels = async ({channelSlackIds, token}: GetUsersFromChannelsProps) => {
     const users = new Set<string>()
 
     //get all members from each channel
-    const allMembers = await Promise.all(channels.map(async (channel) => {
+    const allMembers = await Promise.all(channelSlackIds.map(async (channel) => {
         const members = (await app.client.conversations.members({
             token,
             channel
@@ -36,8 +38,8 @@ export const getUserSlackIdsFromChannels = async ({channels, token}: GetUsersFro
     return users
 }
 
-export const getUsersFromChannels = async ({channels, token}: GetUsersFromChannelsProps): Promise<User[]> => {
-    const userSlackIds = await getUserSlackIdsFromChannels({channels, token})
+export const getUsersFromChannels = async ({channelSlackIds, token}: GetUsersFromChannelsProps): Promise<User[]> => {
+    const userSlackIds = await getUserSlackIdsFromChannels({channelSlackIds, token})
     return (await Promise.all([...userSlackIds].map(async (slackId) => (
         entityManager.findOneBy(User, {slackId})
     )))).filter((user) => user != null) as User[]
@@ -46,26 +48,56 @@ export const getUsersFromChannels = async ({channels, token}: GetUsersFromChanne
 /**
  * From a channel id return a set of unique user ids from those channels.
  */
-export const getUserSlackIdsFromChannel = async ({channel, token}: GetUsersFromChannelProps) => {
+export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token}: GetUsersFromChannelProps) => {
     return (await app.client.conversations.members({
         token,
         channel
     })).members ?? []
 }
 
-export const getUsersFromChannel = async ({channel, token}: GetUsersFromChannelProps): Promise<User[]> => {
-    const userSlackIds = await getUserSlackIdsFromChannel({channel, token})
-    return (await Promise.all([...userSlackIds].map(async (slackId) => (
-        entityManager.findOneBy(User, {slackId})
-    )))).filter((user) => user != null) as User[]
+export const getUsersFromChannel = async ({channelSlackId, token, teamId}: GetUsersFromChannelProps): Promise<User[]> => {
+    const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token, teamId})
+    const workspace = await entityManager.findOneBy(Installation, { teamId })
+    const users = (await Promise.all(userSlackIds.map(async (slackId) => (
+        entityManager.findOne(User, {where: { slackId }, relations: ["workspaces"]})
+        .then(async user => {
+            if (user == null) {
+                return entityManager.create(User, {
+                    slackId,
+                    workspaces: workspace? [workspace] : []
+                }).save()
+            }
+
+            if(workspace && !user.workspaces.some(userWorkspace => userWorkspace.id === workspace.id)) {
+                await entityManager.createQueryBuilder(User, "user")
+                .relation("workspaces")
+                .of(user)
+                .add(workspace)
+            }
+
+
+            return user
+        })
+    ))))
+
+    const foundChannel = await getChannelFromSlackId(channelSlackId, teamId)
+
+    if (foundChannel != null) {
+        foundChannel.users = users
+        await foundChannel.save()
+    }
+
+    return users
+
 }
 
 export interface ChannelInfo {
     slackId: string,
     name: string,
+    teamId: string
 }
 
-export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string): Promise<ChannelInfo[]> => {
+export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string, teamId: string): Promise<ChannelInfo[]> => {
     return ((await app.client.users.conversations({
         token,
         user: userSlackId, 
@@ -73,16 +105,17 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"], token: s
         types: "public_channel" // types of conversations
     })).channels ?? []).map(channel => ({
         slackId: channel.id ?? "",
-        name: channel.name ?? ""
+        name: channel.name ?? "",
+        teamId
     }));
 }
 
-export const getChannelFromSlackId = async (slackId: string): Promise<Channel> => {
-    return entityManager.findOneByOrFail(Channel, {slackId})
+export const getChannelFromSlackId = async (slackId: string, teamId: string): Promise<Channel | null> => {
+    return entityManager.findOne(Channel, {where: {slackId, workspaces: { teamId }}, relations: ["users", "surveys", "workspaces"]})
 }
 
-export const getChannelsFromSlackIds = async (slackIds: string[]): Promise<Channel[]> => {
-    return Promise.all(slackIds.map(x => getChannelFromSlackId(x)))
+export const getChannelsFromSlackIds = async (slackIds: string[], teamId: string): Promise<Channel[]> => {
+    return (await Promise.all(slackIds.map(x => getChannelFromSlackId(x, teamId)))).filter(x => x != null) as Channel[]
 }
 
 export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string): Promise<Survey|null> => {

@@ -1,4 +1,3 @@
-import { app } from "./index.js"
 
 interface SendDMProps {
     users: string[],
@@ -12,21 +11,26 @@ interface SendDMProps {
 *this is to avoid sending a request for each user to check if they are a bot.
 */
 export const sendDM = ({users, token, message}: SendDMProps) => {
+
+    token;message
+
     users.forEach(async (user) => {
       
       //opens a conversation with all members
       try {
-        const dm = await app.client.conversations.open({
-          token,
-          users: user
-        })
+        //THIS WAS FAILING ON CONNECTIONS, BUT WILL BE REWORKED BY @DANIEL
+
+        // const dm = await app.client.conversations.open({
+        //   token,
+        //   users: user
+        // })
       
         //sends a message to the conversation
-        app.client.chat.postMessage({
-          token,
-          channel: dm.channel?.id ?? "",
-          text: message
-        })
+        // app.client.chat.postMessage({
+        //   token,
+        //   channel: dm.channel?.id ?? "",
+        //   text: message
+        // })
       } 
 
       //catches the error if the user is a bot

@@ -30,14 +30,20 @@ export const computeTMSPerUser = async (survey: Survey): Promise<TMSUserScore[]>
   .getRawMany();
 
   //Map the result to the correct format
-  return Promise.all(result.map(async x => ({
-    user: await findUserByEntityId(x.userId),
-    score: {
-      specialization: x.specialization,
-      credibility: x.credibility,
-      coordination: x.coordination
+  return Promise.all(result.map(async x => {
+    const user = await findUserByEntityId(x.userId)
+    if(user == null) {
+      return null
     }
-  })))
+    return {
+      score: {
+        specialization: x.specialization,
+        credibility: x.credibility,
+        coordination: x.coordination
+      },
+      user
+    }
+  })).then(promises => promises.filter(x => x != null) as TMSUserScore[])
 
 } 
 
