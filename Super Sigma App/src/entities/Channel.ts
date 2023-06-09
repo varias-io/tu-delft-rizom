@@ -10,10 +10,10 @@ export class Channel extends TimestampedBaseEntity {
   @Column({nullable: false})
   slackId: string;
 
-  @OneToMany(() => Survey, survey => survey.channel)
+  @OneToMany(() => Survey, survey => survey.channel, { onDelete: "SET NULL" })
   surveys: Survey[];
 
-  @ManyToMany(() => Installation, installation => installation.channels)
+  @ManyToMany(() => Installation, installation => installation.channels, { nullable: false })
   workspaces!: Relation<Installation>[];
 
   @ManyToMany(() => User, user => user.channels)

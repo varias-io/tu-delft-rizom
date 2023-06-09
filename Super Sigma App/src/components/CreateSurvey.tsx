@@ -20,18 +20,31 @@ export const CreateSurvey = async ({userSlackId, token, teamId}: ChannelSelectPr
      * Will also show a pop up confirming you want to create a survey for the selected channel.
      */
     const channels: ChannelInfo[] = await getChannelsFromUser(userSlackId, token, teamId)
-    for(const channel of channels){
-        const existingChannel = await entityManager.findOne(Channel, {where: {slackId: channel.slackId, workspaces: { teamId }}})
-        if(!existingChannel){
-            const workspace = await entityManager.findOne(Installation, {where: {teamId}})
-            if(workspace) {
-                await entityManager.create(Channel, {
-                    ...channel,
-                    workspaces: [workspace]
-                }).save()
-            }
-        }
+    const workspace = await entityManager.findOne(Installation, {where: {teamId}, relations: ["channels"]})
+    if(!workspace) {
+        return <></>
     }
+
+    const removedOrChanged = workspace.channels.filter(channel => !channels.find(c => c.slackId == channel.slackId))
+
+    removedOrChanged.forEach(channel => {
+        entityManager.remove(channel)
+    })
+
+    workspace.channels = await Promise.all(channels.map(async channel => {
+        return await entityManager.findOne(Channel, {where: {slackId: channel.slackId, workspaces: { teamId }}})
+            .then(existingChannel => {
+                if(!existingChannel) {
+                    return entityManager.create(Channel, {
+                        ...channel,
+                    }).save()
+                }
+                return existingChannel
+            })
+    }))
+    
+    await workspace.save()
+        
     if(channels.length) {
         return (
             <>
