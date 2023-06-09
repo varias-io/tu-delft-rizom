@@ -1,4 +1,4 @@
-import {Modal, JSXSlack, Image} from 'jsx-slack'
+import {Modal, JSXSlack, Image, Mrkdwn, Section} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js';
@@ -7,6 +7,14 @@ import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsPro
 
 
 export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, surveys: Survey[], userSlackId: string) => {
+  if(surveys.length == 0) {
+    await client.views.open({
+      token: token,
+      trigger_id: trigger_id,
+      view: JSXSlack(<Modal title="Survey History"><Section><Mrkdwn>There are no surveys to show in the history.</Mrkdwn></Section></Modal>)
+    });
+    return;
+  }
   try {
     const tmsScore: TMSScore[] = (await Promise.all(surveys.map(async (survey) => await computeTMS(survey)))).reverse();
     const dates: string[] = surveys.map((survey) => survey.createdAt.toLocaleDateString("nl-NL")).reverse(); 

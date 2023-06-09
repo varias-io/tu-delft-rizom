@@ -1,5 +1,5 @@
 import { Survey } from "../entities/Survey.js"
-import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getUsersFromChannel, sendDM } from "../utils/index.js"
+import { app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendDM, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import  { JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -37,6 +37,16 @@ app.action("createSurvey", async ({ ack, body, context, client }) => {
 
     const selectedChannelSlackId = selection.value
     await ack()
+
+    const latestSurvey = await getLatestSurveyFromChannelSlackId(selectedChannelSlackId)
+
+    if(latestSurvey != null) {	
+      const participation = (await usersWhoCompletedSurvey(latestSurvey.id)).length/(await participantsOf(latestSurvey.id)).length *100
+
+      await entityManager.update(Survey, {id: latestSurvey.id}, {
+        participation: Number(participation.toFixed(0))
+      })
+    }
 
     const channel = await getChannelFromSlackId(selectedChannelSlackId)
     const manager = await findUserBySlackId(body.user.id)

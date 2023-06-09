@@ -1,4 +1,5 @@
 import { Channel } from "../entities/Channel.js"
+import { Survey } from "../entities/Survey.js"
 import { User } from "../entities/User.js"
 import { app, entityManager } from "./index.js"
 
@@ -82,4 +83,13 @@ export const getChannelFromSlackId = async (slackId: string): Promise<Channel> =
 
 export const getChannelsFromSlackIds = async (slackIds: string[]): Promise<Channel[]> => {
     return Promise.all(slackIds.map(x => getChannelFromSlackId(x)))
+}
+
+export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string): Promise<Survey|null> => {
+    return entityManager
+    .createQueryBuilder(Survey, "surveys")
+    .leftJoin(Channel, "channel", "channel.id = surveys.channelId")
+    .where("channel.slackId = :channelSlackId", { channelSlackId })
+    .andWhere("surveys.participation IS NULL")
+    .getOne();
 }

@@ -1,4 +1,4 @@
-import { AfterInsert, AfterLoad, AfterUpdate, Entity, ManyToMany, ManyToOne, OneToMany, Relation } from "typeorm";
+import { AfterInsert, AfterLoad, AfterUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany, Relation } from "typeorm";
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 import { User } from "./User.js";
 import { SurveyAnswer } from "./SurveyAnswer.js";
@@ -18,6 +18,10 @@ export class Survey extends TimestampedBaseEntity {
     @OneToMany(() => SurveyAnswer, answer => answer.survey)
     answers: Relation<SurveyAnswer>[];
 
+    //null is ongoing 
+    //number will represent percentage of participation
+    @Column({nullable: true, default: null})
+    participation?: number;
 
     // eslint-disable-next-line @typescript-eslint/require-await
     @AfterLoad()
