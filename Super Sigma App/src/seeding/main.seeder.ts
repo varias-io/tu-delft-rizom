@@ -42,7 +42,7 @@ export default class MainSeeder implements Seeder {
 
   
     const surveyFactory = factoryManager.get(Survey);
-    await surveyFactory.saveMany(0)
+    await surveyFactory.saveMany(10)
 
     const surveyAnswerSeeder = new SurveyAnswerSeeder();
     await surveyAnswerSeeder.run(dataSource, factoryManager);
