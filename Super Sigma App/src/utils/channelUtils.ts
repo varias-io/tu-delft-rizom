@@ -58,6 +58,10 @@ export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token
 
 export const getUsersFromChannel = async ({channelSlackId, token, teamId}: GetUsersFromChannelProps, app: App, entityManager: EntityManager): Promise<User[]> => {
     const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token, teamId}, app)
+    return await findUsersFromChannel( userSlackIds, channelSlackId, teamId, entityManager)
+}
+
+export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, teamId: string, entityManager: EntityManager): Promise<User[]> => {
     const workspace = await entityManager.findOneBy(Installation, { teamId })
     const users = (await Promise.all(userSlackIds.map(async (slackId) => (
         entityManager.findOne(User, {where: { slackId }, relations: ["workspaces"]})

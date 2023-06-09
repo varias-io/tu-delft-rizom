@@ -23,7 +23,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
   }
   return <>
     {await Promise.all(surveys.map(async (survey) => {
-      const tmsScore: TMSScore = await computeTMS(survey);
+      const tmsScore: TMSScore = await computeTMS(survey, entityManager);
       const surveyDate: [TMSScore[], string[]] = [[], []]; 
       
       surveyDate[0].push(tmsScore);
