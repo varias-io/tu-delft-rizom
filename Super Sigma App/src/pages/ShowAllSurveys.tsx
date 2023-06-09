@@ -3,7 +3,7 @@ import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js';
 import { SurveyDisplay } from '../components/SurveyDisplay.js';
-import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsProps } from '../utils/index.js';
+import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsProps, entityManager } from '../utils/index.js';
 
 
 export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, surveys: Survey[], userSlackId: string) => {
@@ -16,7 +16,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
     return;
   }
   try {
-    const tmsScore: TMSScore[] = (await Promise.all(surveys.map(async (survey) => await computeTMS(survey)))).reverse();
+    const tmsScore: TMSScore[] = (await Promise.all(surveys.map(async (survey) => await computeTMS(survey, entityManager)))).reverse();
     const dates: string[] = surveys.map((survey) => survey.createdAt.toLocaleDateString("nl-NL")).reverse(); 
 
     const tms: [TMSScore[], string[]] = [ tmsScore, dates];
