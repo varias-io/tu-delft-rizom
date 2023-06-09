@@ -31,7 +31,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
 
       const tms: [TMSScore[], string[]] = surveyDate
       
-      const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id);
+      const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id, entityManager);
       const graphModalProps: GraphsModalProps = {tms, displayedInModal}
       const latestSurvey: TMSScore = tms[0][tms[0].length-1]
       return <>

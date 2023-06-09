@@ -20,7 +20,7 @@ export const fillSurvey: ActionCallback = async ({ ack, client, context, body, a
             console.error(`Survey not found: ${surveyId}`)
             return;
         }
-        await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId));
+        await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId, entityManager));
         await ack();
     }
 }

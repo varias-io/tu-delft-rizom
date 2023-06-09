@@ -1,7 +1,6 @@
 import { EntityManager } from "typeorm";
 import { SurveyAnswer } from "../entities/SurveyAnswer.js";
 import { User } from "../entities/User.js";
-import { entityManager } from "./database.js";
 
 export const getSmallestMissingQuestionIndex = async (userSlackId: string, surveyId: string, entityManager: EntityManager): Promise<number> => {
 
