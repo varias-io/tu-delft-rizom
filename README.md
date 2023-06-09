@@ -65,6 +65,7 @@ First, you need to give your app certain permissions (scopes) within the workspa
 - channels:history
 - channels:join
 - channels:read
+- channels:write.public
 - chat:write
 - commands
 - im:history
