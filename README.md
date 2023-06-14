@@ -17,7 +17,7 @@ A message will be sent to the relevant channel with a button that lets users fil
 
 The surveys that the user is a part of are visible on the homepage.
 
-They are grouped by channels such that for any group of channels, only the latest one is displayed. The groups are ordered alphabetically.
+They are grouped by channels such that for any channel, only the latest one is displayed. The groups are ordered alphabetically.
 
 For each survey displayed, there is a button that, when pressed, displays a line chart showing the progress of each aspect of TMS as well as the overall score, over the course of the surveys done in this channel.
 
@@ -84,16 +84,15 @@ As explained earlier, you will have to use those keys and tokens. More specifica
 
 Some of them are on your app dashboard:
 
-- *SLACK_BOT_TOKEN*: **Features > OAuth & Permissions** > OAuth Tokens for Your Workspace > Bot User OAuth Token
 - *SLACK_SIGNING_SECRET*:  **Settings > Basic Information** > App Credentials > Signing Secret
 - *SLACK_CLIENT_ID*:  **Settings > Basic Information** > App Credentials > Client ID
-- *SLACK_CLIENT_ID*:  **Settings > Basic Information** > App Credentials > Client ID
+- *SLACK_CLIENT_SECRET*:  **Settings > Basic Information** > App Credentials > Client Secret
 
-Some of them are database-specific, but the settings we went with are:
+You need to set up your database-related fields:
 
-- *DB_USER*: postgres
-- *DB_PASSWORD*: password
-- *DB_NAME*: rizzom
+- *DB_USER*
+- *DB_PASSWORD*
+- *DB_NAME*
 - *DATABASE_URL*: just change the formatted variables (e.g. *$DB_USER*) to the values given to those fields
 
 We'll get back to the remaining field (*ENDPOINT*) later.
@@ -162,7 +161,7 @@ Our frontend is built up from JSX-like components. This directory contains the n
 
 This directory contains the entities used by TypeORM and for the database structure. If you change something here, please run 
 ```sh
-npm run migration:generate
+npm run migration:generate [migration name]
 ```
 to generate a migration (into the **migrations** directory) and
 ```sh
@@ -173,6 +172,8 @@ to restructure your database based on the changes. You might run into some issue
 npm run migration:run
 ```
 again.
+
+Also, consider that TypeORM currently doesn't deal with cascade options entirely correctly, so if you are changing one of those, you need to do that manually in the generated migration.
 
 ### **events**
 
