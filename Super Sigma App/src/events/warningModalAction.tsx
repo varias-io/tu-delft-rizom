@@ -45,7 +45,6 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex, 
         survey,
-        token: context.botToken ?? "",
       }))});
   } else {
     //this was last question

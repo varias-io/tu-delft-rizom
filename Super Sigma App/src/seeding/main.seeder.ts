@@ -25,17 +25,17 @@ export default class MainSeeder implements Seeder {
         team_id: "T055Q9UHP5W",
       }))
     const allChannels = await Promise.all(channels.channels?.map(async (channel) => {
-      const existing = await entityManager.findOne(Channel, {where: {slackId: channel.id ?? "", workspaces: { teamId: "T055Q9UHP5W" }}})
+      const existing = await entityManager.findOne(Channel, {where: {slackId: channel.id ?? "", primaryWorkspace: { teamId: "T055Q9UHP5W" }}})
         if (!existing) {
-            return await entityManager.create(Channel, {slackId: channel.id ?? "", workspaces: [workspace]}).save()
+            return await entityManager.create(Channel, {slackId: channel.id ?? "", primaryWorkspace: workspace}).save()
         }
       return existing
     }) ?? [])
 
     const users = (await getUserSlackIdsFromChannels({token: botToken, channelSlackIds: ["C055D7ZGWJV"]}, app))
     await Promise.all(Array.from(users).map(async (slackId) => {
-        if (!await entityManager.exists(User, {where: {slackId, workspaces: { teamId: "T055Q9UHP5W" }}})) {
-            return entityManager.create(User, {slackId, workspaces: [workspace], channels: allChannels}).save()
+        if (!await entityManager.exists(User, {where: {slackId, primaryWorkspace: { teamId: "T055Q9UHP5W" }}})) {
+            return entityManager.create(User, {slackId, primaryWorkspace: workspace, channels: allChannels}).save()
         }
         return undefined
     }))

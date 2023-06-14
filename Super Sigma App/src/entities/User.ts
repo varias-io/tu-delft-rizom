@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable, Relation } from "typeorm"
+import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable, Relation, ManyToOne, Unique } from "typeorm"
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js"
 import { Survey } from "./Survey.js"
 import { SurveyAnswer } from "./SurveyAnswer.js"
@@ -6,6 +6,7 @@ import { Installation } from "./Installation.js"
 import { Channel } from "./Channel.js"
 
 @Entity()
+@Unique(["slackId", "primaryWorkspace"])
 export class User extends TimestampedBaseEntity {
 
     @Column({nullable: false})
@@ -35,8 +36,12 @@ export class User extends TimestampedBaseEntity {
     @OneToMany(() => SurveyAnswer, answer => answer.user)
     answers: SurveyAnswer[];
 
-    @ManyToMany(() => Installation, installation => installation.users)
-    workspaces!: Relation<Installation>[]
+    @ManyToOne(() => Installation, installation => installation.users)
+    primaryWorkspace!: Relation<Installation>
+
+    @ManyToMany(() => Installation)
+    @JoinTable({name: "user_connect_workspaces"})
+    connectWorkspaces: Relation<Installation>[]
 
     @ManyToMany(() => Channel, channel => channel.users)
     channels: Relation<Channel>[]
@@ -55,8 +60,8 @@ export class User extends TimestampedBaseEntity {
         if (!this.managedSurveys) {
         this.managedSurveys = []
         }
-        if (!this.workspaces) {
-        this.workspaces = []
+        if (!this.connectWorkspaces) {
+        this.connectWorkspaces = []
         }
         if (!this.channels) {
         this.channels = []
