@@ -1,5 +1,5 @@
 import { app } from "../utils/appSetup.js"
-import { showSurveyModal } from "../pages/SurveyModalBlock.js";
+import { showWarningModal } from "../pages/SurveyModalBlock.js";
 import { ActionCallback, entityManager, findSurvey, getSmallestMissingQuestionIndex,  } from "../utils/index.js";
 import { EntityManager } from "typeorm";
 
@@ -20,7 +20,7 @@ export const fillSurvey: ActionCallback = async ({ ack, client, context, body, a
             console.error(`Survey not found: ${surveyId}`)
             return;
         }
-        await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId, entityManager));
+        await showWarningModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyId, entityManager));
         await ack();
     }
 }

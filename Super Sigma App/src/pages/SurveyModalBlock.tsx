@@ -1,4 +1,4 @@
-import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack, Section} from 'jsx-slack'
+import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack, Section, Mrkdwn} from 'jsx-slack'
 import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
@@ -28,10 +28,37 @@ const OptionsWithValues = ({reversed} : OptionsWithValuesProps) : JSX.Element =>
   </>
 )
 
+export const showWarningModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
+  try{
+    await client.views.open({
+      token: token,
+      trigger_id: trigger_id,
+      view: JSXSlack(await warningModalBlock({survey, questionIndex, token}))
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+export const warningModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
+  return <Modal 
+    title="Important!"
+    submit="I understand"
+    callbackId='warning_modal'
+    notifyOnClose
+    privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex, token})}
+    >
+    <Section><Mrkdwn>You can not change your answer for a question or go back in the survey after you click next!</Mrkdwn></Section>
+
+    </Modal>
+}
+
 
 export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
   try {
     await client.views.open({
+      client: client,
       token: token,
       trigger_id: trigger_id,
       view: JSXSlack(await SurveyModalBlock({survey, questionIndex, token}))
