@@ -1,6 +1,6 @@
 import { app } from "../utils/index.js"
 import { EntityManager } from "typeorm"
-import { ViewsPublishArguments, UsersConversationsArguments, UsersConversationsResponse, ConversationsListArguments, ConversationsListResponse, ConversationsInfoArguments, ConversationsInfoResponse, ConversationsMembersArguments, ConversationsMembersResponse, ViewsPublishResponse} from "@slack/web-api"
+import { ViewsPublishArguments, ViewsPublishResponse, UsersConversationsArguments, UsersConversationsResponse, ConversationsListArguments, ConversationsListResponse, ConversationsInfoArguments, ConversationsInfoResponse, ConversationsMembersArguments, ConversationsMembersResponse, ViewsPushArguments, ViewsOpenArguments} from "@slack/web-api"
 
 type DefaultActionCallback = Parameters<typeof app.action>[1]
 type DefaultActionCallbackParams = Parameters<DefaultActionCallback>[0]
@@ -36,5 +36,17 @@ export interface ConversationsApp {
       info: (params: ConversationsInfoArguments) => Promise<ConversationsInfoResponse>,
       members: (params: ConversationsMembersArguments) => Promise<ConversationsMembersResponse>
     }
+  }
+}
+
+export interface ViewsPushClient {
+  views: {
+    push: (params: ViewsPushArguments) => void
+  }
+}
+
+export interface ViewsOpenClient {
+  views: {
+    open: (params: ViewsOpenArguments) => void
   }
 }
