@@ -43,6 +43,6 @@ app.action("fillSurveyMessage", async ({ ack, client, context, body, action}) =>
             token: context.botToken ?? ""
         })
     } else {
-        await showWarningModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyToFill.id, entityManager));
+        await showWarningModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, questionIndex);
     }
 })
