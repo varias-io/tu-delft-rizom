@@ -2,6 +2,8 @@ import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entities/Survey.js";
 import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
 import { GraphsModalProps } from "../pages/ShowGraphs.js";
+import { TMStoPercentage } from "../utils/tmsUtils.js";
+
 
 interface SurveyDisplayProps { 
   surveys: Survey[], 
@@ -47,10 +49,10 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         </Section>
         <Section>
           <Mrkdwn>
-          Overall TMS: {((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3).toFixed(2)}<br/>
-          - Specialization: {latestSurvey.specialization.toFixed(2)}<br />
-          - Credibility: {latestSurvey.credibility.toFixed(2)}<br />
-          - Coordination: {latestSurvey.coordination.toFixed(2)}<br />
+          Overall TMS: {TMStoPercentage(((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3)).toFixed(2)}%<br/>
+          - Specialization: {TMStoPercentage(latestSurvey.specialization).toFixed(2)}<br />
+          - Credibility: {TMStoPercentage(latestSurvey.credibility).toFixed(2)}<br />
+          - Coordination: {TMStoPercentage(latestSurvey.coordination).toFixed(2)}<br />
           <br />
           <b>Personal progress: {personalProgress}/15</b> <br />
           </Mrkdwn>
