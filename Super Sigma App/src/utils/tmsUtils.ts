@@ -1,4 +1,8 @@
 
 export const TMStoPercentage = (tms: number): number => {
-    return (tms - 1) * 25  
+    if (tms <= 0){
+        return 0
+    } else {
+        return (tms - 1) * 25  
+    }
 }
