@@ -1,7 +1,7 @@
 import { Survey } from "../entities/Survey.js"
-import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendDM, usersWhoCompletedSurvey } from "../utils/index.js"
+import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendChannelMessageBlock, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
-import { JSXSlack, Mrkdwn, Section } from "jsx-slack"
+import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
 
 const selectionBlockNotFound = (): object => {
@@ -26,7 +26,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
 
   const selection = Object.entries(body.view?.state.values.channelSelect ?? selectionBlockNotFound())[0][1].selected_option
 
-  if(!selection) {
+  if (!selection) {
     client.views.update({
       token: context.botToken ?? "",
       view_id: body.view?.id ?? "",
@@ -45,8 +45,8 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   await ack()
 
   const latestSurvey = await getLatestSurveyFromChannelSlackId(selectedChannelSlackId, entityManager)
-  if(latestSurvey != null) {
-    const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length/(await participantsOf(latestSurvey.id, entityManager)).length *100
+  if (latestSurvey != null) {
+    const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length / (await participantsOf(latestSurvey.id, entityManager)).length * 100
 
     await entityManager.update(Survey, { id: latestSurvey.id }, {
       participation: Number(participation.toFixed(0))
@@ -55,7 +55,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
 
   const channel = await getChannelFromSlackId(selectedChannelSlackId, context.teamId ?? "", entityManager)
 
-  if(!channel) {
+  if (!channel) {
     console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
     return
   }
@@ -69,9 +69,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     participants
   }).save()
 
-  //TODO: Make message contain a link that directly triggers the fill in survey modal.
-  const message = `A new TMS survey has just been created in <#${channel.slackId}>. Go to the home tab to fill it out.`
-  sendDM({ users: participants.map((p) => p.slackId), token: context.botToken ?? "", message })
+  sendChannelMessageBlock({ channel: selectedChannelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
 
   updateHome(body.user.id, context)
 }
