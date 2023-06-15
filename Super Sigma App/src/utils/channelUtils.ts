@@ -5,6 +5,7 @@ import { Installation } from "../entities/Installation.js"
 import { User } from "../entities/User.js"
 import { EntityManager } from "typeorm"
 import { app } from "./appSetup.js"
+import { ConversationsApp, UsersConversationsApp } from "./index.js"
 
 interface GetUsersFromChannelsProps {
     channelSlackIds: string[]
@@ -58,7 +59,7 @@ export const getUsersFromChannels = async ({channelSlackIds, token}: GetUsersFro
 /**
  * From a channel id return a set of unique user ids from those channels.
  */
-export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token}: GetUserSlackIdsFromChannelProps, app: App) => {
+export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token}: GetUserSlackIdsFromChannelProps, app: ConversationsApp) => {
     return app.client.conversations.members({
         token,
         channel
@@ -71,7 +72,7 @@ export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token
 
 }
 
-export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: App, entityManager: EntityManager): Promise<User[]> => {
+export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: ConversationsApp, entityManager: EntityManager): Promise<User[]> => {
     const token = await entityManager.findOne(Installation, {where: {teamId}}).then((installation) => installation?.botToken ?? "")
     const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token}, app)
     return await findUsersFromChannel( userSlackIds, channelSlackId, teamId, entityManager)
@@ -152,8 +153,15 @@ export interface ChannelInfo {
     conversationHostId: string | undefined
 }
 
-export const getChannelsFromUser = async (userSlackId: User["slackId"], token: string, app: App): Promise<ChannelInfo[]> => {
-    return app.client.users.conversations({
+interface GetChannelsFromUserProps {
+    userSlackId: User["slackId"],
+    token: string,
+    teamId: string, 
+    app: UsersConversationsApp
+}
+
+export const getChannelsFromUser = async ({userSlackId, token, app}: GetChannelsFromUserProps): Promise<ChannelInfo[]> => {
+    return await app.client.users.conversations({
         token,
         user: userSlackId, 
         exclude_archived: true,
@@ -169,7 +177,6 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"], token: s
         console.error(`Something bad happened with userSlackId ${userSlackId} (probably bc it's the wrong token)`)
         return []
     })
-    
 }
 
 export const getChannelFromSlackId = async (slackId: string, teamId: string, entityManager: EntityManager): Promise<Channel | null> => {
@@ -189,7 +196,7 @@ export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string, 
     .getOne();
 }
 
-export const getChannelsFromWorkspace = async (token: string, app: App) => {
+export const getChannelsFromWorkspace = async (token: string, app: ConversationsApp) => {
     return app.client.conversations.list({
         token,
         exclude_archived: true,

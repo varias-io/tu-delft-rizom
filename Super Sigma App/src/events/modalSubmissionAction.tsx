@@ -15,7 +15,7 @@ interface PrivateMetadataQuestion {
 app.view({callback_id:"survey_modal", type:"view_closed"}, async ({ ack, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
   //handle closing
   await ack();
-  updateHome(body.user.id, context)
+  updateHome({app, userSlackId: body.user.id, context})
 })
 
 
@@ -70,7 +70,7 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
       }))});
   } else {
     //this was last question
-    updateHome(body.user.id, context)
+    updateHome({app, userSlackId: body.user.id, context})
     await ack()
   }
 }

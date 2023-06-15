@@ -81,7 +81,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   crons.set(channel.id, task)
   task.start()
 
-  updateHome(body.user.id, context)
+  updateHome({app, userSlackId: body.user.id, context})
 }
 
 const noChannelSelectedErrorBlock = (): Block => (

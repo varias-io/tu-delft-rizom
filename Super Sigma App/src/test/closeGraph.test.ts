@@ -9,7 +9,7 @@ const innerObj = {filename}
 const body = {
   view: {private_metadata: JSON.stringify(innerObj)}
 }
-let acked: boolean = false
+let acked = false
 const ack = async () => {
   acked = true
 }
