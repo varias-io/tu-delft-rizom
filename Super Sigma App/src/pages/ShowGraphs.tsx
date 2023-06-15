@@ -3,6 +3,7 @@ import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { createGraph, defaultRadarGraphProps, RadarGraphProps} from '../utils/createGraph.js';
 import { TMSScore } from '../utils/computeTMS.js';
+import { TMStoPercentage } from '../utils/index.js';
 
 export interface GraphsModalProps {
   tms: [TMSScore[], string[]]
@@ -23,9 +24,9 @@ export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token
 
 export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX.Element> => {
   const latestSurvey: TMSScore = tms[0][tms[0].length-1]
-  const spec: number = latestSurvey.specialization
-  const cred: number = latestSurvey.credibility
-  const coor: number = latestSurvey.coordination
+  const spec: number = TMStoPercentage(latestSurvey.specialization)
+  const cred: number = TMStoPercentage(latestSurvey.credibility)
+  const coor: number = TMStoPercentage(latestSurvey.coordination)
 
   const radarGraphProps: RadarGraphProps = {
     ...defaultRadarGraphProps,
@@ -33,7 +34,7 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
     height: 1300,
     filename: `bar${  new Date().getTime()}`, 
     data: {
-      labels: [["Specialization", `${Number(spec.toFixed(2))}`], ["Credibility", `${Number(cred.toFixed(2))}`], ["Coordination", `${Number(coor.toFixed(2))}`]],
+      labels: [["Specialization", `${Number(spec.toFixed(0))}%`], ["Credibility", `${Number(cred.toFixed(0))}%`], ["Coordination", `${Number(coor.toFixed(0))}%`]],
       datasets: [{
         data: [spec, cred, coor],
         backgroundColor: "rgba(3, 94, 252, 0.4)", 

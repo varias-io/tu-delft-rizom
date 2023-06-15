@@ -1,8 +1,7 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entities/Survey.js";
-import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
+import { TMStoPercentage, TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
 import { GraphsModalProps } from "../pages/ShowGraphs.js";
-import { TMStoPercentage } from "../utils/tmsUtils.js";
 
 
 interface SurveyDisplayProps { 
