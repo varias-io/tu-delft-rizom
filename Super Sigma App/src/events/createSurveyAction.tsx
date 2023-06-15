@@ -1,9 +1,8 @@
 import { Survey } from "../entities/Survey.js"
-import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, usersWhoCompletedSurvey } from "../utils/index.js"
+import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendChannelMessageBlock, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
-import { sendChannelMessageBlock } from "../utils/sendChannelMessage.js"
 
 const selectionBlockNotFound = (): object => {
   console.error("Selection block not found")
