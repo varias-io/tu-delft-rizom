@@ -57,9 +57,14 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
           </Mrkdwn>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >View Breakdown</Button>
         </Section>
-        <Actions>
-          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>}
-        </Actions>
+        {
+          displayedInModal
+          ? <></>
+          : <Actions>
+              <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>
+            </Actions>
+        }
+        
       </>
     }))}
   </>
