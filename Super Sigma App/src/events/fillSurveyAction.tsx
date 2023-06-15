@@ -1,5 +1,5 @@
 import { app } from "../utils/appSetup.js"
-import { showSurveyModal, showWarningModal } from "../pages/SurveyModalBlock.js";
+import { showWarningModal } from "../pages/SurveyModalBlock.js";
 import { ActionCallback, entityManager, findSurvey, getSmallestMissingQuestionIndex, latestSurveyForChannel, sendChannelMessageEphemeral } from "../utils/index.js";
 import { EntityManager } from "typeorm";
 
@@ -43,6 +43,6 @@ app.action("fillSurveyMessage", async ({ ack, client, context, body, action}) =>
             token: context.botToken ?? ""
         })
     } else {
-        await showSurveyModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, questionIndex);
+        await showWarningModal(client, context.botToken ?? "", body.trigger_id ?? "", surveyToFill, await getSmallestMissingQuestionIndex(body.user.id, surveyToFill.id, entityManager));
     }
 })
