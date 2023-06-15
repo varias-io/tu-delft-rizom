@@ -110,3 +110,11 @@ export const getSlackChannel = async (channel: Channel, token: string): Promise<
 export const getChannel = async (survey: Survey, entityManager: EntityManager): Promise<Channel | null> => {
   return channelOf(survey.id, entityManager)
 }
+
+export const latestSurveyForChannel = async (channelId: Channel["id"], entityManager: EntityManager): Promise<Survey|null> => {
+  return entityManager.createQueryBuilder(Survey, "survey")
+    .innerJoin("survey.channel", "channel")
+    .where("channel.id = :channelId", { channelId })
+    .orderBy("survey.createdAt", "DESC")
+    .getOne()
+}
