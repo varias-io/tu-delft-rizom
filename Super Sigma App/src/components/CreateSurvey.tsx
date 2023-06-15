@@ -30,10 +30,14 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
 
     for(const channel of removedOrChanged) {
             try {
-                await app.client.conversations.info({
+                const res = await app.client.conversations.info({
                     channel: channel.slackId,
-                    token: workspace.botToken
+                    token: workspace.botToken,
                 })
+
+                if(res.channel?.is_archived) {
+                    entityManager.update(Channel, {id: channel.id}, {deletedAt: new Date()})
+                }
 
             } catch {
                 console.log("Soft deleting channel")
@@ -60,6 +64,27 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
                         if(!primaryWorkspace) {
                             console.error(`App is not installed in workspace ${channel.conversationHostId}`)
                             return null
+                        }
+                        const actualExisting = await entityManager.createQueryBuilder(Channel, "channel")
+                            .leftJoinAndSelect("channel.primaryWorkspace", "primaryWorkspace")
+                            .leftJoinAndSelect("channel.connectWorkspaces", "connectWorkspaces")
+                            .where("channel.slackId = :slackId", {slackId: channel.slackId})
+                            .andWhere("primaryWorkspace.teamId = :teamId", {teamId: channel.conversationHostId})
+                            .withDeleted()
+                            .getOne()
+                        if(actualExisting) {
+                            await entityManager.createQueryBuilder(Channel, "channel")
+                                .relation(Channel, "connectWorkspaces")
+                                .of(actualExisting)
+                                .add(workspace)
+
+                            return entityManager.createQueryBuilder(Channel, "channel")
+                                .leftJoinAndSelect("channel.primaryWorkspace", "primaryWorkspace")
+                                .leftJoinAndSelect("channel.connectWorkspaces", "connectWorkspaces")
+                                .where("channel.slackId = :slackId", {slackId: channel.slackId})
+                                .andWhere("primaryWorkspace.teamId = :teamId", {teamId: channel.conversationHostId})
+                                .withDeleted()
+                                .getOne()
                         }
                         return entityManager.create(Channel, {
                             ...channel,
@@ -99,11 +124,18 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
         
     const slackChannels = await Promise.all(shownChannels.map(async channel => {
         try {
+            const info = await app.client.conversations.info({
+                channel: channel.slackId,
+                token: channel.primaryWorkspace.botToken
+            })
+
+            if (!info.channel || info.channel.is_archived) {
+                await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
+                return null
+            }
+
             const channelInfo: {channelName: string, channelSlackId: string, channelTeamId: string} = {
-                channelName: (await app.client.conversations.info({
-                    channel: channel.slackId,
-                    token: channel.primaryWorkspace.botToken
-                })).channel?.name ?? "", 
+                channelName: info.channel?.name ?? "", 
                 channelSlackId: channel.slackId, 
                 channelTeamId: channel.primaryWorkspace.teamId
             }

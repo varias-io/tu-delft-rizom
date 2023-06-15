@@ -3,6 +3,7 @@ import { ActionCallback, app, crons, dailyReminderCron, entityManager, findUserB
 import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
+import { Installation } from "../entities/Installation.js"
 
 const selectionBlockNotFound = (): object => {
   console.error("Selection block not found")
@@ -69,8 +70,9 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     participants
   }).save()
 
+  const token = (await entityManager.findOne(Installation, { where: { teamId: channelTeamId } }))?.botToken ?? ""
   //Sends the fill survey message to the channel
-  sendChannelMessageBlock({ channel: channelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
+  sendChannelMessageBlock({ channel: channelSlackId, token, blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
 
   //If there is an ongoing cron for a channel stop it.
   crons.get(channel.id)?.stop()

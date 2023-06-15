@@ -55,10 +55,15 @@ export const getUsersFromChannels = async ({channelSlackIds, token}: GetUsersFro
  * From a channel id return a set of unique user ids from those channels.
  */
 export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token}: GetUserSlackIdsFromChannelProps, app: App) => {
-    return (await app.client.conversations.members({
-        token,
-        channel
-    })).members ?? []
+    try {
+        return (await app.client.conversations.members({
+            token,
+            channel
+        })).members ?? []
+    } catch {
+        console.error("Channel was deleted while in home")
+        return []
+    }
 }
 
 export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: App, entityManager: EntityManager): Promise<User[]> => {
@@ -74,19 +79,22 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
         users = (await Promise.all(userSlackIds.map(async (slackId) => (
             entityManager.findOne(User, {where: { slackId }, relations: ["primaryWorkspace", "connectWorkspaces"]})
             .then(async user => {
+                const is_stranger = await app.client.users.info({
+                    token: workspace?.botToken ?? "",
+                    user: slackId,
+                }).then(res => res.user?.is_stranger ?? false)
+                .catch(console.error)
+
                 if (user == null) {
     
-                    console.log(`User not found for ${slackId}`)
+                    console.log(`Creating user with ${JSON.stringify({slackId})}`)
     
                     try {
-                        const stranger = await app.client.users.info({
-                            token: workspace?.botToken ?? "",
-                            user: slackId,
-                        }).then(res => res.user?.is_stranger ?? false) 
+
     
                         
     
-                        if(!stranger) {
+                        if(!is_stranger) {
                             return entityManager.create(User, {
                                 slackId,
                                 primaryWorkspace: workspace? workspace : null as unknown as Installation,
@@ -104,17 +112,20 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                             connectWorkspaces: workspace? [workspace] : [],
                         }).save()                   
                     }
-                }
-        
-                if (workspace && (!user.primaryWorkspace || user.primaryWorkspace.teamId != workspace.teamId) && !user.connectWorkspaces.find(x => x.teamId == workspace.teamId)) {
-                    await entityManager.createQueryBuilder(User, "user")
-                    .relation("connectWorkspaces")
-                    .of(user)
-                    .add(workspace)
                 } else if(workspace) {
-                    await entityManager.update(User, {slackId}, {primaryWorkspace: workspace})
-                }
-    
+
+                    if(is_stranger) {
+                        if(!user.connectWorkspaces.find(x => x.teamId == workspace.teamId)) {
+                            await entityManager.createQueryBuilder(User, "user")
+                            .relation("connectWorkspaces")
+                            .of(user)
+                            .add(workspace)
+                        }
+                    } else {
+                        await entityManager.update(User, {slackId}, {primaryWorkspace: workspace})
+                    }
+                } 
+
     
                 return user
             })
@@ -152,6 +163,9 @@ export const getChannelsFromUser = async (userSlackId: User["slackId"], token: s
             contextTeamId: channel.context_team_id ?? "",
             conversationHostId: channel.conversation_host_id
         })) ?? []
+    }).catch(_e => {
+        console.error(`Something bad happened with userSlackId ${userSlackId} (probably bc it's the wrong token)`)
+        return []
     })
     
 }
