@@ -4,6 +4,7 @@ import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js';
 import { SurveyDisplay } from '../components/SurveyDisplay.js';
 import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsProps, entityManager } from '../utils/index.js';
+import { threshold } from '../events/showAllSurveysAction.js';
 
 
 export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, surveys: Survey[], userSlackId: string) => {
@@ -11,7 +12,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
     await client.views.open({
       token: token,
       trigger_id: trigger_id,
-      view: JSXSlack(<Modal title="Survey History"><Section><Mrkdwn>There are no finished surveys to show in the history.</Mrkdwn></Section>{participationWarning}</Modal>)
+      view: JSXSlack(<Modal title="Survey History"><Section><Mrkdwn>There are no finished surveys to show in the history.</Mrkdwn></Section>{participationWarning()}</Modal>)
     });
     return;
   }
@@ -72,8 +73,8 @@ export const AllSurveysBlock = async(surveys: Survey[], token: string, userSlack
   return <Modal title="Survey History" callbackId='line_graph_modal' notifyOnClose privateMetadata={JSON.stringify({filename: `${lineGraph}.png`})}>
     <Image src={`${process.env.ENDPOINT}${lineGraph}.png`} alt="Line graph visualizing the history of TMS scores for a channel." />
     {await SurveyDisplay({surveys, token, userSlackId, displayedInModal: true})}
-    {participationWarning}
+    {participationWarning()}
     </Modal>
 }
 
-const participationWarning = <><Divider /><Section><Mrkdwn>Did you expect to see a survey, but it did not show up? It might not have hit the threshold of 80% participation.</Mrkdwn></Section></>
+const participationWarning = () => <><Divider /><Section><Mrkdwn>Did you expect to see a survey, but it did not show up? It might not have hit the threshold of {threshold}% participation.</Mrkdwn></Section></>

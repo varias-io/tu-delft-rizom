@@ -27,14 +27,18 @@ export const showAllSurveysAction: ActionCallback = async ({ ack, client, contex
     await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", surveys, body.user.id);
 }
 
+export const threshold = 80;
+
 const getSurveys = async (surveysIds: string[], entityManager: EntityManager): Promise<Survey[]> => {
    return await entityManager.createQueryBuilder(Survey, "survey")
         .leftJoinAndSelect("survey.channel", "channel")
         .leftJoinAndSelect("survey.participants", "user")
         .where("survey.id IN (:...ids)", {ids: surveysIds})
-        .andWhere("survey.participation >= :threshold", {threshold: 80})
+        .andWhere("survey.participation >= :threshold", {threshold})
         .orderBy("survey.createdAt", "DESC")
         .getMany();
 }
+
+
 
 
