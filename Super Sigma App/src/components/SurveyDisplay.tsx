@@ -38,7 +38,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         <Divider/>
         <Section>
           <Mrkdwn>
-          {await surveyToTitle(survey, token, entityManager)}<br />
+          Latest survey for {await surveyToTitle(survey, token, entityManager)}<br />
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
           Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users <br />
           <br />
@@ -53,7 +53,6 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         <Actions>
           {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurveyHome" value={survey.id}>Fill in Survey</Button>}
           {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>}
-          <Button actionId="view_participation">View Participation </Button>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >Show TMS score breakdown</Button>
         </Actions>
       </>
