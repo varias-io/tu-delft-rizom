@@ -38,7 +38,7 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
     return
   }
 
-  if(questionInfo.questionIndex < surveyTemplate.length - 1){
+  if(questionInfo.questionIndex < surveyTemplate.length){
     //show next question
     await ack({
       response_action: "update", 
