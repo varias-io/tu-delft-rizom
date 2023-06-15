@@ -1,92 +1,200 @@
-# Transactive Memory System
+# Rizom - Transactive Memory System scores for Slack
+This Slack app has been created to make it easier for teams to gauge their wellbeing using TMS (transactive memory system) scores. The app allows users to create TMS surveys for channels within their Slack workspace.
 
+# Features
 
+This section describes the pieces of functionality that the app offers. All of this can be found on the homepage of the app, unless specified otherwise
 
-## Getting started
+## Creating surveys
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+The user can choose a channel, and click the "Create Survey" button. The available channels are those public channels in the workspace that the user is a member of. A new survey will be created, the participants will be the users who are in the selected channel.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+If the user tries to create a survey with no channel selected, a warning will be shown.
 
-## Add your files
+A message will be sent to the relevant channel with a button that lets users fill out the latest survey.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## List of surveys
 
+The surveys that the user is a part of are visible on the homepage.
+
+They are grouped by channels such that for any channel, only the latest one is displayed. The groups are ordered alphabetically.
+
+For each survey displayed, there is a button that, when pressed, displays a line chart showing the progress of each aspect of TMS as well as the overall score, over the course of the surveys done in this channel.
+
+For every survey displayed, the channel and the starting date are clearly visible. The TMS score is also visible, with a radar chart showing the different aspects of TMS after clicking a button. The number of people eligible to fill out and the number of people who have completed the survey are shown. The user's own progress within the 15 questions of the survey are also displayed.
+
+TODO: There is a "View Participation" button, which, when pressed, displays a list of the users eligible to fill in the survey, with indication of each user's progress.
+
+TODO: The TMS score (and breakdown), participation ratio and "View Participation" button are only shown if any of the following cases applies:
+ - The user is the creator of the survey
+ - The participation of the survey is over 80%
+
+## Filling out surveys
+
+Each survey displayed on the homepage that hasn't been completed by the user has a "Fill in Survey" button, which leads to a series of modal elements popping up, each containing a single question for the survey.
+
+The question modal contains the number of the question, the question itself, and the aspect of TMS the question belongs to. It also displays the channel the survey is associated with. Beside the "X" and "Close" buttons which simply close the modal (not saving the answer given to the current question), there is also a green "Next" button (or "Submit" for the last question), which saves the answer given to the current question and displays the modal for the next question (or closes the modal for the last question).
+
+If anything causes the modal to close ("X" button, "Close" button or "Submit" button), the homepage is refreshed to reflect the current state of the system.
+
+Once the user has answered a question for a given survey, it cannot be changed anymore. Of course, a different answer can be given in a different survey.
+
+TODO: After clicking the "Fill in Survey" button, regardless of what question is coming up, the first modal displayed is a warning that each answer given is final for the given survey. After confirming, the user is taken to the relevant question.
+
+# Contribution
+
+If you'd like to contribute to this project, you can find out how in the following section
+
+## Dependencies
+
+The project relies on a couple of technologies which are not contained in this repository, they are:
+- Node.js and npm
+- Docker
+Please make sure these are installed on your machine when you start working. Docker also needs to be running in order for the application to start properly.
+
+## Creating a Slack App
+
+To have a dummy app that you can use for development, you need to create one. Since it utilizes keys and tokens that are arguably private, we decided not to share these over Git, and so it is easiest if every developer has their own set of these.
+
+Navigate to [this page](api.slack.com/apps/new) and click "Create New App". If it prompts for a configuration, just select "From scratch". Name the app, choose a workspace safe for experiments, and click "Create App".
+
+You should be redirected to the dashboard of your new app. Look to the left: this menu helps you find the settings you're looking for. Let's set this up!
+
+First, you need to give your app certain permissions (scopes) within the workspace. To do this, go to **Features > OAuth & Permissions**. Navigate to the **Scopes** section, the **Bot Token Scopes** subsection, and click "Add an OAuth Scope". Now you can add permissions, let's add the following ones:
+
+- channels:history
+- channels:join
+- channels:read
+- channels:write.public
+- chat:write
+- commands
+- im:history
+- im:read
+- im:write
+- mpim:history
+- mpim:read
+- mpim:write
+- users:read
+
+You should also go to **Features > App Home** and make sure "Home Tab" and "Messages Tab" are turned on.
+
+Now you can scroll up and click the "Install to Workspace" button, and click "Allow". Congrats, now an app that you created exists in your workspace! But how do you connect it to your functionality?
+
+As explained earlier, you will have to use those keys and tokens. More specifically, you need to copy the ".env.example" file and create the ".env" file in the same directory. Don't worry, it is git-ignored so your keys won't be leaked. But where do you find the appropriate values?
+
+Some of them are on your app dashboard:
+
+- *SLACK_SIGNING_SECRET*:  **Settings > Basic Information** > App Credentials > Signing Secret
+- *SLACK_CLIENT_ID*:  **Settings > Basic Information** > App Credentials > Client ID
+- *SLACK_CLIENT_SECRET*:  **Settings > Basic Information** > App Credentials > Client Secret
+
+You need to set up your database-related fields:
+
+- *DB_USER*
+- *DB_PASSWORD*
+- *DB_NAME*
+- *DATABASE_URL*: just change the formatted variables (e.g. *$DB_USER*) to the values given to those fields
+
+We'll get back to the remaining field (*ENDPOINT*) later.
+
+## Setting up the development environment
+
+After cloning the repository, please enter the "Super Sigma App" directory:
+```sh
+cd "Super Sigma App"
 ```
-cd existing_repo
-git remote add origin https://gitlab.ewi.tudelft.nl/cse2000-software-project/2022-2023-q4/cluster-15/transactive-memory-system/transactive-memory-system.git
-git branch -M main
-git push -uf origin main
+First, you need to make sure that all npm packages are up to date. To do this, run:
+```sh
+npm i
 ```
+Now you need to generate the database with the correct structure. Please keep in mind that you will need to this every time you're trying to run the app with a different database structure (i.e. a different set of migrations) than the last one you used. We set up a simple script for this:
+```sh
+npm run migration:run
+```
+You can use DataGrip or any similar database manager to check whether it worked. You should see some appropriate tables under "public", like "survey" and "channel".
 
-## Integrate with your tools
+## Responding to requests
 
-- [ ] [Set up project integrations](https://gitlab.ewi.tudelft.nl/cse2000-software-project/2022-2023-q4/cluster-15/transactive-memory-system/transactive-memory-system/-/settings/integrations)
+The way that the Slack API generally works is the following: on user interaction (if the app is set to listen to the given event), the API sends an POST request to a certain URL, the URL that the application is listening to. By default, it is just port 9000 (or whatever is specified in .env) of the machine that is running the source code.
 
-## Collaborate with your team
+To make this URL accessible, you can use a service like [ngrok](https://ngrok.com/docs/getting-started/) or [nginx](https://docs.nginx.com/). If you work at Varias, ask Kacper about the reverse proxy system he set up for this project, you should be able to get a constant, custom URL to use.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Got the link? Great. From now on, it will be referred to as *[your URL]*.
 
-## Test and Deploy
+Start by setting the *ENDPOINT* variable in .env to *[your URL]*.
 
-Use the built-in continuous integration in GitLab.
+There are a couple places on your dashboard as well where you will need to input this URL, with some alterations.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Before you do anything, make sure your app is running:
+```sh
+npm run start:dev
+```
+Also make sure that it is accessible from *[your URL]*. You can check this by sending a GET request to it through your browser (or Curl/Postman if you're feeling fancy). If you get a 404, you're all set!
 
-***
+Now let's let your app know what URL it should send its POST requests to! Go to your dashboard and set the following things:
 
-# Editing this README
+1. **Features > Interactivity & Shortcuts** - Turn on "Interactivity" and set the Request URL to *[your URL]*/slack/events.
+2. **Features > OAuth & Permissions** - Set "Redirect URLs" to *[your URL]*/auth/callback.
+3. **Features > Event Subscriptions** - Turn on "Enable Events" and set the Request URL to *[your URL]*/slack/events. Go to "Subscribe to bot events" and add the following bot user events:
+    - app_home_opened
+    - message.channels
+    - message.groups
+    - message.im
+    - message.mpim
+4. **Settings > Manage Distribution** - Click the "Add to Slack" button in "Share Your App with Your Workspace". Click "Allow". It should take you to a page specified in src/utils/appSetup.ts (It is currently a very popular music video from the 80's.)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+You should now have the app respond to requests! Go to its home page in your Slack workspace and try interacting with it!
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## The structure of the source code
 
-## Name
-Choose a self-explaining name for your project.
+This section goes through all of the directories in our src folder, describes their purpose and how you should add functionality.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### **assets**
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+This directory is for temporarily storing images displayed to the user. Right now, these images are limited to the charts displaying the TMS scores.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### **components**
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Our frontend is built up from JSX-like components. This directory contains the non-top-level components that can be used *within* a view to display something to the user.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### **entities**
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+This directory contains the entities used by TypeORM and for the database structure. If you change something here, please run 
+```sh
+npm run migration:generate [migration name]
+```
+to generate a migration (into the **migrations** directory) and
+```sh
+npm run migration:run
+```
+to restructure your database based on the changes. You might run into some issues if you have stuff saved in your database, in this case drop all your tables and run 
+```sh
+npm run migration:run
+```
+again.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Also, consider that TypeORM currently doesn't deal with cascade options entirely correctly, so if you are changing one of those, you need to do that manually in the generated migration.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### **events**
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+This directory contains the handlers for the various events, actions and commands that our app is listening to. If you create a new file, make sure to export it in events/index.ts in a similar way to the already existing ones.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### **migrations**
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This is where the migrations for creating the database structure are stored. For further explanation, see the section on **entities** above.
 
-## License
-For open source projects, say how it is licensed.
+### **pages**
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Our frontend is built up from JSX-like components. This directory contains the top-level components that can be used as a view to display something to the user, namely modals and home pages.
+
+### **seeding**
+
+During development, you may find it useful to fill the database with dummy data to manually test some piece of functionality. This directory contains the source files for this.
+
+### **test**
+
+This directory contains the automated tests for the project.
+
+### **utils**
+
+There are pieces of functionality that are reusable and/or are built upon calls to the Slack API or the database. These functions can be found in **utils**. If you create a new file, make sure to export it in utils/index.ts in a similar way to the already existing ones.
