@@ -43,7 +43,7 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
           Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users<br />
           <br/>
           </Mrkdwn>
-          {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurvey" value={survey.id}>Fill in Survey</Button>}
+          {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurveyHome" value={survey.id}>Fill in Survey</Button>}
         </Section>
         <Section>
           <Mrkdwn>
