@@ -1,5 +1,5 @@
 import { Channel } from "../entities/Channel.js";
-import { showSurveyModal } from "../pages/SurveyModalBlock.js";
+import { showWarningModal } from "../pages/SurveyModalBlock.js";
 import { ActionCallback, app, entityManager, findSurvey, getSmallestMissingQuestionIndex, latestSurveyForChannel, sendChannelMessageEphemeral, } from "../utils/index.js";
 import { EntityManager } from "typeorm";
 
