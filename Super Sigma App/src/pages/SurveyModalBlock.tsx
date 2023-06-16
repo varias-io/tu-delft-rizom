@@ -54,20 +54,6 @@ export const warningModalBlock = async ({survey, questionIndex, token} : Questio
     </Modal>
 }
 
-
-export const showSurveyModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
-  try {
-    await client.views.open({
-      client: client,
-      token: token,
-      trigger_id: trigger_id,
-      view: JSXSlack(await SurveyModalBlock({survey, questionIndex, token}))
-    });
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 export const SurveyModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
