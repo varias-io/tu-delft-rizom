@@ -1,6 +1,6 @@
-import { app } from "../utils/appSetup.js"
-import { showWarningModal } from "../pages/SurveyModalBlock.js";
-import { ActionCallback, entityManager, findSurvey, getSmallestMissingQuestionIndex, latestSurveyForChannel, sendChannelMessageEphemeral } from "../utils/index.js";
+import { Channel } from "../entities/Channel.js";
+import { showSurveyModal } from "../pages/SurveyModalBlock.js";
+import { ActionCallback, app, entityManager, findSurvey, getSmallestMissingQuestionIndex, latestSurveyForChannel, sendChannelMessageEphemeral, } from "../utils/index.js";
 import { EntityManager } from "typeorm";
 
 app.action("fillSurveyHome", async (params) => {
@@ -30,14 +30,15 @@ app.action("fillSurveyMessage", async ({ ack, client, context, body, action}) =>
     await ack();
     const channelId = action.value
     const surveyToFill = await latestSurveyForChannel(channelId, entityManager)
+    const channelSlackId = (await entityManager.findOne(Channel, { where: { id: channelId } }))?.slackId ?? ""
     if (surveyToFill == null) {
-        console.error(`No survey found for channel ${channelId}`)
+        console.error(`No survey found for channel ${channelSlackId}`)
         return
     }
     const questionIndex = await getSmallestMissingQuestionIndex(body.user.id, surveyToFill.id, entityManager)
     if (questionIndex > 14) {
         sendChannelMessageEphemeral({
-            channel: channelId,
+            channel: channelSlackId,
             user: body.user.id,
             text: ":warning: You have already completed this survey",
             token: context.botToken ?? ""
