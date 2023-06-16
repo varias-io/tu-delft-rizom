@@ -1,6 +1,6 @@
 import { Actions, Button, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
-import { ChannelInfo, app, entityManager, getChannelsFromUser, getUsersFromChannel } from '../utils/index.js';
+import { ChannelInfo, app, entityManager, getChannelsFromWorkspace, getUsersFromChannel } from '../utils/index.js';
 import { Channel } from "../entities/Channel.js";
 import { Installation } from "../entities/Installation.js";
 import { Brackets } from "typeorm";
@@ -20,7 +20,7 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
      * Will also show a pop up confirming you want to create a survey for the selected channel.
      */
     const workspace = await entityManager.findOne(Installation, {where: {teamId}, relations: ["channels", "channels.users"]})
-    const channels: ChannelInfo[] = await getChannelsFromUser(userSlackId, workspace?.botToken ?? "", app)
+    const channels: ChannelInfo[] = await getChannelsFromWorkspace(workspace?.botToken ?? "", app)
 
     if(!workspace) {
         return <></>

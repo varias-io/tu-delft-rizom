@@ -86,9 +86,7 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                 .catch(console.error)
 
                 if (user == null) {
-    
-                    console.log(`Creating user with ${JSON.stringify({slackId})}`)
-    
+        
                     try {
 
     
@@ -185,4 +183,22 @@ export const getLatestSurveyFromChannelSlackId = async (channelSlackId: string, 
     .where("channel.slackId = :channelSlackId", { channelSlackId })
     .andWhere("surveys.participation IS NULL")
     .getOne();
+}
+
+export const getChannelsFromWorkspace = async (token: string, app: App) => {
+    return app.client.conversations.list({
+        token,
+        exclude_archived: true,
+        types: "public_channel" // types of conversations
+    }).then((res) => {
+        return res.channels?.map((channel) => ({
+            slackId: channel.id ?? "",
+            name: channel.name ?? "",
+            contextTeamId: channel.context_team_id ?? "",
+            conversationHostId: channel.conversation_host_id
+        })) ?? []
+    }).catch(_e => {
+        console.error(`Something bad happened (probably bc it's the wrong token)`)
+        return []
+    })
 }
