@@ -75,10 +75,15 @@ export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFrom
 export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, teamId: string, entityManager: EntityManager): Promise<User[]> => {
     const workspace = await entityManager.findOneBy(Installation, { teamId })
     let users: User[] = []
+    /**
+     * A transaction makes sure that the database goes from a valid state to another valid state. Either everything succeeds, then great.
+     * If anything fails nothing will change in the database. 
+     */
     await entityManager.transaction(async (entityManager) => {
         users = (await Promise.all(userSlackIds.map(async (slackId) => (
             entityManager.findOne(User, {where: { slackId }, relations: ["primaryWorkspace", "connectWorkspaces"]})
             .then(async user => {
+                //strangers are users from another workspace through slack connect. 
                 const is_stranger = await app.client.users.info({
                     token: workspace?.botToken ?? "",
                     user: slackId,
@@ -88,10 +93,8 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                 if (user == null) {
         
                     try {
-
-    
-                        
-    
+                        // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
+                        // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
                         if(!is_stranger) {
                             return entityManager.create(User, {
                                 slackId,
