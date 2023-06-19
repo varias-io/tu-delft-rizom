@@ -1,16 +1,19 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entities/Survey.js";
-import { TMStoPercentage, TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
+import { TMStoPercentage, TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, ConversationsApp, TeamInfoApp } from "../utils/index.js";
 import { GraphsModalProps } from "../pages/ShowGraphs.js";
+import { EntityManager } from "typeorm";
 
 
 interface SurveyDisplayProps { 
   surveys: Survey[], 
   userSlackId: string
   displayedInModal?: boolean
+  entityManager: EntityManager
+  app: ConversationsApp & TeamInfoApp
 }
 
-export const SurveyDisplay = async ({ surveys, userSlackId, displayedInModal = false}: SurveyDisplayProps) => {
+export const SurveyDisplay = async ({ surveys, userSlackId, entityManager, app, displayedInModal = false}: SurveyDisplayProps) => {
   if (surveys.length == 0) {
     return <>
       <Divider/>
@@ -40,8 +43,8 @@ export const SurveyDisplay = async ({ surveys, userSlackId, displayedInModal = f
           <Mrkdwn>
           {
             displayedInModal 
-            ? <>{await surveyToTitle(survey, entityManager)}<br/></> 
-            : <>Latest survey for {await surveyToTitle(survey, entityManager)}<br /></>
+            ? <>{await surveyToTitle(survey, entityManager, app)}<br/></> 
+            : <>Latest survey for {await surveyToTitle(survey, entityManager, app)}<br /></>
           }
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
           Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users<br />
@@ -67,7 +70,6 @@ export const SurveyDisplay = async ({ surveys, userSlackId, displayedInModal = f
               <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>
             </Actions>
         }
-        
       </>
     }))}
   </>

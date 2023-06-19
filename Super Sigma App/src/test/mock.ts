@@ -35,6 +35,8 @@ export class FakeEntityManager extends EntityManager {
             this.find = async () => results.next().value as any
             this.remove = async () => []
             this.create = () => new FakeEntity(results.next().value as any, async () => {}) as any
+            this.update = () => new FakeEntity(results.next().value as any, async () => {}) as any
+            this.transaction = async (params) => {return params}
         } catch{}
     }
 }
@@ -63,6 +65,7 @@ export class FakeSelectQueryBuilder<T extends ObjectLiteral> extends SelectQuery
             this.getMany = () => Promise.resolve(results.next().value as unknown as T[])
             this.getRawMany = () => Promise.resolve(results.next().value as unknown as T[]) as any
             this.getQuery = () => ""
+            this.withDeleted = () => this
     }
 }
 

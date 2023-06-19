@@ -20,10 +20,10 @@ interface TMSUserScore {
 export const computeTMSPerUser = async (survey: Survey, entityManager: EntityManager): Promise<TMSUserScore[]> => {
   //Get the scores of each user broken down by question focus
   const result = await getCompletedSurveys(survey, entityManager);
-
+  
   //Map the result to the correct format
   return Promise.all(result.map(async x => {
-    const user = await findUserByEntityId(x.userId)
+    const user = await findUserByEntityId(x.userId, entityManager)
     if(user == null) {
       return null
     }

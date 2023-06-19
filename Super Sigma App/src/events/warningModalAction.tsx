@@ -15,16 +15,16 @@ interface PrivateMetadataQuestion {
 app.view({callback_id:"warning_modal", type:"view_closed"}, async ({ ack, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
   //handle closing
   await ack();
-  updateHome({app, userSlackId: body.user.id, context})
+  updateHome({app, userSlackId: body.user.id, context, entityManager})
 })
 
 
 app.view("warning_modal", async (params) => {
   //handle submission
-  handleSubmission(params, entityManager)
+  handleSubmission(params, entityManager, app)
 });
 
-const handleSubmission: ViewCallback = async ({ ack, view, context, body }, entityManager) => {
+const handleSubmission: ViewCallback = async ({ ack, view, context, body }, entityManager, app) => {
   const questionInfo = JSON.parse(view.private_metadata) as PrivateMetadataQuestion
   const survey = await findSurvey(questionInfo.surveyId, entityManager)
 
@@ -45,10 +45,12 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex, 
         survey,
+        entityManager,
+        app
       }))});
   } else {
     //this was last question
-    updateHome({app, userSlackId: body.user.id, context})
+    updateHome({app, userSlackId: body.user.id, context, entityManager})
     await ack()
   }
 }

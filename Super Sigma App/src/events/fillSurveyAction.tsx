@@ -1,14 +1,13 @@
 import { Channel } from "../entities/Channel.js";
 import { showWarningModal } from "../pages/SurveyModalBlock.js";
 import { ActionCallback, app, entityManager, findSurvey, getSmallestMissingQuestionIndex, latestSurveyForChannel, sendChannelMessageEphemeral, } from "../utils/index.js";
-import { EntityManager } from "typeorm";
 
 app.action("fillSurveyHome", async (params) => {
-    return fillSurvey(params, entityManager)
+    return fillSurvey(params, entityManager, app)
 })
 
-export const fillSurvey: ActionCallback = async ({ ack, client, context, body, action}, entityManager: EntityManager) => {
-    if(action.type != "button" || body.type != "block_actions"){
+export const fillSurvey: ActionCallback = async ({ ack, client, context, body, action }, entityManager) => {
+    if (action.type != "button" || body.type != "block_actions") {
         console.error(`Unexpected action type: ${action.type}}`)
         return;
     }

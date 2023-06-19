@@ -1,8 +1,7 @@
 import { DataSource } from "typeorm";
 import { Seeder, SeederFactoryManager } from "typeorm-extension";
 import { Channel } from "../entities/Channel.js";
-import { app } from "../utils/appSetup.js";
-import { entityManager, getUserSlackIdsFromChannels } from "../utils/index.js";
+import { entityManager, getUserSlackIdsFromChannels, app } from "../utils/index.js";
 import { Installation } from "../entities/Installation.js";
 import { User } from "../entities/User.js";
 import "./survey.factory.js";

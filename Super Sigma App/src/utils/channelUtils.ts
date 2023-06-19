@@ -4,8 +4,7 @@ import { Survey } from "../entities/Survey.js"
 import { Installation } from "../entities/Installation.js"
 import { User } from "../entities/User.js"
 import { EntityManager } from "typeorm"
-import { app } from "./appSetup.js"
-import { ConversationsApp, UsersConversationsApp } from "./index.js"
+import { ConversationsApp, UsersApp, UsersInfoApp } from "./index.js"
 
 interface GetUsersFromChannelsProps {
     channelSlackIds: string[]
@@ -72,13 +71,13 @@ export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token
 
 }
 
-export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: ConversationsApp, entityManager: EntityManager): Promise<User[]> => {
+export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: ConversationsApp & UsersInfoApp, entityManager: EntityManager): Promise<User[]> => {
     const token = await entityManager.findOne(Installation, {where: {teamId}}).then((installation) => installation?.botToken ?? "")
     const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token}, app)
-    return await findUsersFromChannel( userSlackIds, channelSlackId, teamId, entityManager)
+    return await findUsersFromChannel( userSlackIds, channelSlackId, teamId, entityManager, app)
 }
 
-export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, teamId: string, entityManager: EntityManager): Promise<User[]> => {
+export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, teamId: string, entityManager: EntityManager, app: UsersInfoApp): Promise<User[]> => {
     const workspace = await entityManager.findOneBy(Installation, { teamId })
     let users: User[] = []
     /**
@@ -157,7 +156,7 @@ interface GetChannelsFromUserProps {
     userSlackId: User["slackId"],
     token: string,
     teamId: string, 
-    app: UsersConversationsApp
+    app: UsersApp
 }
 
 export const getChannelsFromUser = async ({userSlackId, token, app}: GetChannelsFromUserProps): Promise<ChannelInfo[]> => {

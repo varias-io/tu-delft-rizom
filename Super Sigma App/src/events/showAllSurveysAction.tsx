@@ -1,16 +1,14 @@
-import { app } from "../utils/appSetup.js"
 import { Survey } from "../entities/Survey.js";
-import { entityManager } from "../utils/database.js";
 import { showAllSurveys } from "../pages/ShowAllSurveys.js";
-import { ActionCallback } from "../utils/index.js";
+import { ActionCallback, app, entityManager } from "../utils/index.js";
 import { EntityManager } from "typeorm";
 
 app.action("show_all_surveys", async (params) => {
-    showAllSurveysAction(params, entityManager)
+    showAllSurveysAction(params, entityManager, app)
 })
 
 
-export const showAllSurveysAction: ActionCallback = async ({ ack, client, context, body, action}, entityManager) => {
+export const showAllSurveysAction: ActionCallback = async ({ ack, client, context, body, action}, entityManager, app) => {
     await ack();
     if(action.type != "button"){
         console.error("action type is not button")
@@ -24,7 +22,7 @@ export const showAllSurveysAction: ActionCallback = async ({ ack, client, contex
 
     const surveys = await getSurveys(surveysIds, entityManager);
 
-    await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", surveys, body.user.id);
+    await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", surveys, body.user.id, entityManager, app);
 }
 
 export const threshold = 80;
