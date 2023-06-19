@@ -1,5 +1,5 @@
 import { Survey } from "../entities/Survey.js"
-import { ActionCallback, app, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendChannelMessageBlock, usersWhoCompletedSurvey } from "../utils/index.js"
+import { ActionCallback, app, crons, dailyReminderCron, entityManager, findUserBySlackId, getChannelFromSlackId, getLatestSurveyFromChannelSlackId, getUsersFromChannel, participantsOf, sendChannelMessageBlock, usersWhoCompletedSurvey } from "../utils/index.js"
 import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
@@ -63,13 +63,21 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   const manager = await findUserBySlackId(body.user.id)
   const participants = await getUsersFromChannel({ channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? "" }, app, entityManager)
 
-  await entityManager.create(Survey, {
+  const survey = await entityManager.create(Survey, {
     channel,
     manager,
     participants
   }).save()
 
+  //Sends the fill survey message to the channel
   sendChannelMessageBlock({ channel: selectedChannelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
+
+  //If there is an ongoing cron for a channel stop it.
+  crons.get(channel.id)?.stop()
+  //Create a cron for the new survey.
+  const task = dailyReminderCron({ users: participants.map(user => user.slackId), channel: selectedChannelSlackId, token: context.botToken ?? "", message: "Don't forget to fill out the TMS survey!", survey })
+  crons.set(channel.id, task)
+  task.start()
 
   updateHome(body.user.id, context)
 }
