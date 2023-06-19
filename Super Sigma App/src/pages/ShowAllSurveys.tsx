@@ -3,7 +3,7 @@ import { JSX } from 'jsx-slack/jsx-runtime'
 import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js';
 import { SurveyDisplay } from '../components/SurveyDisplay.js';
-import { LineGraphProps, TMSScore, computeTMS, createGraph, defaultLineGraphsProps, entityManager } from '../utils/index.js';
+import { LineGraphProps, TMSScore, TMStoPercentage, computeTMS, createGraph, defaultLineGraphsProps, entityManager } from '../utils/index.js';
 import { threshold } from '../events/showAllSurveysAction.js';
 
 
@@ -12,7 +12,7 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
     await client.views.open({
       token: token,
       trigger_id: trigger_id,
-      view: JSXSlack(<Modal title="Survey History"><Section><Mrkdwn>There are no finished surveys to show in the history.</Mrkdwn></Section>{participationWarning()}</Modal>)
+      view: JSXSlack(<Modal title="Survey History"><Section><Mrkdwn>There are no finished surveys to show in the history.</Mrkdwn></Section><ParticipationWarning/></Modal>)
     });
     return;
   }
@@ -29,25 +29,25 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
         labels: tms[1], 
         datasets: [{
           label: "Specialization",
-          data: tms[0].map((tms) => tms.specialization),
+          data: tms[0].map((tms) => TMStoPercentage(tms.specialization)),
           borderColor: "#035efc",
           backgroundColor: "#035efc",
           borderWidth: 7
         }, {
           label: "Credibility",
-          data: tms[0].map((tms) => tms.credibility),
+          data: tms[0].map((tms) => TMStoPercentage(tms.credibility)),
           borderColor: "#de34eb",
           backgroundColor: "#de34eb",
           borderWidth: 7,
         }, {
           label: "Coordination",
-          data: tms[0].map((tms) => tms.coordination),
+          data: tms[0].map((tms) => TMStoPercentage(tms.coordination)),
           borderColor: "#e8eb34",
           backgroundColor: "#e8eb34",
           borderWidth: 7
         }, {
           label: "Overall TMS",
-          data: tms[0].map((tms) => (tms.specialization+tms.credibility+tms.coordination)/3),
+          data: tms[0].map((tms) => TMStoPercentage((tms.specialization+tms.credibility+tms.coordination)/3)),
           borderColor: "#34eb34",
           backgroundColor: "#34eb34",
           borderDash: [10, 5],
@@ -73,8 +73,9 @@ export const AllSurveysBlock = async(surveys: Survey[], token: string, userSlack
   return <Modal title="Survey History" callbackId='line_graph_modal' notifyOnClose privateMetadata={JSON.stringify({filename: `${lineGraph}.png`})}>
     <Image src={`${process.env.ENDPOINT}${lineGraph}.png`} alt="Line graph visualizing the history of TMS scores for a channel." />
     {await SurveyDisplay({surveys, token, userSlackId, displayedInModal: true})}
-    {participationWarning()}
+    <ParticipationWarning/>
+
     </Modal>
 }
 
-const participationWarning = () => <><Divider /><Section><Mrkdwn>Did you expect to see a survey, but it did not show up? It might not have hit the threshold of {threshold}% participation.</Mrkdwn></Section></>
+const ParticipationWarning = () => <><Divider /><Section><Mrkdwn>Did you expect to see a survey, but it did not show up? It might not have hit the threshold of {threshold}% participation.</Mrkdwn></Section></>

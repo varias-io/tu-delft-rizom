@@ -1,7 +1,8 @@
 import { Actions, Button, Divider, Mrkdwn, Section } from "jsx-slack";
 import { Survey } from "../entities/Survey.js";
-import { TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
+import { TMStoPercentage, TMSScore, computeTMS, getSmallestMissingQuestionIndex, participantsOf, surveyToTitle, usersWhoCompletedSurvey, groupSurvey, entityManager } from "../utils/index.js";
 import { GraphsModalProps } from "../pages/ShowGraphs.js";
+
 
 interface SurveyDisplayProps { 
   surveys: Survey[], 
@@ -47,18 +48,23 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         </Section>
         <Section>
           <Mrkdwn>
-          Overall TMS: {((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3).toFixed(2)}<br/>
-          - Specialization: {latestSurvey.specialization.toFixed(2)}<br />
-          - Credibility: {latestSurvey.credibility.toFixed(2)}<br />
-          - Coordination: {latestSurvey.coordination.toFixed(2)}<br />
+          Overall TMS: {TMStoPercentage(((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3)).toFixed(2)}%<br/>
+          - Specialization: {TMStoPercentage(latestSurvey.specialization).toFixed(0)}%<br />
+          - Credibility: {TMStoPercentage(latestSurvey.credibility).toFixed(0)}%<br />
+          - Coordination: {TMStoPercentage(latestSurvey.coordination).toFixed(0)}%<br />
           <br />
           <b>Personal progress: {personalProgress}/15</b> <br />
           </Mrkdwn>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >View Breakdown</Button>
         </Section>
-        <Actions>
-          {displayedInModal ? <></> : <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>}
-        </Actions>
+        {
+          displayedInModal
+          ? <></>
+          : <Actions>
+              <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>
+            </Actions>
+        }
+        
       </>
     }))}
   </>
