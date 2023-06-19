@@ -37,20 +37,18 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
 
     // for every channel that was removed or changed, check if it is either archived or deleted and if so soft delete it in the database.
     for(const channel of removedOrChanged) {
-            try {
-                const res = await app.client.conversations.info({
-                    channel: channel.slackId,
-                    token: workspace.botToken,
-                })
-
-                if(res.channel?.is_archived) {
-                    entityManager.update(Channel, {id: channel.id}, {deletedAt: new Date()})
-                }
-
-            } catch {
-                console.log("Soft deleting channel")
+        await app.client.conversations.info({
+            channel: channel.slackId,
+            token: workspace.botToken,
+        }).then(res => {
+            if(res.channel?.is_archived) {
                 entityManager.update(Channel, {id: channel.id}, {deletedAt: new Date()})
             }
+        }).catch(_e => {
+            console.log("Soft deleting channel")
+            entityManager.update(Channel, {id: channel.id}, {deletedAt: new Date()})
+        })
+
     }
 
 
@@ -142,17 +140,15 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
             users: {
                 slackId: userSlackId
             }
-        }, relations: ["users", "primaryWorkspace"], withDeleted: true
+        }, relations: ["users", "primaryWorkspace"]
     })
         
     // get every channel that is not archived or deleted. 
     const slackChannels = await Promise.all(shownChannels.map(async channel => {
-        try {
-            const info = await app.client.conversations.info({
-                channel: channel.slackId,
-                token: channel.primaryWorkspace.botToken
-            })
-
+        return app.client.conversations.info({
+            channel: channel.slackId,
+            token: channel.primaryWorkspace.botToken
+        }).then(async info => {
             if (!info.channel || info.channel.is_archived) {
                 await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
                 return null
@@ -164,10 +160,10 @@ export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): P
                 channelTeamId: channel.primaryWorkspace.teamId
             }
             return channelInfo
-        } catch {
+        }).catch(async _e => {
             await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
             return null
-        }
+        })
     })).then(channels => channels.filter(channel => channel != null) as {channelName: string, channelSlackId: string, channelTeamId: string}[])
     
     // if there are any channels, return the page. 

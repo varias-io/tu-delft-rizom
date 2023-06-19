@@ -55,15 +55,16 @@ export const getUsersFromChannels = async ({channelSlackIds, token}: GetUsersFro
  * From a channel id return a set of unique user ids from those channels.
  */
 export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token}: GetUserSlackIdsFromChannelProps, app: App) => {
-    try {
-        return (await app.client.conversations.members({
-            token,
-            channel
-        })).members ?? []
-    } catch {
+    return app.client.conversations.members({
+        token,
+        channel
+    }).catch(_e => {
         console.error("Channel was deleted while in home")
-        return []
-    }
+        return {
+            members: []
+        }
+    }).then(res => res.members ?? [])
+
 }
 
 export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: App, entityManager: EntityManager): Promise<User[]> => {
@@ -92,26 +93,18 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
 
                 if (user == null) {
         
-                    try {
-                        // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
-                        // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
-                        if(!is_stranger) {
-                            return entityManager.create(User, {
-                                slackId,
-                                primaryWorkspace: workspace? workspace : null as unknown as Installation,
-                            }).save()
-                        } else {
-                            return entityManager.create(User, {
-                                slackId,
-                                connectWorkspaces: workspace? [workspace] : [],
-                            }).save()   
-                        }
-                    } catch(e) {
-                        console.error(e)
+                    // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
+                    // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
+                    if(!is_stranger) {
+                        return entityManager.create(User, {
+                            slackId,
+                            primaryWorkspace: workspace? workspace : null as unknown as Installation,
+                        }).save()
+                    } else {
                         return entityManager.create(User, {
                             slackId,
                             connectWorkspaces: workspace? [workspace] : [],
-                        }).save()                   
+                        }).save()   
                     }
                 } else if(workspace) {
 
