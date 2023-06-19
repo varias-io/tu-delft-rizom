@@ -12,6 +12,9 @@ export const updateHome = async (userSlackId: AppHomeOpenedEvent["user"], contex
     token: context.botToken ?? "",
     view: JSXSlack(await HomePage({ userSlackId, teamId: context.teamId ?? "" }))
   })
+    .catch((error) => {
+      console.error(`Failed to publish home tab: ${error}`)
+    })
 }
 
 app.event("app_home_opened", ({payload, context}) => {

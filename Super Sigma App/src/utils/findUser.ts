@@ -9,16 +9,20 @@ export const findUserBySlackId = async (slackId: string, teamId: string): Promis
       const stranger = await app.client.users.info({
         token: workspace?.botToken ?? "",
         user: slackId,
-      }).then(res => {
-
-        return res.user?.is_stranger ?? false
       })
+        .catch((_error) => {
+          console.error("Couldn't get the users info")
+          return { user: { is_stranger: false } }
+        })
+        .then(res => {
+          return res.user?.is_stranger ?? false
+        })
 
-      if(!workspace) {
+      if (!workspace) {
         throw new Error("Workspace not found")
       }
 
-      if(!stranger) {
+      if (!stranger) {
         console.log("Creating user")
         return await entityManager.create(User, {
           slackId,

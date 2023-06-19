@@ -6,13 +6,16 @@ interface SendChannelMessageBlockProps {
     blocks: NonNullable<NonNullable<Parameters<typeof app.client.chat.postMessage>[0]>["blocks"]>,
 }
 
-export const sendChannelMessageBlock = ({channel, token, blocks}: SendChannelMessageBlockProps) => {
+export const sendChannelMessageBlock = ({ channel, token, blocks }: SendChannelMessageBlockProps) => {
     app.client.chat.postMessage({
         token,
         channel,
         blocks,
         text: "A new TMS survey has been created!"
     })
+        .catch((error) => {
+            console.error(`Failed to send message to channel: ${error}`)
+        })
 }
 
 interface SendChannelMessageEphemeralProps {
@@ -22,11 +25,14 @@ interface SendChannelMessageEphemeralProps {
     token: string,
 }
 
-export const sendChannelMessageEphemeral = ({channel, user, text, token}: SendChannelMessageEphemeralProps) => {
+export const sendChannelMessageEphemeral = ({ channel, user, text, token }: SendChannelMessageEphemeralProps) => {
     app.client.chat.postEphemeral({
         token,
         channel,
         user,
         text
     })
+        .catch((error) => {
+            console.error(`Failed to send message to channel: ${error}`)
+        })
 }

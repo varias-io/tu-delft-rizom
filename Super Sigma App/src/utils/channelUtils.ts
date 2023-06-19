@@ -29,13 +29,17 @@ export const getUserSlackIdsFromChannels = async ({channelSlackIds, token}: GetU
 
     //get all members from each channel
     const allMembers = await Promise.all(channelSlackIds.map(async (channel) => {
-        const members = (await app.client.conversations.members({
+        const members = await app.client.conversations.members({
             token,
             channel
-        })).members ?? []
-        return members
+        })
+            .catch((_error) => {
+                console.error(`Couldn't get the members for channel: ${channel}`)
+                return { members: [] }
+            })
+        return members.members ?? []
     }))
-
+    
     //add each member to the set
     allMembers.flat().forEach((member) => {
         users.add(member)
@@ -88,8 +92,12 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                 const is_stranger = await app.client.users.info({
                     token: workspace?.botToken ?? "",
                     user: slackId,
-                }).then(res => res.user?.is_stranger ?? false)
-                .catch(console.error)
+                })
+                .catch((_error) => {
+                    console.error("Couldn't get the users info")
+                    return { user: { is_stranger: false } }
+                  })
+                .then(res => res.user?.is_stranger ?? false)
 
                 if (user == null) {
         

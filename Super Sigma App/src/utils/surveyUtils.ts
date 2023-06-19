@@ -88,9 +88,12 @@ export const getlatestSurveysQuery = async (subQuery: string, channels: Channel[
 
 export const groupSurvey = async (userSlackId: User["slackId"], channelId: Channel["id"], entityManager: EntityManager): Promise<Survey[]> => {
 
-  const surveys = entityManager.find(Survey, {where: { 
-    participants: { slackId: userSlackId } , channel: { id: channelId } }, 
-    relations: ["channel", "participants"], order: { createdAt: "ASC" }})
+  const surveys = entityManager.find(Survey, {
+    where: {
+      participants: { slackId: userSlackId }, channel: { id: channelId }
+    },
+    relations: ["channel", "participants"], order: { createdAt: "ASC" }
+  })
   return surveys
 }
 
@@ -101,26 +104,34 @@ export const findSurvey = async (surveyId: Survey["id"], entityManager: EntityMa
 
 export const surveyToTitle = async (survey: Survey, entityManager: EntityManager): Promise<string> => {
   const channel = await getChannel(survey, entityManager)
-  if(!channel) {
+  if (!channel) {
     console.error(`Survey ${survey.id} has no associated channel`)
     return `Survey ${survey.id} has no associated channel`
   }
   const slackChannel = await getSlackChannel(channel, channel.primaryWorkspace.botToken)
-  const workspaceName = (await app.client.team.info({
+  const teamInfo = await app.client.team.info({
     token: channel.primaryWorkspace.botToken,
     team: channel.primaryWorkspace.teamId
-  })).team?.name
-  return `#${slackChannel.channel?.name} - ${workspaceName}`
+  })
+    .catch((_error) => {
+      console.error(`Couldn't get team info for: ${channel.primaryWorkspace.teamId}`)
+      return { team: { name: "Unknown" } }
+    })
+  return `#${slackChannel.channel?.name} - ${teamInfo.team?.name}`
 }
 
-export const getSlackChannel = async (channel: Channel, token: string): Promise<ConversationsInfoResponse> => {
+export const getSlackChannel = async (channel: Channel, token: string): Promise<ConversationsInfoResponse | { channel: { name: string; }; }> => {
   return app.client.conversations.info({ channel: channel.slackId, token })
+    .catch((_error) => {
+      console.error(`Couldn't get the channel info for channel: ${channel.slackId}`)
+      return { channel: { name: "Unknown" } }
+    })
 }
 export const getChannel = async (survey: Survey, entityManager: EntityManager): Promise<Channel | null> => {
   return channelOf(survey.id, entityManager)
 }
 
-export const latestSurveyForChannel = async (channelId: Channel["id"], entityManager: EntityManager): Promise<Survey|null> => {
+export const latestSurveyForChannel = async (channelId: Channel["id"], entityManager: EntityManager): Promise<Survey | null> => {
   return entityManager.createQueryBuilder(Survey, "survey")
     .innerJoin("survey.channel", "channel")
     .where("channel.id = :channelId", { channelId })
