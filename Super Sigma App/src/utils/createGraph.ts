@@ -40,9 +40,9 @@ export const defaultRadarGraphProps: Pick<RadarGraphProps, "type" | "options"> =
                 },
                 beginAtZero: true,
                 min: 0,
-                max: 5,
+                max: 100,
                 ticks: {
-                    stepSize: 1
+                    stepSize: 20
                 }
             }
         }
@@ -59,7 +59,7 @@ export const defaultLineGraphsProps: Pick<LineGraphProps, "type" | "options"> = 
         scales: {
             y: {
                 beginAtZero: true,
-                max: 5
+                max: 100
             }
         }
     },
