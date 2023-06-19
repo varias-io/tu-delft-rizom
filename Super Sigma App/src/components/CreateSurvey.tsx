@@ -48,7 +48,7 @@ export const CreateSurvey = async ({userSlackId, token, teamId}: ChannelSelectPr
     if(channels.length) {
         return (
             <>
-                <Select placeholder="Select channel" blockId="channelSelect" label="Channel:" >
+                <Select placeholder="Select channel" blockId="channelSelect" label="Create a survey:" >
                     {channels.map(channel => <option value={channel.slackId}>{channel.name}</option>)}
                 </Select>
                 <Actions>

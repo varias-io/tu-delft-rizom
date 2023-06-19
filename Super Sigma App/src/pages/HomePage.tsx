@@ -12,7 +12,6 @@ interface HomeProps {
 
 export const HomePage = async ({userSlackId, token, teamId}: HomeProps) => (
     <Home>   
-        <Header>Create a survey:</Header>
         {await CreateSurvey({userSlackId, token, teamId})}
         {await SurveyDisplay( {surveys: await latestSurveys(userSlackId, entityManager), token, userSlackId})}
     </Home>
