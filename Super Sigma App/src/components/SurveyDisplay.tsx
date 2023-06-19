@@ -39,7 +39,9 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         <Divider/>
         <Section>
           <Mrkdwn>
-          Latest survey for {await surveyToTitle(survey, token, entityManager)}<br />
+          {displayedInModal 
+          ? <>{await surveyToTitle(survey, token, entityManager)}<br/></> 
+          : <>Latest survey for {await surveyToTitle(survey, token, entityManager)}<br /></>}
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
           Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users<br />
           <br/>
