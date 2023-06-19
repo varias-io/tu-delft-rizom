@@ -3,6 +3,7 @@ import { ActionCallback, app, crons, dailyReminderCron, entityManager, findUserB
 import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
+import { Installation } from "../entities/Installation.js"
 
 const selectionBlockNotFound = (): object => {
   console.error("Selection block not found")
@@ -41,27 +42,27 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     return;
   }
 
-  const selectedChannelSlackId = selection.value
+  const [channelSlackId, channelTeamId] = JSON.parse(selection.value)
   await ack()
 
-  const latestSurvey = await getLatestSurveyFromChannelSlackId(selectedChannelSlackId, entityManager)
+  const latestSurvey = await getLatestSurveyFromChannelSlackId(channelSlackId, entityManager)
   if (latestSurvey != null) {
-    const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length / (await participantsOf(latestSurvey.id, entityManager)).length * 100
+    const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length/(await participantsOf(latestSurvey.id, entityManager)).length *100
 
     await entityManager.update(Survey, { id: latestSurvey.id }, {
       participation: Number(participation.toFixed(0))
     })
   }
 
-  const channel = await getChannelFromSlackId(selectedChannelSlackId, context.teamId ?? "", entityManager)
+  const channel = await getChannelFromSlackId(channelSlackId, channelTeamId, entityManager)
 
   if (!channel) {
-    console.error(`Channel with slack id ${selectedChannelSlackId} not found`)
+    console.error(`Channel with slack id ${channelSlackId} not found`)
     return
   }
 
-  const manager = await findUserBySlackId(body.user.id)
-  const participants = await getUsersFromChannel({ channelSlackId: selectedChannelSlackId, token: context.botToken ?? "", teamId: context.teamId ?? "" }, app, entityManager)
+  const manager = await findUserBySlackId(body.user.id, context.teamId ?? "")
+  const participants = await getUsersFromChannel({ channelSlackId, teamId: channelTeamId }, app, entityManager)
 
   const survey = await entityManager.create(Survey, {
     channel,
@@ -69,13 +70,14 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     participants
   }).save()
 
+  const token = (await entityManager.findOne(Installation, { where: { teamId: channelTeamId } }))?.botToken ?? ""
   //Sends the fill survey message to the channel
-  sendChannelMessageBlock({ channel: selectedChannelSlackId, token: context.botToken ?? "", blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
+  sendChannelMessageBlock({ channel: channelSlackId, token, blocks: [JSXSlack(<Section>A new TMS survey has been created for this channel.</Section>), JSXSlack(<Actions><Button style="primary" actionId="fillSurveyMessage" value={channel.id}>Fill in Survey</Button></Actions>)] })
 
   //If there is an ongoing cron for a channel stop it.
   crons.get(channel.id)?.stop()
   //Create a cron for the new survey.
-  const task = dailyReminderCron({ users: participants.map(user => user.slackId), channel: selectedChannelSlackId, token: context.botToken ?? "", message: "Don't forget to fill out the TMS survey!", survey })
+  const task = dailyReminderCron({ users: participants.map(user => user.slackId), channel: channelSlackId, token: context.botToken ?? "", message: "Don't forget to fill out the TMS survey!", survey })
   crons.set(channel.id, task)
   task.start()
 

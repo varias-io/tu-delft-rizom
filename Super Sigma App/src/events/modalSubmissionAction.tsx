@@ -54,7 +54,7 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
   //save answer
   await entityManager.create(SurveyAnswer, {
     survey, 
-    user: await findUserBySlackId(body.user.id),
+    user: await findUserBySlackId(body.user.id, context.teamId ?? ""),
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
   }).save()
@@ -67,7 +67,6 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex+1, 
         survey,
-        token: context.botToken ?? "",
       }))});
   } else {
     //this was last question

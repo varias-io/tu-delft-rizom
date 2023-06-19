@@ -8,7 +8,6 @@ import { entityManager, surveyToTitle } from '../utils/index.js'
 interface QuestionModalProps {
   questionIndex : number,
   survey : Survey,
-  token: string,
 }
 
 const valueIfReversed = (value: number, reversed: boolean) : string => (
@@ -33,7 +32,7 @@ export const showWarningModal = async (client: AllMiddlewareArgs["client"], toke
     await client.views.open({
       token: token,
       trigger_id: trigger_id,
-      view: JSXSlack(await warningModalBlock({survey, questionIndex, token}))
+      view: JSXSlack(await warningModalBlock({survey, questionIndex}))
     });
   } catch (error) {
     console.error(error);
@@ -41,20 +40,20 @@ export const showWarningModal = async (client: AllMiddlewareArgs["client"], toke
 
 }
 
-export const warningModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
+export const warningModalBlock = async ({survey, questionIndex} : QuestionModalProps) : Promise<JSX.Element> => {
   return <Modal 
     title="Important!"
     submit="I understand"
     callbackId='warning_modal'
     notifyOnClose
-    privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex, token})}
+    privateMetadata={JSON.stringify({surveyId: survey.id, questionIndex})}
     >
     <Section><Mrkdwn>You can not change your answer for a question or go back in the survey after you click next!</Mrkdwn></Section>
 
     </Modal>
 }
 
-export const SurveyModalBlock = async ({survey, questionIndex, token} : QuestionModalProps) : Promise<JSX.Element> => {
+export const SurveyModalBlock = async ({survey, questionIndex} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
     title='TMS survey'
@@ -74,7 +73,7 @@ export const SurveyModalBlock = async ({survey, questionIndex, token} : Question
     <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
   <Divider/>
-  <Section>{await surveyToTitle(survey, token, entityManager)}</Section>
+  <Section>{await surveyToTitle(survey, entityManager)}</Section>
 
   </Modal>
 }

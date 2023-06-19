@@ -10,7 +10,7 @@ export const updateHome = async (userSlackId: AppHomeOpenedEvent["user"], contex
   app.client.views.publish({
     user_id: userSlackId,
     token: context.botToken ?? "",
-    view: JSXSlack(await HomePage({ userSlackId, token: context.botToken ?? "", teamId: context.teamId ?? "" }))
+    view: JSXSlack(await HomePage({ userSlackId, teamId: context.teamId ?? "" }))
   })
 }
 
