@@ -1,4 +1,4 @@
-import { AfterInsert, AfterLoad, AfterUpdate, Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { AfterInsert, AfterLoad, AfterUpdate, Column, Entity, OneToMany } from "typeorm";
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 import { User } from "./User.js";
 import { Channel } from "./Channel.js";
@@ -20,12 +20,10 @@ export class Installation extends TimestampedBaseEntity {
   @Column({nullable: true, default: ""})
   botUserId: string;
 
-  @ManyToMany(() => User, user => user.workspaces)
-  @JoinTable({name: "installation_users"})
+  @OneToMany(() => User, user => user.primaryWorkspace)
   users: User[];
 
-  @ManyToMany(() => Channel, channel => channel.workspaces)
-  @JoinTable({name: "installation_channels"})
+  @OneToMany(() => Channel, channel => channel.primaryWorkspace)
   channels: Channel[];
 
 

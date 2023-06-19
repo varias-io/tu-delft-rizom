@@ -5,15 +5,14 @@ import { entityManager, latestSurveys } from "../utils/index.js";
 
 interface HomeProps {
     userSlackId: string
-    token: string
     selectedChannel?: string
     teamId: string
 }
 
-export const HomePage = async ({userSlackId, token, teamId}: HomeProps) => (
+export const HomePage = async ({ userSlackId, teamId }: HomeProps) => (
     <Home>   
-        {await CreateSurvey({userSlackId, token, teamId})}
-        {await SurveyDisplay( {surveys: await latestSurveys(userSlackId, entityManager), token, userSlackId})}
+        {await CreateSurvey({ userSlackId, teamId })}
+        {await SurveyDisplay({ surveys: await latestSurveys(userSlackId, entityManager), userSlackId })}
     </Home>
 )
 

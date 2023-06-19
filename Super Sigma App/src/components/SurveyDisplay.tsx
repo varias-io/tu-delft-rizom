@@ -6,12 +6,11 @@ import { GraphsModalProps } from "../pages/ShowGraphs.js";
 
 interface SurveyDisplayProps { 
   surveys: Survey[], 
-  token: string, 
   userSlackId: string
   displayedInModal?: boolean
 }
 
-export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInModal = false}: SurveyDisplayProps) => {
+export const SurveyDisplay = async ({ surveys, userSlackId, displayedInModal = false}: SurveyDisplayProps) => {
   if (surveys.length == 0) {
     return <>
       <Divider/>
@@ -39,7 +38,11 @@ export const SurveyDisplay = async ({ surveys, token, userSlackId, displayedInMo
         <Divider/>
         <Section>
           <Mrkdwn>
-          Latest survey for {await surveyToTitle(survey, token, entityManager)}<br />
+          {
+            displayedInModal 
+            ? <>{await surveyToTitle(survey, entityManager)}<br/></> 
+            : <>Latest survey for {await surveyToTitle(survey, entityManager)}<br /></>
+          }
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
           Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users<br />
           <br/>

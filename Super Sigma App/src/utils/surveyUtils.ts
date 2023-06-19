@@ -21,6 +21,7 @@ export const channelOf = async (surveyId: string, entityManager: EntityManager):
   return entityManager
     .createQueryBuilder(Channel, "channel")
     .innerJoin("channel.surveys", "survey")
+    .leftJoinAndSelect("channel.primaryWorkspace", "primaryWorkspace")
     .where("survey.id = :surveyId", { surveyId })
     .getOne();
 };
@@ -45,11 +46,14 @@ export const usersWhoCompletedSurvey = async (surveyId: string, entityManager: E
 
 
 export const latestSurveys = async (userSlackId: User["slackId"], entityManager: EntityManager): Promise<Survey[]> => {
-  const queryBuilder = await sortSurveysQuery(userSlackId, entityManager)
+
+  const channels = await entityManager.find(Channel, { where: { users: { slackId: userSlackId } }, relations: ["users", "surveys", "surveys.participants"] })
+
+  const queryBuilder = await sortSurveysQuery(entityManager)
 
   const subQuery = queryBuilder.getQuery();
 
-  const latestSurveysQuery = await getlatestSurveysQuery(subQuery, userSlackId, entityManager);
+  const latestSurveysQuery = await getlatestSurveysQuery(subQuery, channels, entityManager);
 
   const latestSurveys = await latestSurveysQuery.getMany();
 
@@ -57,26 +61,27 @@ export const latestSurveys = async (userSlackId: User["slackId"], entityManager:
 
 }
 
-export const sortSurveysQuery = async (userSlackId: User["slackId"], entityManager: EntityManager): Promise<SelectQueryBuilder<Survey>> => {
+export const sortSurveysQuery = async (entityManager: EntityManager): Promise<SelectQueryBuilder<Survey>> => {
   return entityManager.createQueryBuilder()
     .select("MAX(survey.createdAt)", "latestDate")
     .addSelect("channel.id", "channelId")
     .from(Survey, "survey")
     .innerJoin("survey.channel", "channel")
     .innerJoin("survey.participants", "participant")
-    .where("participant.slackId = :userSlackId", { userSlackId })
+    .where("channel.id IN (:...channels)")
     .groupBy("channel.id");
 }
 
 
-export const getlatestSurveysQuery = async (subQuery: string, userSlackId: User["slackId"], entityManager: EntityManager): Promise<SelectQueryBuilder<Survey>> => {
+export const getlatestSurveysQuery = async (subQuery: string, channels: Channel[], entityManager: EntityManager): Promise<SelectQueryBuilder<Survey>> => {
   return entityManager.createQueryBuilder()
     .select("survey")
     .from(Survey, "survey")
-    .innerJoin(`(${subQuery})`, "subQuery", '"subQuery"."latestDate" = survey.createdAt AND "subQuery"."channelId" = survey.channel.id', { userSlackId })
+    .innerJoin(`(${subQuery})`, "subQuery", '"subQuery"."latestDate" = survey.createdAt AND "subQuery"."channelId" = survey.channel.id', { channels: channels.map(channel => channel.id) })
     .distinctOn(["survey.channel.id"])
     .leftJoinAndSelect("survey.channel", "channel")
     .leftJoinAndSelect("survey.participants", "participant")
+    .leftJoinAndSelect("channel.primaryWorkspace", "primaryWorkspace")
 }
 
 
@@ -94,14 +99,18 @@ export const findSurvey = async (surveyId: Survey["id"], entityManager: EntityMa
   entityManager.findOneBy(Survey, { id: surveyId })
 )
 
-export const surveyToTitle = async (survey: Survey, token: string, entityManager: EntityManager): Promise<string> => {
+export const surveyToTitle = async (survey: Survey, entityManager: EntityManager): Promise<string> => {
   const channel = await getChannel(survey, entityManager)
   if(!channel) {
     console.error(`Survey ${survey.id} has no associated channel`)
     return `Survey ${survey.id} has no associated channel`
   }
-  const slackChannel = await getSlackChannel(channel, token)
-  return `#${slackChannel.channel?.name}`
+  const slackChannel = await getSlackChannel(channel, channel.primaryWorkspace.botToken)
+  const workspaceName = (await app.client.team.info({
+    token: channel.primaryWorkspace.botToken,
+    team: channel.primaryWorkspace.teamId
+  })).team?.name
+  return `#${slackChannel.channel?.name} - ${workspaceName}`
 }
 
 export const getSlackChannel = async (channel: Channel, token: string): Promise<ConversationsInfoResponse> => {
