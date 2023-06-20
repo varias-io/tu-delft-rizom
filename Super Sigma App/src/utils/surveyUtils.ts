@@ -49,6 +49,8 @@ export const latestSurveys = async (userSlackId: User["slackId"], entityManager:
 
   const channels = await entityManager.find(Channel, { where: { users: { slackId: userSlackId } }, relations: ["users", "surveys", "surveys.participants"] })
 
+  if(!channels.length) return []
+
   const queryBuilder = await sortSurveysQuery(entityManager)
 
   const subQuery = queryBuilder.getQuery();
