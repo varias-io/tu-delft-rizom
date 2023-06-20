@@ -50,7 +50,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     const participation = (await usersWhoCompletedSurvey(latestSurvey.id, entityManager)).length/(await participantsOf(latestSurvey.id, entityManager)).length *100
 
     await entityManager.update(Survey, { id: latestSurvey.id }, {
-      participation: Number(participation.toFixed(0))
+      participation: Number(Math.floor(participation))
     })
   }
 
