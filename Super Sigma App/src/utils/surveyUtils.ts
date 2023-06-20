@@ -88,12 +88,10 @@ export const getlatestSurveysQuery = async (subQuery: string, channels: Channel[
 
 
 
-export const groupSurvey = async (userSlackId: User["slackId"], channelId: Channel["id"], entityManager: EntityManager): Promise<Survey[]> => {
+export const groupSurvey = async (channelId: Channel["id"], entityManager: EntityManager): Promise<Survey[]> => {
 
   const surveys = entityManager.find(Survey, {
-    where: {
-      participants: { slackId: userSlackId }, channel: { id: channelId }
-    },
+    where: { channel: { id: channelId }},
     relations: ["channel", "participants"], order: { createdAt: "ASC" }
   })
   return surveys
