@@ -62,7 +62,14 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   }
 
   const manager = await findUserBySlackId(body.user.id, context.teamId ?? "", entityManager, app)
-  const participants = await getUsersFromChannel({ channelSlackId, teamId: context.teamId ?? "" }, app, entityManager)
+
+  const workspace = await entityManager.findOne(Installation, { where: { teamId: channelTeamId } })
+
+  if(!workspace) {
+    return
+  }
+
+  const participants = await getUsersFromChannel({ channelSlackId, workspace }, app, entityManager)
 
   const survey = await entityManager.create(Survey, {
     channel,

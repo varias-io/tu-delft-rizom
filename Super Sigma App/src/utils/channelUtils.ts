@@ -13,7 +13,7 @@ interface GetUsersFromChannelsProps {
 
 interface GetUsersFromChannelProps {
     channelSlackId: string
-    teamId: string
+    workspace: Pick<Installation, "teamId" | "id" | "botToken">
 }
 
 interface GetUserSlackIdsFromChannelProps {
@@ -71,35 +71,34 @@ export const getUserSlackIdsFromChannel = async ({channelSlackId: channel, token
 
 }
 
-export const getUsersFromChannel = async ({channelSlackId, teamId}: GetUsersFromChannelProps, app: ConversationsApp & UsersInfoApp, entityManager: EntityManager): Promise<User[]> => {
-    const token = await entityManager.findOne(Installation, {where: {teamId}}).then((installation) => installation?.botToken ?? "")
+export const getUsersFromChannel = async ({channelSlackId, workspace}: GetUsersFromChannelProps, app: ConversationsApp & UsersInfoApp, entityManager: EntityManager): Promise<User[]> => {
+    const token = await entityManager.findOne(Installation, {where: {teamId: workspace.teamId}}).then((installation) => installation?.botToken ?? "")
     const userSlackIds = await getUserSlackIdsFromChannel({channelSlackId, token}, app)
-    return await findUsersFromChannel( userSlackIds, channelSlackId, teamId, entityManager, app)
+    return await findUsersFromChannel( userSlackIds, channelSlackId, workspace, app, entityManager)
 }
 
-export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, teamId: string, entityManager: EntityManager, app: UsersInfoApp): Promise<User[]> => {
-    const workspace = await entityManager.findOneBy(Installation, { teamId })
+export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, workspace: GetUsersFromChannelProps['workspace'], app: UsersInfoApp,  entityManager: EntityManager): Promise<User[]> => {
+    // const workspace = await entityManager.findOneBy(Installation, { teamId })
     let users: User[] = []
     /**
      * A transaction makes sure that the database goes from a valid state to another valid state. Either everything succeeds, then great.
      * If anything fails nothing will change in the database. 
      */
-    await entityManager.transaction(async (entityManager) => {
         users = (await Promise.all(userSlackIds.map(async (slackId) => (
             entityManager.findOne(User, {where: { slackId }, relations: ["primaryWorkspace", "connectWorkspaces"]})
             .then(async user => {
                 //strangers are users from another workspace through slack connect. 
-                const is_stranger = await app.client.users.info({
-                    token: workspace?.botToken ?? "",
-                    user: slackId,
-                })
-                .catch((_error) => {
-                    console.error("Couldn't get the users info")
-                    return { user: { is_stranger: false } }
-                  })
-                .then(res => res.user?.is_stranger ?? false)
-
+                
                 if (user == null) {
+                    const is_stranger = await app.client.users.info({
+                        token: workspace?.botToken ?? "",
+                        user: slackId,
+                    })
+                    .catch((_error) => {
+                        console.error("Couldn't get the users info")
+                        return { user: { is_stranger: false } }
+                      })
+                    .then(res => res.user?.is_stranger ?? false)
         
                     // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
                     // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
@@ -116,7 +115,7 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                     }
                 } else if(workspace) {
 
-                    if(is_stranger) {
+                    if(user.primaryWorkspace && user.primaryWorkspace.teamId != workspace.teamId) {
                         if(!user.connectWorkspaces.find(x => x.teamId == workspace.teamId)) {
                             await entityManager.createQueryBuilder(User, "user")
                             .relation("connectWorkspaces")
@@ -132,9 +131,8 @@ export const findUsersFromChannel = async (userSlackIds: string[], channelSlackI
                 return user
             })
         ))))
-    })
 
-    const foundChannel = await getChannelFromSlackId(channelSlackId, teamId, entityManager)
+    const foundChannel = await getChannelFromSlackId(channelSlackId, workspace.teamId, entityManager)
 
     if (foundChannel != null) {
         foundChannel.users = users
@@ -199,6 +197,7 @@ export const getChannelsFromWorkspace = async (token: string, app: Conversations
     return app.client.conversations.list({
         token,
         exclude_archived: true,
+        limit: 1000,
         types: "public_channel" // types of conversations
     }).then((res) => {
         return res.channels?.map((channel) => ({
