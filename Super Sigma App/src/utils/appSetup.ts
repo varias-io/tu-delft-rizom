@@ -12,14 +12,17 @@ const expressReceiver = new ExpressReceiver({
 
 const authorizeFn: pkg.Authorize<boolean> = async ({ teamId, enterpriseId: _enterpriseId }) => {
   // Fetch team info from database
-  const team = await entityManager.findOneOrFail(Installation, {where: {teamId: teamId ?? ""}});
+  const team = await entityManager.findOneOrFail(Installation, { where: { teamId: teamId ?? "" } })
+    .catch((_error) => {
+      throw new Error(`Can't authorize for team ${teamId}`);
+    });
 
   return team
 
 }
 
 export const app = new App({
-  authorize: authorizeFn, 
+  authorize: authorizeFn,
   receiver: expressReceiver,
   signingSecret: process.env.SLACK_SIGNING_SECRET ?? "",
   clientSecret: process.env.SLACK_CLIENT_SECRET ?? "",
@@ -53,24 +56,24 @@ app_express.get('/auth/callback', (req, res) => {
   // let state = req.param("state");
 
   return app.client.oauth.v2.access({
-      client_id: process.env.SLACK_CLIENT_ID ?? "",
-      client_secret: process.env.SLACK_CLIENT_SECRET ?? "",
-      code: code?.toString() ?? ""
+    client_id: process.env.SLACK_CLIENT_ID ?? "",
+    client_secret: process.env.SLACK_CLIENT_SECRET ?? "",
+    code: code?.toString() ?? ""
   }).then(async (result) => {
-      // save result of oauth.access call somewhere, like in a database.
+    // save result of oauth.access call somewhere, like in a database.
 
-      entityManager.save(Installation, {
-        enterpriseId: result.enterprise?.id ?? "",
-        teamId: result.team?.id ?? "",
-        botToken: result.access_token ?? "",
-        botId: result.app_id ?? "",
-        botUserId: result.bot_user_id ?? "",
-      })
+    entityManager.save(Installation, {
+      enterpriseId: result.enterprise?.id ?? "",
+      teamId: result.team?.id ?? "",
+      botToken: result.access_token ?? "",
+      botId: result.app_id ?? "",
+      botUserId: result.bot_user_id ?? "",
+    })
 
-      res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUIcmljayByb2w%3D")
+    res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUIcmljayByb2w%3D")
 
-      // redirect user afterwards with res.redirect to an url that will say something like "Thanks for installing!" perhaps.
+    // redirect user afterwards with res.redirect to an url that will say something like "Thanks for installing!" perhaps.
   }).catch((error) => {
-      throw error;
+    console.error(`An error occurred while redirecting to add the app: ${error}`);
   });
 });

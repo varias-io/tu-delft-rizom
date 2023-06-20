@@ -20,7 +20,11 @@ export const getManagedChannels = async (userSlackId: string, token: string) => 
             token,
             user: userSlackId,
             types: "private_channel, public_channel"
-        });
+        })
+            .catch((_error) => {
+                console.error(`Failed to get conversations for user: ${userSlackId}`)
+                return { channels: [] }
+            })
 
         const channels = conversationsResponse.channels ?? [];
         
