@@ -1,5 +1,4 @@
 export * from "./database.js"
-export * from "./sendDM.js"
 export * from "./channelUtils.js"
 export * from "./appSetup.js"
 export * from "./computeTMS.js"
