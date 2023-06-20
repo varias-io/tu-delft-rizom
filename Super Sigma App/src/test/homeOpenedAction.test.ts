@@ -66,20 +66,6 @@ const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersInfoApp = {
         })
       }
     },
-    // users: {
-    //   conversations: async ({token, user, exclude_archived, types}) => {
-    //     conversed = true;
-    //     assert.equal(token, context.botToken)
-    //     assert.equal(user, userSlackId)
-    //     assert.equal(exclude_archived, true)
-    //     assert.equal(types, "public_channel")
-    //     return {
-    //       ok: true,
-    //       channels
-    //   }
-
-    //   }
-    // },
     conversations: {
       list: async () => {
         conversations_list_called = true;
