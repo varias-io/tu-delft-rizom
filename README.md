@@ -11,7 +11,7 @@ The user can choose a channel, and click the "Create Survey" button. The availab
 
 If the user tries to create a survey with no channel selected, a warning will be shown.
 
-A message will be sent to the relevant channel with a button that lets users fill out the latest survey.
+A message will be sent to the relevant channel with a button that lets users fill out the latest survey. When a user tries to click the fill in survey button in this message for a survey they have already filled out, a message only they can see will be sent in the channel letting them know they have already filled out the survey. 
 
 ## List of surveys
 
@@ -19,27 +19,20 @@ The surveys that the user is a part of are visible on the homepage.
 
 They are grouped by channels such that for any channel, only the latest one is displayed. The groups are ordered alphabetically.
 
-For each survey displayed, there is a button that, when pressed, displays a line chart showing the progress of each aspect of TMS as well as the overall score, over the course of the surveys done in this channel.
+For every survey displayed, the channel, workspace, and the starting date are clearly visible. The TMS score is also visible, with a radar chart showing the different aspects of TMS after clicking a button. The number of people eligible to fill out and the number of people who have completed the survey are shown. The user's own progress within the 15 questions of the survey are also displayed.
 
-For every survey displayed, the channel and the starting date are clearly visible. The TMS score is also visible, with a radar chart showing the different aspects of TMS after clicking a button. The number of people eligible to fill out and the number of people who have completed the survey are shown. The user's own progress within the 15 questions of the survey are also displayed.
-
-TODO: There is a "View Participation" button, which, when pressed, displays a list of the users eligible to fill in the survey, with indication of each user's progress.
-
-TODO: The TMS score (and breakdown), participation ratio and "View Participation" button are only shown if any of the following cases applies:
- - The user is the creator of the survey
- - The participation of the survey is over 80%
+For each survey displayed, there is a button that, when pressed, shows the history of surveys in that specific channel. It will display a line chart showing the progress of each aspect of the TMS as well as the overall score, over the course of surveys done in this channel. It will also show the history of surveys for this specific channel in the same way as on the home screen. It will only display any closed surveys with a participation of over 80%. The personal progress will be shown in a slightly different way than it is being shown on the home screen. In the Survey History modal it will either say "You have completed this survey." or "You did not finish filling out this survey.".
+The Survey History modal has an explanation at the bottom explaining why some surveys a user expects to see might not show up because of the 80% threshold. If the Survey History is empty, because there are no finished channels for a channel the modal will say "There are no finished surveys to show in the history.". 
 
 ## Filling out surveys
 
-Each survey displayed on the homepage that hasn't been completed by the user has a "Fill in Survey" button, which leads to a series of modal elements popping up, each containing a single question for the survey.
+Each survey displayed on the homepage that hasn't been completed by the user has a "Fill in Survey" button, which leads to a series of modal elements popping up, each containing a single question for the survey. The "Fill in Survey" button is only shown for surveys that were created after the user joined the channel. In the case of the latest survey being a survey created before a user joined the channel the following explanation will be shown: "You're not a participant in this survey, it was started when you were not a member of this channel.". 
+
+After clicking the "Fill in Survey" button, regardless of what question is coming up, the first modal displayed is a warning that each answer given is final for the given survey. An answer cannot be changed after clicking "Next". After confirming, the user is taken to the relevant question. 
 
 The question modal contains the number of the question, the question itself, and the aspect of TMS the question belongs to. It also displays the channel the survey is associated with. Beside the "X" and "Close" buttons which simply close the modal (not saving the answer given to the current question), there is also a green "Next" button (or "Submit" for the last question), which saves the answer given to the current question and displays the modal for the next question (or closes the modal for the last question).
 
 If anything causes the modal to close ("X" button, "Close" button or "Submit" button), the homepage is refreshed to reflect the current state of the system.
-
-Once the user has answered a question for a given survey, it cannot be changed anymore. Of course, a different answer can be given in a different survey.
-
-TODO: After clicking the "Fill in Survey" button, regardless of what question is coming up, the first modal displayed is a warning that each answer given is final for the given survey. After confirming, the user is taken to the relevant question.
 
 # Contribution
 
@@ -75,6 +68,7 @@ First, you need to give your app certain permissions (scopes) within the workspa
 - mpim:read
 - mpim:write
 - users:read
+- team:read
 
 You should also go to **Features > App Home** and make sure "Home Tab" and "Messages Tab" are turned on.
 
