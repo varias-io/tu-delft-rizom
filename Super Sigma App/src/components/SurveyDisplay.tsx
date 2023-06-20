@@ -51,10 +51,10 @@ export const SurveyDisplay = async ({ surveys, userSlackId, displayedInModal = f
         </Section>
         <Section>
           <Mrkdwn>
-          Overall TMS: {TMStoPercentage(((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3)).toFixed(0)}%<br/>
-          - Specialization: {TMStoPercentage(latestSurvey.specialization).toFixed(0)}%<br />
-          - Credibility: {TMStoPercentage(latestSurvey.credibility).toFixed(0)}%<br />
-          - Coordination: {TMStoPercentage(latestSurvey.coordination).toFixed(0)}%<br />
+          Overall TMS: {Math.floor(TMStoPercentage(((latestSurvey.specialization+latestSurvey.credibility+latestSurvey.coordination)/3)))}%<br/>
+          - Specialization: {Math.floor(TMStoPercentage(latestSurvey.specialization))}%<br />
+          - Credibility: {Math.floor(TMStoPercentage(latestSurvey.credibility))}%<br />
+          - Coordination: {Math.floor(TMStoPercentage(latestSurvey.coordination))}%<br />
           <br />
           <b>Personal progress: {personalProgress}/15</b> <br />
           </Mrkdwn>
