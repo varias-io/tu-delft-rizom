@@ -1,5 +1,11 @@
+import { EntityManager } from "typeorm";
 import { AppDataSource } from "./data-source.js";
 
-const dataSource = await AppDataSource.initialize()
+let dataSource 
+try {
+  dataSource = await AppDataSource.initialize()
+} catch (error) {
+  console.error(error)
+}
 
-export const entityManager = dataSource.createEntityManager()
+export const entityManager = dataSource?.createEntityManager() as EntityManager

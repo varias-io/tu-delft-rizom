@@ -1,11 +1,18 @@
 import {RadioButton, Modal, Header, RadioButtonGroup, Divider, JSXSlack, Section, Mrkdwn} from 'jsx-slack'
 import { surveyTemplate } from '../constants.js'
 import { JSX } from 'jsx-slack/jsx-runtime'
-import { AllMiddlewareArgs } from '@slack/bolt'
 import { Survey } from '../entities/Survey.js'
-import { entityManager, surveyToTitle } from '../utils/index.js'
+import { ConversationsApp, TeamInfoApp, ViewsOpenClient, surveyToTitle } from '../utils/index.js'
+import { EntityManager } from 'typeorm'
 
 interface QuestionModalProps {
+  questionIndex : number,
+  survey : Survey,
+  entityManager: EntityManager
+  app: ConversationsApp & TeamInfoApp
+}
+
+interface WarningModalProps {
   questionIndex : number,
   survey : Survey,
 }
@@ -27,12 +34,12 @@ const OptionsWithValues = ({reversed} : OptionsWithValuesProps) : JSX.Element =>
   </>
 )
 
-export const showWarningModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
+export const showWarningModal = async (client: ViewsOpenClient, token: string, trigger_id: string, survey: Survey, questionIndex: number) => {
   try{
     await client.views.open({
       token: token,
       trigger_id: trigger_id,
-      view: JSXSlack(await warningModalBlock({survey, questionIndex}))
+      view: JSXSlack(await WarningModalBlock({survey, questionIndex}))
     });
   } catch (error) {
     console.error(error);
@@ -40,7 +47,7 @@ export const showWarningModal = async (client: AllMiddlewareArgs["client"], toke
 
 }
 
-export const warningModalBlock = async ({survey, questionIndex} : QuestionModalProps) : Promise<JSX.Element> => {
+export const WarningModalBlock = async ({survey, questionIndex} : WarningModalProps) : Promise<JSX.Element> => {
   return <Modal 
     title="Important!"
     submit="I understand"
@@ -53,7 +60,7 @@ export const warningModalBlock = async ({survey, questionIndex} : QuestionModalP
     </Modal>
 }
 
-export const SurveyModalBlock = async ({survey, questionIndex} : QuestionModalProps) : Promise<JSX.Element> => {
+export const SurveyModalBlock = async ({survey, questionIndex, entityManager, app} : QuestionModalProps) : Promise<JSX.Element> => {
   const {focus, number, text, reversed} = surveyTemplate[questionIndex];
   return <Modal 
     title='TMS survey'
@@ -73,7 +80,7 @@ export const SurveyModalBlock = async ({survey, questionIndex} : QuestionModalPr
     <OptionsWithValues {...{reversed}} />
   </RadioButtonGroup>
   <Divider/>
-  <Section>{await surveyToTitle(survey, entityManager)}</Section>
+  <Section>{await surveyToTitle(survey, entityManager, app)}</Section>
 
   </Modal>
 }

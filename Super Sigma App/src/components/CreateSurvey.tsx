@@ -1,19 +1,21 @@
 import { Actions, Button, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
-import { ChannelInfo, app, entityManager, getChannelsFromWorkspace, getUsersFromChannel } from '../utils/index.js';
+import { ChannelInfo, ConversationsApp, UsersInfoApp, getChannelsFromWorkspace, getUsersFromChannel } from '../utils/index.js';
 import { Channel } from "../entities/Channel.js";
 import { Installation } from "../entities/Installation.js";
-import { Brackets } from "typeorm";
+import { Brackets, EntityManager } from "typeorm";
 
 interface ChannelSelectProps {
     userSlackId: string,
-    teamId: string
+    teamId: string,
+    app: ConversationsApp & UsersInfoApp,
+    entityManager: EntityManager
 }
 
 /**
  * Create survey component.
  */
-export const CreateSurvey = async ({userSlackId, teamId}: ChannelSelectProps): Promise<JSX.Element> => {
+export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: ChannelSelectProps): Promise<JSX.Element> => {
 
     /**
      * Show a dropdown menu with all channels the user is a member of.

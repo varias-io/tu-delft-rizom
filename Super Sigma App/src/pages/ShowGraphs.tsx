@@ -1,16 +1,13 @@
 import {Modal, JSXSlack, Image} from 'jsx-slack'
 import { JSX } from 'jsx-slack/jsx-runtime'
-import { AllMiddlewareArgs } from '@slack/bolt'
-import { createGraph, defaultRadarGraphProps, RadarGraphProps} from '../utils/createGraph.js';
-import { TMSScore } from '../utils/computeTMS.js';
-import { TMStoPercentage } from '../utils/index.js';
+import { RadarGraphProps, TMSScore, TMStoPercentage, ViewsOpenClient, ViewsPushClient, createGraph, defaultRadarGraphProps } from '../utils/index.js';
 
 export interface GraphsModalProps {
   tms: [TMSScore[], string[]]
   displayedInModal: boolean
 }
 
-export const showGraphsModal = async (client: AllMiddlewareArgs["client"], token: string, trigger_id: string, {tms, displayedInModal}: GraphsModalProps) => {
+export const showGraphsModal = async (client: ViewsOpenClient & ViewsPushClient, token: string, trigger_id: string, {tms, displayedInModal}: GraphsModalProps) => {
   try {
       await client.views[displayedInModal? "push" : "open"]({
       token: token,

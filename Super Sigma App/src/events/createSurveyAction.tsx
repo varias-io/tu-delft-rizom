@@ -14,12 +14,12 @@ const selectionBlockNotFound = (): object => {
  * Action that happens when you click the button for creating a survey
  */
 app.action("createSurvey", async (params) => {
-  createSurvey(params, entityManager)
+  createSurvey(params, entityManager, app)
 })
 
 
 
-export const createSurvey: ActionCallback = async ({ ack, body, context, client }, entityManager) => {
+export const createSurvey: ActionCallback = async ({ ack, body, context, client }, entityManager, app) => {
   if (body.type != "block_actions") {
     console.error(`Unexpected body type: ${body.type}}`)
     return;
@@ -61,8 +61,8 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
     return
   }
 
-  const manager = await findUserBySlackId(body.user.id, context.teamId ?? "")
-  const participants = await getUsersFromChannel({ channelSlackId, teamId: channelTeamId }, app, entityManager)
+  const manager = await findUserBySlackId(body.user.id, context.teamId ?? "", entityManager, app)
+  const participants = await getUsersFromChannel({ channelSlackId, teamId: context.teamId ?? "" }, app, entityManager)
 
   const survey = await entityManager.create(Survey, {
     channel,
@@ -81,7 +81,7 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
   crons.set(channel.id, task)
   task.start()
 
-  updateHome(body.user.id, context)
+  updateHome({app, userSlackId: body.user.id, context, entityManager})
 }
 
 const noChannelSelectedErrorBlock = (): Block => (

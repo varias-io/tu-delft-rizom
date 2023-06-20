@@ -2,7 +2,7 @@ import { EntityManager, SelectQueryBuilder } from "typeorm";
 import { Channel } from "../entities/Channel.js";
 import { Survey } from "../entities/Survey.js";
 import { User } from "../entities/User.js";
-import { app } from "./index.js";
+import { ConversationsApp, TeamInfoApp } from "./index.js";
 import { ConversationsInfoResponse } from "@slack/web-api";
 
 export const participantsOf = async (surveyId: string, entityManager: EntityManager): Promise<User[]> => {
@@ -104,13 +104,13 @@ export const findSurvey = async (surveyId: Survey["id"], entityManager: EntityMa
   entityManager.findOneBy(Survey, { id: surveyId })
 )
 
-export const surveyToTitle = async (survey: Survey, entityManager: EntityManager): Promise<string> => {
+export const surveyToTitle = async (survey: Survey, entityManager: EntityManager, app: ConversationsApp & TeamInfoApp): Promise<string> => {
   const channel = await getChannel(survey, entityManager)
   if (!channel) {
     console.error(`Survey ${survey.id} has no associated channel`)
     return `Survey ${survey.id} has no associated channel`
   }
-  const slackChannel = await getSlackChannel(channel, channel.primaryWorkspace.botToken)
+  const slackChannel = await getSlackChannel(app, channel, channel.primaryWorkspace.botToken)
   const teamInfo = await app.client.team.info({
     token: channel.primaryWorkspace.botToken,
     team: channel.primaryWorkspace.teamId
@@ -122,7 +122,7 @@ export const surveyToTitle = async (survey: Survey, entityManager: EntityManager
   return `#${slackChannel.channel?.name} - ${teamInfo.team?.name}`
 }
 
-export const getSlackChannel = async (channel: Channel, token: string): Promise<ConversationsInfoResponse | { channel: { name: string; }; }> => {
+export const getSlackChannel = async (app: ConversationsApp, channel: Channel, token: string): Promise<ConversationsInfoResponse | { channel: { name: string; }; }> => {
   return app.client.conversations.info({ channel: channel.slackId, token })
     .catch((_error) => {
       console.error(`Couldn't get the channel info for channel: ${channel.slackId}`)

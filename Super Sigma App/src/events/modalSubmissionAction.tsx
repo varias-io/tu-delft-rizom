@@ -1,11 +1,12 @@
 import { JSXSlack } from "jsx-slack";
 import { SurveyModalBlock } from "../pages/SurveyModalBlock.js";
 import { surveyTemplate } from "../constants.js";
-import { ViewCallback, app, entityManager, findSurvey, findUserBySlackId } from "../utils/index.js";
+import { ViewCallback, app, findSurvey, findUserBySlackId } from "../utils/index.js";
 import { SurveyAnswer } from "../entities/SurveyAnswer.js";
 import { updateHome } from "./homeOpenedAction.js";
 import { SlackViewMiddlewareArgs, SlackViewAction, AllMiddlewareArgs } from "@slack/bolt";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers.js";
+import { entityManager } from "../utils/database.js";
 
 interface PrivateMetadataQuestion {
   surveyId: string
@@ -15,16 +16,16 @@ interface PrivateMetadataQuestion {
 app.view({callback_id:"survey_modal", type:"view_closed"}, async ({ ack, context, body }: SlackViewMiddlewareArgs<SlackViewAction> & AllMiddlewareArgs<StringIndexed>) => {
   //handle closing
   await ack();
-  updateHome(body.user.id, context)
+  updateHome({app, userSlackId: body.user.id, context, entityManager})
 })
 
 
 app.view("survey_modal", async (params) => {
   //handle submission
-  handleSubmission(params, entityManager)
+  handleSubmission(params, entityManager, app)
 });
 
-const handleSubmission: ViewCallback = async ({ ack, view, context, body }, entityManager) => {
+const handleSubmission: ViewCallback = async ({ ack, view, context, body }, entityManager, app) => {
   const questionInfo = JSON.parse(view.private_metadata) as PrivateMetadataQuestion
   const selectedOptionValue = Object.entries(view.state.values.radio_buttons)[0][1].selected_option?.value
 
@@ -54,7 +55,7 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
   //save answer
   await entityManager.create(SurveyAnswer, {
     survey, 
-    user: await findUserBySlackId(body.user.id, context.teamId ?? ""),
+    user: await findUserBySlackId(body.user.id, context.teamId ?? "", entityManager, app),
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
   }).save()
@@ -67,10 +68,12 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
       view: JSXSlack(await SurveyModalBlock({
         questionIndex: questionInfo.questionIndex+1, 
         survey,
+        entityManager,
+        app
       }))});
   } else {
     //this was last question
-    updateHome(body.user.id, context)
+    updateHome({app, userSlackId: body.user.id, context, entityManager})
     await ack()
   }
 }

@@ -1,8 +1,9 @@
-import { Installation } from "../entities/Installation.js";
+import { EntityManager } from "typeorm";
 import { User } from "../entities/User.js";
-import { app, entityManager } from "./index.js";
+import { Installation } from "../entities/Installation.js";
+import { UsersApp } from "./types.js";
 
-export const findUserBySlackId = async (slackId: string, teamId: string): Promise<User> => (
+export const findUserBySlackId = async (slackId: string, teamId: string, entityManager: EntityManager, app: UsersApp): Promise<User> => (
   entityManager.findOneBy(User, { slackId }).then(async (foundUser) => {
     if (foundUser == null) {
       const workspace = await entityManager.findOneBy(Installation, { teamId })
@@ -35,6 +36,6 @@ export const findUserBySlackId = async (slackId: string, teamId: string): Promis
   })
 )
 
-export const findUserByEntityId = async (id: string): Promise<User | null> => (
+export const findUserByEntityId = async (id: string, entityManager: EntityManager): Promise<User | null> => (
   entityManager.findOneBy(User, { id })
 )
