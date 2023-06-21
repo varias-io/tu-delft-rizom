@@ -34,12 +34,12 @@ export const GraphsModalBlock = async(tms: [TMSScore[], string[]]) : Promise<JSX
       labels: [["Specialization", `${Number(Math.floor(spec))}%`], ["Credibility", `${Number(Math.floor(cred))}%`], ["Coordination", `${Number(Math.floor(coor))}%`]],
       datasets: [{
         data: [spec, cred, coor],
-        backgroundColor: "rgba(3, 94, 252, 0.4)", 
+        backgroundColor: "rgba(3, 75, 203, 0.4)", 
         borderWidth: 5,
-        borderColor: "rgba(3, 94, 252, 0.8)",
+        borderColor: "rgba(3, 75, 203, 0.8)",
         pointBorderWidth: 10, 
-        pointBackgroundColor: "rgba(3, 94, 252, 1)",
-        pointBorderColor: "rgba(3, 94, 252, 1)"
+        pointBackgroundColor: "rgba(3, 75, 203, 1)",
+        pointBorderColor: "rgba(3, 75, 203, 1)"
       }]
     },
   }

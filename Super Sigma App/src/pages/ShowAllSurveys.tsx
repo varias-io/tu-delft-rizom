@@ -31,26 +31,26 @@ export const showAllSurveys = async (client: AllMiddlewareArgs["client"], token:
         datasets: [{
           label: "Specialization",
           data: tms[0].map((tms) => TMStoPercentage(tms.specialization)),
-          borderColor: "#035efc",
-          backgroundColor: "#035efc",
+          borderColor: "#1803fc",
+          backgroundColor: "#1803fc",
           borderWidth: 7
         }, {
           label: "Credibility",
           data: tms[0].map((tms) => TMStoPercentage(tms.credibility)),
-          borderColor: "#de34eb",
-          backgroundColor: "#de34eb",
+          borderColor: "#90109a",
+          backgroundColor: "#90109a",
           borderWidth: 7,
         }, {
           label: "Coordination",
           data: tms[0].map((tms) => TMStoPercentage(tms.coordination)),
-          borderColor: "#e8eb34",
-          backgroundColor: "#e8eb34",
+          borderColor: "#b30909",
+          backgroundColor: "#b30909",
           borderWidth: 7
         }, {
           label: "Overall TMS",
           data: tms[0].map((tms) => TMStoPercentage((tms.specialization+tms.credibility+tms.coordination)/3)),
-          borderColor: "#34eb34",
-          backgroundColor: "#34eb34",
+          borderColor: "#000000",
+          backgroundColor: "#000000",
           borderDash: [10, 5],
           borderWidth: 7
         }]
