@@ -2,7 +2,7 @@ import { test, beforeEach } from "node:test"
 import assert from "assert"
 import { ViewsPublishArguments } from "@slack/web-api"
 import { updateHome } from "../events/index.js";
-import { ConversationsApp, TeamInfoApp, UsersInfoApp, ViewsPublishApp } from "../utils/index.js";
+import { ConversationsApp, TeamInfoApp, UsersApp, ViewsPublishApp } from "../utils/index.js";
 import { Channel } from "../entities/Channel.js";
 import { FakeEntityManager } from "./mock.js";
 import { Installation } from "../entities/Installation.js";
@@ -53,7 +53,7 @@ survey1.createdAt = new Date(2021, 1, 1)
 survey1.channel = channel1
 
 
-const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersInfoApp = {
+const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersApp = {
   client: {
     views: {
       publish: async ({ user_id, token, view }: ViewsPublishArguments) => {
@@ -111,7 +111,15 @@ const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersInfoApp = {
             is_stranger: false,
           }
         })
-      }
+      },
+      list: async () => ({
+        ok: true,
+        members: []
+      }),
+      conversations: async () => ({
+        ok: true,
+        channels: []
+      })
     }
   }
 }
@@ -134,6 +142,10 @@ test("updateHome", async () => {
         // CreateSurvey
         yield workspace
         yield channel1
+
+        // getUsersFromChannels
+          // findOrCreateUser
+          yield user1
 
         yield [channel1]
         yield channel1
@@ -179,6 +191,27 @@ test("updateHome", async () => {
             yield [user1]
             //groupSurvey
             yield [survey1]
+      
+    // updateHome2
+      // HomePage
+        // CreateSurvey
+        yield workspace
+        yield channel1
+
+        // getUsersFromChannels
+          // findOrCreateUser
+          yield user1
+
+        yield [channel1]
+        yield channel1
+
+        // latestSurveys
+        yield [channel1]
+        yield [survey1]
+
+      while(true) {
+        yield "anyád"
+      }
   }
   const entityManager = new FakeEntityManager(responseGenerator())
 

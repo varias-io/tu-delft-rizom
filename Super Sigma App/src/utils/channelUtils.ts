@@ -1,4 +1,3 @@
-import { App } from "@slack/bolt"
 import { Channel } from "../entities/Channel.js"
 import { Survey } from "../entities/Survey.js"
 import { Installation } from "../entities/Installation.js"
@@ -7,8 +6,7 @@ import { EntityManager } from "typeorm"
 import { ConversationsApp, UsersApp, UsersInfoApp } from "./index.js"
 
 interface GetUsersFromChannelsProps {
-    channelSlackIds: string[]
-    token: string
+    channels: Channel[]
 }
 
 interface GetUsersFromChannelProps {
@@ -24,35 +22,86 @@ interface GetUserSlackIdsFromChannelProps {
 /**
  * From a list of channel ids return a set of unique user ids from those channels.
  */
-export const getUserSlackIdsFromChannels = async ({channelSlackIds, token}: GetUsersFromChannelsProps, app: App) => {
-    const users = new Set<string>()
+export const getUserSlackIdsFromChannels = async ({ channels }: GetUsersFromChannelsProps, app: ConversationsApp) => {
 
     //get all members from each channel
-    const allMembers = await Promise.all(channelSlackIds.map(async (channel) => {
+    const users: ([Channel, string[]] | [null, []])[] = await Promise.all(channels.map(async channel => {
+        if (!channel.primaryWorkspace) {
+            return [null, []]
+        }
+
         const members = await app.client.conversations.members({
-            token,
-            channel
+            token: channel.primaryWorkspace?.botToken ?? "",
+            channel: channel.slackId
         })
             .catch((_error) => {
                 console.error(`Couldn't get the members for channel: ${channel}`)
                 return { members: [] }
             })
-        return members.members ?? []
+
+        return [channel, members.members ?? []]
     }))
-    
-    //add each member to the set
-    allMembers.flat().forEach((member) => {
-        users.add(member)
-    })
-    
+
     return users
 }
 
-export const getUsersFromChannels = async ({channelSlackIds, token}: GetUsersFromChannelsProps, app: App, entityManager: EntityManager): Promise<User[]> => {
-    const userSlackIds = await getUserSlackIdsFromChannels({channelSlackIds, token}, app)
-    return (await Promise.all([...userSlackIds].map(async (slackId) => (
-        entityManager.findOneBy(User, {slackId})
-    )))).filter((user) => user != null) as User[]
+export const getUsersFromChannels = async ({ channels }: GetUsersFromChannelsProps, app: ConversationsApp & UsersApp, entityManager: EntityManager): Promise<User[]> => {
+    const teamMembers = await getUserSlackIdsFromChannels({ channels }, app)
+    // return (await Promise.all([...userSlackIds].map(async (slackId) => (
+    //     entityManager.findOneBy(User, {slackId})
+    // )))).filter((user) => user != null) as User[]
+
+    const updateChannelOfUser: {
+        userSlackId: string
+        channel: Channel
+    }[] = []
+
+    const nativeUsers = await app.client.users.list({
+        token: channels[0].primaryWorkspace?.botToken ?? ""
+    })
+
+    let isNative: Map<string, boolean> = new Map()
+
+    if(nativeUsers.members) {
+         isNative = new Map(
+            nativeUsers.members?.map((user) => [user.id ?? "", true])
+        ) 
+    }
+
+    
+    const users = (await Promise.all(teamMembers.map(async ([channel, slackIds]): Promise<User[]> => {
+        if (channel == null) {
+            return []
+        }
+
+        return Promise.all(slackIds.map(async (slackId) => {
+
+            return findOrCreateUser(slackId, entityManager, channel, app, isNative)
+                .catch(_e => {
+                    updateChannelOfUser.push({
+                        userSlackId: slackId,
+                        channel
+                    })
+                });
+
+        })).then((users) => users.filter((user) => user != null) as User[])
+    }))).flat()
+
+    await Promise.all(updateChannelOfUser.map(async ({ userSlackId, channel }) => {
+        const user = await entityManager.findOne(User, { where: { slackId: userSlackId }, relations: ["primaryWorkspace", "channels"] })
+        if (user != null) {
+            await entityManager.createQueryBuilder(User, "user")
+                .relation(User, "channels")
+                .of(user)
+                .add(channel)
+                    .catch(_e => {
+                        console.error("Connection already exists")
+                    })
+        }
+    }))
+
+    return users
+
 }
 
 /**
@@ -79,69 +128,153 @@ export const getUsersFromChannel = async ({channelSlackId, workspace}: GetUsersF
 
 export const findUsersFromChannel = async (userSlackIds: string[], channelSlackId: string, workspace: GetUsersFromChannelProps['workspace'], app: UsersInfoApp,  entityManager: EntityManager): Promise<User[]> => {
     // const workspace = await entityManager.findOneBy(Installation, { teamId })
-    let users: User[] = []
-    /**
-     * A transaction makes sure that the database goes from a valid state to another valid state. Either everything succeeds, then great.
-     * If anything fails nothing will change in the database. 
-     */
-        users = (await Promise.all(userSlackIds.map(async (slackId) => (
-            entityManager.findOne(User, {where: { slackId }, relations: ["primaryWorkspace", "connectWorkspaces"]})
-            .then(async user => {
-                //strangers are users from another workspace through slack connect. 
-                
-                if (user == null) {
-                    const is_stranger = await app.client.users.info({
-                        token: workspace?.botToken ?? "",
-                        user: slackId,
-                    })
+    const foundChannel = await getChannelFromSlackId(channelSlackId, workspace.teamId, entityManager)
+    if(foundChannel) {
+        let users: User[] = (await Promise.all(userSlackIds.map(async (slackId) => findOrCreateUser(slackId, entityManager, foundChannel, app)))).filter((user) => user != null) as User[]
+        if (foundChannel != null) {
+            foundChannel.users = users
+            await foundChannel.save()
+        }
+    
+        return users
+    }
+
+    return []
+}
+
+const findOrCreateUser = async (slackId: string, entityManager: EntityManager, channel: Channel, app: UsersInfoApp, isNative?: Map<string, boolean>): Promise<User | null> => 
+    entityManager.findOne(User, { where: { slackId }, relations: ["primaryWorkspace", "connectWorkspaces"] })
+    .then(async user => {
+        
+        //strangers are users from another workspace through slack connect. 
+
+        if (user == null) {
+            
+            let is_stranger = false
+
+            if(isNative) {
+                is_stranger = !isNative.has(slackId)
+            } else {
+                is_stranger = await app.client.users.info({
+                    token: channel.primaryWorkspace?.botToken ?? "",
+                    user: slackId,
+                })
                     .catch((_error) => {
                         console.error("Couldn't get the users info")
                         return { user: { is_stranger: false } }
-                      })
+                    })
                     .then(res => res.user?.is_stranger ?? false)
-        
-                    // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
-                    // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
-                    if(!is_stranger) {
-                        return entityManager.create(User, {
-                            slackId,
-                            primaryWorkspace: workspace? workspace : null as unknown as Installation,
-                        }).save()
-                    } else {
-                        return entityManager.create(User, {
-                            slackId,
-                            connectWorkspaces: workspace? [workspace] : [],
-                        }).save()   
-                    }
-                } else if(workspace) {
+            }
 
-                    if(user.primaryWorkspace && user.primaryWorkspace.teamId != workspace.teamId) {
-                        if(!user.connectWorkspaces.find(x => x.teamId == workspace.teamId)) {
-                            await entityManager.createQueryBuilder(User, "user")
-                            .relation("connectWorkspaces")
-                            .of(user)
-                            .add(workspace)
-                        }
-                    } else {
-                        await entityManager.update(User, {slackId}, {primaryWorkspace: workspace})
-                    }
-                } 
+            // Users cannot see the original workspace of strangers, so if the user is a stranger you make the connectWorkspaces an empty array. 
+            // Primary workspace can technically not be null, but we know that we don't know it, so we set it to null anyway. 
+            if (!is_stranger) {
+                return entityManager.create(User, {
+                    slackId,
+                    primaryWorkspace: channel.primaryWorkspace ? channel.primaryWorkspace : null as unknown as Installation,
+                    channels: [channel]
+                }).save()
+            } else {
+                return entityManager.create(User, {
+                    slackId,
+                    connectWorkspaces: channel.primaryWorkspace ? [channel.primaryWorkspace] : [],
+                    channels: [channel]
+                }).save()
+            }
+        } else if (channel.primaryWorkspace) {
 
+            if (user.primaryWorkspace) {
+                if(user.primaryWorkspace.teamId != channel.primaryWorkspace.teamId) {
+                    const setWorkspacePromise = entityManager.createQueryBuilder(User, "user")
+                        .relation("connectWorkspaces")
+                        .of(user)
+                        .add(channel.primaryWorkspace)
+                        .catch(_e => {
+                            // Race condition happened, but we don't care about it
+                        })
     
-                return user
-            })
-        ))))
+                    const setChannelPromise = entityManager.createQueryBuilder(Channel, "channel") 
+    
+                    await Promise.all([setWorkspacePromise, setChannelPromise])
+                    return user
+                } else {
+                    const setWorkspacePromise = entityManager.createQueryBuilder(User, "user")
+                    .relation("primaryWorkspace")
+                    .of(user)
+                    .set(channel.primaryWorkspace)
+                    .catch(_e => {
+                        // Race condition happened, but we don't care about it
+                    })                
+                    
+                    const setChannelPromise = entityManager.createQueryBuilder(Channel, "channel")
+                        .relation("users")
+                        .of(channel)
+                        .add(user)
+                        .catch(_e => {
+                            // Race condition happened, but we don't care about it
+                        })
 
-    const foundChannel = await getChannelFromSlackId(channelSlackId, workspace.teamId, entityManager)
+                    await Promise.all([setWorkspacePromise, setChannelPromise])
+                    return user
+                }
+            } else {
 
-    if (foundChannel != null) {
-        foundChannel.users = users
-        await foundChannel.save()
-    }
+                let is_stranger = false
 
-    return users
+                if(isNative) {
+                    is_stranger = !isNative.has(slackId)
+                } else {
+                    is_stranger = await app.client.users.info({
+                        token: channel.primaryWorkspace?.botToken ?? "",
+                        user: slackId,
+                    })
+                        .catch((_error) => {
+                            console.error("Couldn't get the users info")
+                            return { user: { is_stranger: false } }
+                        })
+                        .then(res => res.user?.is_stranger ?? false)
+                }
 
-}
+                if (is_stranger) {
+                    const setWorkspacePromise = entityManager.createQueryBuilder(User, "user")
+                    .relation("connectWorkspaces")
+                    .of(user)
+                    .add(channel.primaryWorkspace)
+                    .catch(_e => {
+                        // Race condition happened, but we don't care about it
+                    })
+
+                    const setChannelPromise = entityManager.createQueryBuilder(Channel, "channel") 
+
+                    await Promise.all([setWorkspacePromise, setChannelPromise])
+                    return user
+                } else {
+                    const setWorkspacePromise = entityManager.createQueryBuilder(User, "user")
+                    .relation("primaryWorkspace")
+                    .of(user)
+                    .set(channel.primaryWorkspace)
+                    .catch(_e => {
+                        // Race condition happened, but we don't care about it
+                    })  
+
+                    const setChannelPromise = entityManager.createQueryBuilder(Channel, "channel")
+                        .relation("users")
+                        .of(channel)
+                        .add(user)
+                        .catch(_e => {
+                            // Race condition happened, but we don't care about it
+                        })
+
+                    await Promise.all([setWorkspacePromise, setChannelPromise])
+                    return user
+                }
+
+            }
+        }
+
+        return user
+    })
+
 
 export interface ChannelInfo {
     slackId: string,

@@ -1,21 +1,26 @@
-import { Actions, Button, Select } from "jsx-slack";
+import { Actions, Button, Mrkdwn, Section, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
-import { ChannelInfo, ConversationsApp, UsersInfoApp, getChannelsFromWorkspace, getUsersFromChannel } from '../utils/index.js';
+import { ChannelInfo, ConversationsApp, TeamInfoApp, UsersApp, ViewsPublishApp, getChannelsFromWorkspace, getUsersFromChannels } from '../utils/index.js';
 import { Channel } from "../entities/Channel.js";
 import { Installation } from "../entities/Installation.js";
 import { Brackets, EntityManager } from "typeorm";
+import { Context } from "@slack/bolt";
+import { StringIndexed } from "@slack/bolt/dist/types/helpers.js";
+import { updateHome } from "../events/index.js";
 
 interface ChannelSelectProps {
     userSlackId: string,
     teamId: string,
-    app: ConversationsApp & UsersInfoApp,
+    app: ConversationsApp & UsersApp & ViewsPublishApp & TeamInfoApp,
     entityManager: EntityManager
+    shouldReload: boolean,
+    context: Pick<Context & StringIndexed, "teamId" | "botToken">
 }
 
 /**
  * Create survey component.
  */
-export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: ChannelSelectProps): Promise<JSX.Element> => {
+export const CreateSurvey = async ({userSlackId, teamId, shouldReload, context, app, entityManager}: ChannelSelectProps): Promise<JSX.Element> => {
 
     /**
      * Show a dropdown menu with all channels the user is a member of.
@@ -129,58 +134,71 @@ export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: Ch
 
     //refresh the workspace
     await workspace.reload()
-    //for every channel with no users, create the users. 
-    for(const channel of allChannels.filter(channel => channel?.users.length == 0)) {
-        if(channel) {
-            await getUsersFromChannel({channelSlackId: channel.slackId, workspace: channel.primaryWorkspace}, app, entityManager)
-        }
-    }
 
-    // every channel that the user can see. 
-    const shownChannels = await entityManager.find(Channel, {
-        where: {
-            users: {
-                slackId: userSlackId
-            }
-        }, relations: ["users", "primaryWorkspace"]
-    })
+    if(shouldReload) { 
         
-    // get every channel that is not archived or deleted. 
-    const slackChannels = await Promise.all(shownChannels.map(async channel => {
-        return app.client.conversations.info({
-            channel: channel.slackId,
-            token: channel.primaryWorkspace.botToken
-        }).then(async info => {
-            if (!info.channel || info.channel.is_archived) {
-                await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
-                return null
-            }
+        getUsersFromChannels({channels: allChannels.filter(channel => channel != null) as Channel[]}, app, entityManager)
+            .then(async () => {
+                console.log("Updating home")
+                updateHome({ userSlackId, context, app, entityManager, shouldReload: false })
+            })
 
-            const channelInfo: {channelName: string, channelSlackId: string, channelTeamId: string} = {
-                channelName: info.channel?.name ?? "", 
-                channelSlackId: channel.slackId, 
-                channelTeamId: channel.primaryWorkspace.teamId
-            }
-            return channelInfo
-        }).catch(async _e => {
-            await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
-            return null
-        })
-    })).then(channels => channels.filter(channel => channel != null) as {channelName: string, channelSlackId: string, channelTeamId: string}[])
-    
-    // if there are any channels, return the page. 
-    if(slackChannels.length) {
         return (
-            <>
-                <Select placeholder="Select channel" blockId="channelSelect" label="Create a survey:" >
-                    {slackChannels.map(channel => <option value={JSON.stringify([channel.channelSlackId, channel.channelTeamId])}>{channel.channelName}</option>)}
-                </Select>
-                <Actions>
-                    <Button style="primary" actionId="createSurvey">Create survey</Button>
-                </Actions>
-            </>
+            <Section>
+                <Mrkdwn>
+                    <b>Loading channels...</b>
+                </Mrkdwn>
+            </Section>
         )
     } else {
-        return <></>
+        //for every channel with no users, create the users. 
+    
+        // every channel that the user can see. 
+        const shownChannels = await entityManager.find(Channel, {
+            where: {
+                users: {
+                    slackId: userSlackId
+                }
+            }, relations: ["users", "primaryWorkspace"]
+        })
+            
+        // get every channel that is not archived or deleted. 
+        const slackChannels = await Promise.all(shownChannels.map(async channel => {
+            return app.client.conversations.info({
+                channel: channel.slackId,
+                token: channel.primaryWorkspace.botToken
+            }).then(async info => {
+                if (!info.channel || info.channel.is_archived) {
+                    await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
+                    return null
+                }
+    
+                const channelInfo: {channelName: string, channelSlackId: string, channelTeamId: string} = {
+                    channelName: info.channel?.name ?? "", 
+                    channelSlackId: channel.slackId, 
+                    channelTeamId: channel.primaryWorkspace.teamId
+                }
+                return channelInfo
+            }).catch(async _e => {
+                await entityManager.update(Channel, { id: channel.id }, { deletedAt: new Date() });
+                return null
+            })
+        })).then(channels => channels.filter(channel => channel != null) as {channelName: string, channelSlackId: string, channelTeamId: string}[])
+        
+        // if there are any channels, return the page. 
+        if(slackChannels.length) {
+            return (
+                <>
+                    <Select placeholder="Select channel" blockId="channelSelect" label="Create a survey:" >
+                        {slackChannels.map(channel => <option value={JSON.stringify([channel.channelSlackId, channel.channelTeamId])}>{channel.channelName}</option>)}
+                    </Select>
+                    <Actions>
+                        <Button style="primary" actionId="createSurvey">Create survey</Button>
+                    </Actions>
+                </>
+            )
+        } else {
+            return <></>
+        }
     }
 }

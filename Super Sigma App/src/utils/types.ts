@@ -4,7 +4,7 @@ import { ViewsPublishArguments, UsersConversationsArguments, UsersConversationsR
    ConversationsListArguments, ConversationsListResponse, ConversationsInfoArguments,
     ConversationsInfoResponse, ConversationsMembersArguments, ConversationsMembersResponse,
      ViewsPushArguments, ViewsOpenArguments, TeamInfoArguments, TeamInfoResponse,
-    UsersInfoArguments, UsersInfoResponse, ViewsPublishResponse} from "@slack/web-api"
+    UsersInfoArguments, UsersInfoResponse, ViewsPublishResponse, UsersListArguments, UsersListResponse} from "@slack/web-api"
 
 type DefaultActionCallback = Parameters<typeof app.action>[1]
 type DefaultActionCallbackParams = Parameters<DefaultActionCallback>[0]
@@ -22,6 +22,7 @@ export interface UsersApp {
       users: {
           conversations: (params: UsersConversationsArguments) => Promise<UsersConversationsResponse>
           info: (params: UsersInfoArguments) => Promise<UsersInfoResponse>
+          list: (params: UsersListArguments) => Promise<UsersListResponse>
       }
   }
 }
