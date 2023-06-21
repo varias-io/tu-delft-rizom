@@ -2,12 +2,14 @@ import {
   BaseEntity,
   CreateDateColumn,
   DeleteDateColumn,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm"
 
 export class TimestampedBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
+  @Index()
   id: string
 
   @CreateDateColumn({
@@ -16,6 +18,7 @@ export class TimestampedBaseEntity extends BaseEntity {
     name: 'created_at',
     precision: 6,
   })
+  @Index()
   createdAt: Date;
 
   @UpdateDateColumn({
