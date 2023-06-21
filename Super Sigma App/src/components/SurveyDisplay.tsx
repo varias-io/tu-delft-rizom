@@ -37,20 +37,24 @@ export const SurveyDisplay = async ({ surveys, userSlackId, entityManager, app, 
       const personalProgress = await getSmallestMissingQuestionIndex(userSlackId, survey.id, entityManager);
       const graphModalProps: GraphsModalProps = {tms, displayedInModal}
       const latestSurvey: TMSScore = tms[0][tms[0].length-1]
+      const title = await surveyToTitle(survey, entityManager, app)
+      const doneUsers = await usersWhoCompletedSurvey(survey.id, entityManager)
+      const participants = await participantsOf(survey.id, entityManager)
+      const isParticipant = participants.find(participant => participant.slackId == userSlackId) === undefined ? false : true
       return <>
         <Divider/>
         <Section>
           <Mrkdwn>
           {
             displayedInModal 
-            ? <>{await surveyToTitle(survey, entityManager, app)}<br/></> 
-            : <>Latest survey for {await surveyToTitle(survey, entityManager, app)}<br /></>
+            ? <>{title}<br/></> 
+            : <>Latest survey for {title}<br /></>
           }
           {survey.createdAt.toLocaleDateString("nl-NL")}<br />
-          Completed by {(await usersWhoCompletedSurvey(survey.id, entityManager)).length}/{(await participantsOf(survey.id, entityManager)).length} users<br />
+          Completed by {doneUsers.length}/{participants.length} users<br />
           <br/>
           </Mrkdwn>
-          {displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurveyHome" value={survey.id}>Fill in Survey</Button>}
+          {!isParticipant || displayedInModal || personalProgress==15 ? <></> : <Button style="primary" actionId="fillSurveyHome" value={survey.id}>Fill in Survey</Button>}
         </Section>
         <Section>
           <Mrkdwn>
@@ -59,7 +63,18 @@ export const SurveyDisplay = async ({ surveys, userSlackId, entityManager, app, 
           - Credibility: {Number(Math.floor(TMStoPercentage(latestSurvey.credibility)))}%<br />
           - Coordination: {Number(Math.floor(TMStoPercentage(latestSurvey.coordination)))}%<br />
           <br />
-          <b>Personal progress: {personalProgress}/15</b> <br />
+          {
+            isParticipant ? (
+              displayedInModal ? (
+                personalProgress == 15 ?
+                <b>You have completed this survey.</b> :
+                <b>You did not finish filling out this survey.</b>
+              ) :
+              <b>Personal progress: {personalProgress}/15</b>
+            ) : 
+            <b>You're not a participant in this survey, it was started when you were not a member of this channel.</b>
+          }
+          <br />
           </Mrkdwn>
           <Button actionId="show_graphs" value={JSON.stringify(graphModalProps)} >View Breakdown</Button>
         </Section>
@@ -67,7 +82,7 @@ export const SurveyDisplay = async ({ surveys, userSlackId, entityManager, app, 
           displayedInModal
           ? <></>
           : <Actions>
-              <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(userSlackId, survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>
+              <Button actionId="show_all_surveys" value={JSON.stringify((await groupSurvey(survey.channel.id, entityManager)).map(survey => survey.id))}>Survey History</Button>
             </Actions>
         }
       </>

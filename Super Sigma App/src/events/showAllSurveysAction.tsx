@@ -20,6 +20,11 @@ export const showAllSurveysAction: ActionCallback = async ({ ack, client, contex
     }
     const surveysIds = JSON.parse(action.value) as Survey["id"][];
 
+    if (surveysIds.length == 0) {
+        await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", [], body.user.id, entityManager, app);
+        return;
+    }
+
     const surveys = await getSurveys(surveysIds, entityManager);
 
     await showAllSurveys(client, context.botToken ?? "", body.trigger_id ?? "", surveys, body.user.id, entityManager, app);
