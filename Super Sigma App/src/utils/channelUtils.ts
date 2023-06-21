@@ -32,7 +32,8 @@ export const getUserSlackIdsFromChannels = async ({ channels }: GetUsersFromChan
 
         const members = await app.client.conversations.members({
             token: channel.primaryWorkspace?.botToken ?? "",
-            channel: channel.slackId
+            channel: channel.slackId,
+            limit: 1000
         })
             .catch((_error) => {
                 console.error(`Couldn't get the members for channel: ${channel}`)
