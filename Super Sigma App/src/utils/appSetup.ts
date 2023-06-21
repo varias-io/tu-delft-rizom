@@ -62,12 +62,14 @@ app_express.get('/auth/callback', (req, res) => {
   }).then(async (result) => {
     // save result of oauth.access call somewhere, like in a database.
 
-    entityManager.save(Installation, {
+    entityManager.upsert(Installation, {
       enterpriseId: result.enterprise?.id ?? "",
       teamId: result.team?.id ?? "",
       botToken: result.access_token ?? "",
       botId: result.app_id ?? "",
       botUserId: result.bot_user_id ?? "",
+    }, {
+      conflictPaths: ["teamId"]
     })
 
     res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUIcmljayByb2w%3D")

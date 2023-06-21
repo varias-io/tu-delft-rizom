@@ -132,7 +132,7 @@ export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: Ch
     //for every channel with no users, create the users. 
     for(const channel of allChannels.filter(channel => channel?.users.length == 0)) {
         if(channel) {
-            await getUsersFromChannel({channelSlackId: channel.slackId, teamId: channel.primaryWorkspace.teamId}, app, entityManager)
+            await getUsersFromChannel({channelSlackId: channel.slackId, workspace: channel.primaryWorkspace}, app, entityManager)
         }
     }
 
