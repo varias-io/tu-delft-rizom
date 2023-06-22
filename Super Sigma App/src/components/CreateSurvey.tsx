@@ -1,4 +1,4 @@
-import { Actions, Button, Select } from "jsx-slack";
+import { Actions, Button, Header, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
 import { ChannelInfo, ConversationsApp, TeamInfoApp, UsersApp, ViewsPublishApp, getChannelsFromWorkspace, getUsersFromChannels } from '../utils/index.js';
 import { Channel } from "../entities/Channel.js";
@@ -173,7 +173,8 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
     if(slackChannels.length) {
         return (
             <>
-                <Select placeholder="Select channel" blockId="channelSelect" label="Create a survey:" >
+                <Header>Create a survey:</Header>
+                <Select placeholder="Select channel" blockId="channelSelect" label=" " >
                     {slackChannels.map(channel => <option value={JSON.stringify([channel.channelSlackId, channel.channelTeamId])}>{channel.channelName}</option>)}
                 </Select>
                 <Actions>
