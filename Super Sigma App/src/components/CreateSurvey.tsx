@@ -130,7 +130,7 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
                 return existingChannel
             })
     }))
-
+    // If we want to refresh the database, we get all the users from the channels.
     if(shouldReload) {
         //for every channel, create the users. 
         await getUsersFromChannels({channels: allChannels.filter(channel => channel != null) as Channel[], teamId}, app, entityManager)
