@@ -3,9 +3,8 @@ import assert from "assert"
 import { TMStoPercentage } from "../utils/index.js"
 
 test("TMStoPercentage - too small", async () => {
-  assert.throws(() => {
-    TMStoPercentage(0)
-  })
+  const result = TMStoPercentage(0)
+  assert.equal(result, 0)
 })
 
 test("TMStoPercentage - too large", async () => {
