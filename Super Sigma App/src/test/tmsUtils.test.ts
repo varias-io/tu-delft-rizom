@@ -2,15 +2,19 @@ import { test } from "node:test"
 import assert from "assert"
 import { TMStoPercentage } from "../utils/index.js"
 
-test("TMStoPercentage - too small", async () => {
+test("TMStoPercentage - zero", async () => {
   const result = TMStoPercentage(0)
   assert.equal(result, 0)
 })
 
+test("TMStoPercentage - small", async () => {
+  const result = TMStoPercentage(-1)
+  assert.equal(result, NaN)
+})
+
 test("TMStoPercentage - too large", async () => {
-  assert.throws(() => {
-    TMStoPercentage(6)
-  })
+  const result = TMStoPercentage(6)
+  assert.equal(result, NaN)
 })
 
 test("TMStoPercentage - 1", async () => {
