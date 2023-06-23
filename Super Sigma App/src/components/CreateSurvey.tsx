@@ -64,6 +64,7 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
             // get the channel from the database, which might be soft deleted. 
             .leftJoinAndSelect("channel.primaryWorkspace", "primaryWorkspace")
             .leftJoinAndSelect("channel.connectWorkspaces", "connectWorkspaces")
+            .leftJoinAndSelect("channel.users", "users")
             .where("channel.slackId = :slackId", {slackId: channel.slackId})
             .andWhere(new Brackets(qb => {
                 qb.where("primaryWorkspace.teamId = :teamId", {teamId})
