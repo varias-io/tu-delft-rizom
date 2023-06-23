@@ -59,6 +59,9 @@ const handleSubmission: ViewCallback = async ({ ack, view, context, body }, enti
     questionNumber: questionInfo.questionIndex,
     value: parseInt(selectedOptionValue)
   }).save()
+    .catch((_e) => {
+      console.error(`User ${body.user.id} already answered question ${questionInfo.questionIndex} of survey ${questionInfo.surveyId}`)
+    })
 
 
   if(questionInfo.questionIndex < surveyTemplate.length - 1){

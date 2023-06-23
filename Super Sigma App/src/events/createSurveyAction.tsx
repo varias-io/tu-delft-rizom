@@ -4,6 +4,8 @@ import { updateHome } from "./homeOpenedAction.js"
 import { Actions, Button, JSXSlack, Mrkdwn, Section } from "jsx-slack"
 import { Block } from "@slack/bolt"
 import { Installation } from "../entities/Installation.js"
+import { IsNull } from "typeorm"
+import AsyncLock from "async-lock"
 
 const selectionBlockNotFound = (): object => {
   console.error("Selection block not found")
@@ -71,11 +73,26 @@ export const createSurvey: ActionCallback = async ({ ack, body, context, client 
 
   const participants = await getUsersFromChannel({ channelSlackId, workspace }, app, entityManager)
 
-  const survey = await entityManager.create(Survey, {
-    channel,
-    manager,
-    participants
-  }).save()
+  const lock = new AsyncLock()
+  const survey = await lock.acquire(channel.id, async () => {
+    let survey = await entityManager.findOne(Survey, { where: { channel: { id: channel.id }, participation: IsNull() } })
+    if (!survey) {
+      return survey = await entityManager.create(Survey, {
+        channel,
+        manager,
+        participants
+      }).save()
+        .catch((_e) => {
+          console.error("What happened?")
+          return null
+        })
+    }
+    return survey
+  })
+
+  if (!survey) {
+    return 
+  }
 
   const token = (await entityManager.findOne(Installation, { where: { teamId: channelTeamId } }))?.botToken ?? ""
   //Sends the fill survey message to the channel

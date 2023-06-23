@@ -97,6 +97,9 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
                                 .relation(Channel, "connectWorkspaces")
                                 .of(actualExisting)
                                 .add(workspace)
+                                .catch((_e) => {
+                                    //connection already exists
+                                })
 
                             //return the channel. now with the workspace as relation
                             return entityManager.createQueryBuilder(Channel, "channel")
@@ -113,6 +116,10 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
                             primaryWorkspace,
                             connectWorkspaces: [workspace]
                         }).save()
+                            .catch((_e) => {
+                                console.error(`race condition for channel ${channel.slackId}`)
+                                return null
+                            }) 
                     } 
                     // otherwise create it in the database with just the primary workspace.
                     else {
@@ -120,6 +127,10 @@ export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, ap
                             ...channel,
                             primaryWorkspace: workspace
                         }).save()
+                            .catch((_e) => {
+                                console.error(`race condition for channel ${channel.slackId}`)
+                                return null
+                            }) 
                     }
                 }
                 // if it is soft deleted, restore it in the database.
