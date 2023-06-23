@@ -1,13 +1,14 @@
 import { test, beforeEach } from "node:test"
 import assert from "assert"
 import { ViewsPublishArguments } from "@slack/web-api"
-import { updateHome } from "../events/index.js";
-import { ConversationsApp, TeamInfoApp, UsersInfoApp, ViewsPublishApp } from "../utils/index.js";
+import { ConversationsApp, TeamInfoApp, UsersApp, ViewsPublishApp, latestSurveys } from "../utils/index.js";
 import { Channel } from "../entities/Channel.js";
 import { FakeEntityManager } from "./mock.js";
 import { Installation } from "../entities/Installation.js";
 import { Survey } from "../entities/Survey.js";
 import { User } from "../entities/User.js";
+import { CreateSurvey } from "../components/CreateSurvey.js";
+import { SurveyDisplay } from "../components/SurveyDisplay.js";
 
 let views_publish_called = false;
 let conversations_list_called = false;
@@ -53,7 +54,7 @@ survey1.createdAt = new Date(2021, 1, 1)
 survey1.channel = channel1
 
 
-const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersInfoApp = {
+const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersApp = {
   client: {
     views: {
       publish: async ({ user_id, token, view }: ViewsPublishArguments) => {
@@ -111,7 +112,15 @@ const app: ViewsPublishApp & ConversationsApp & TeamInfoApp & UsersInfoApp = {
             is_stranger: false,
           }
         })
-      }
+      },
+      list: async () => ({
+        ok: true,
+        members: []
+      }),
+      conversations: async () => ({
+        ok: true,
+        channels: []
+      })
     }
   }
 }
@@ -125,61 +134,73 @@ beforeEach(() => {
   users_info_called = false;
 })
 
-test("updateHome", async () => {
-  // The response generator defines the return values of the mock entityManager
-  // The comments help you navigate the calls through the code tree
+test("CreateSurvey", async () => {
   function* responseGenerator() {
-    // updateHome
-      // HomePage
-        // CreateSurvey
-        yield workspace
-        yield channel1
+    // CreateSurvey
+    yield workspace
+    yield channel1
 
-        yield [channel1]
-        yield channel1
-
-        // latestSurveys
-        yield [channel1]
-        yield [survey1]
-
-        // SurveyDisplay
-          //survey1
-            // computeTMS
-              // computeTMSPerUser
-                // getCompletedSurveys
-                yield [
-                  {
-                    score: {
-                      specialization: 3,
-                      credibility: 3.5,
-                      coordination: 4
-                    }
-                  },
-                  {
-                    score: {
-                      specialization: 4,
-                      credibility: 4.5,
-                      coordination: 5
-                    }
-                  }
-                ]
-                // for each user, findUserByEntityId 
-                yield new User()
-                yield new User()
-
-            // getSmallestMissingQuestionIndex
-              // querySmallestMissingQuestionIndex
-              yield 0 as any
-            // surveyToTitle
-              // getChannel
-              yield channel1
-            // usersWhoCompletedSurvey
-            yield [user1]
-            // participantsOf
-            yield [user1]
-            //groupSurvey
-            yield [survey1]
+    yield [channel1]
   }
+
+  const entityManager = new FakeEntityManager(responseGenerator())
+
+  assert.ok(!conversations_list_called)
+  assert.ok(!conversations_info_called)
+  assert.ok(!conversations_members_called)
+  assert.ok(!team_info_called)
+  assert.ok(!users_info_called)
+  await CreateSurvey({app, context, entityManager, shouldReload: false, userSlackId, teamId})
+  assert.ok(!views_publish_called)
+  assert.ok(conversations_list_called)
+  assert.ok(conversations_info_called)
+
+})
+
+test("SurveyDisplay", async () => {
+  function* responseGenerator() {
+    // latestSurveys
+    yield [channel1]
+    yield [survey1]
+    //SurveyDisplay
+      //survey1
+        // computeTMS
+          // computeTMSPerUser
+            // getCompletedSurveys
+            yield [
+              {
+                score: {
+                  specialization: 3,
+                  credibility: 3.5,
+                  coordination: 4
+                }
+              },
+              {
+                score: {
+                  specialization: 4,
+                  credibility: 4.5,
+                  coordination: 5
+                }
+              }
+            ]
+            // for each user, findUserByEntityId 
+            yield new User()
+            yield new User()
+
+        // getSmallestMissingQuestionIndex
+          // querySmallestMissingQuestionIndex
+          yield 0 as any
+        // surveyToTitle
+          // getChannel
+          yield channel1
+        // usersWhoCompletedSurvey
+        yield [user1]
+        // participantsOf
+        yield [user1]
+        //groupSurvey
+        yield [survey1]
+  }
+  
   const entityManager = new FakeEntityManager(responseGenerator())
 
   assert.ok(!views_publish_called)
@@ -188,12 +209,8 @@ test("updateHome", async () => {
   assert.ok(!conversations_members_called)
   assert.ok(!team_info_called)
   assert.ok(!users_info_called)
-  await updateHome({app, userSlackId, context, entityManager})
-  assert.ok(views_publish_called)
-  assert.ok(conversations_list_called)
+  await SurveyDisplay({app, entityManager, surveys: await latestSurveys(userSlackId, entityManager), userSlackId, displayedInModal: false})
+  assert.ok(!views_publish_called)
+  assert.ok(!conversations_list_called)
   assert.ok(conversations_info_called)
-  //the following calls are not called because the channel is not archived
-  //assert.ok(conversations_members_called)
-  //assert.ok(team_info_called)
-  //assert.ok(users_info_called)
 })

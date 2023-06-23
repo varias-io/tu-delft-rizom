@@ -1,21 +1,25 @@
-import { Actions, Button, Select } from "jsx-slack";
+import { Actions, Button, Header, Select } from "jsx-slack";
 import { JSX } from 'jsx-slack/jsx-runtime';
-import { ChannelInfo, ConversationsApp, UsersInfoApp, getChannelsFromWorkspace, getUsersFromChannel } from '../utils/index.js';
+import { ChannelInfo, ConversationsApp, TeamInfoApp, UsersApp, ViewsPublishApp, getChannelsFromWorkspace, getUsersFromChannels } from '../utils/index.js';
 import { Channel } from "../entities/Channel.js";
 import { Installation } from "../entities/Installation.js";
 import { Brackets, EntityManager } from "typeorm";
+import { Context } from "@slack/bolt";
+import { StringIndexed } from "@slack/bolt/dist/types/helpers.js";
 
 interface ChannelSelectProps {
     userSlackId: string,
     teamId: string,
-    app: ConversationsApp & UsersInfoApp,
+    app: ConversationsApp & UsersApp & ViewsPublishApp & TeamInfoApp,
     entityManager: EntityManager
+    shouldReload?: boolean
+    context: Pick<Context & StringIndexed, "teamId" | "botToken">
 }
 
 /**
  * Create survey component.
  */
-export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: ChannelSelectProps): Promise<JSX.Element> => {
+export const CreateSurvey = async ({userSlackId, teamId, shouldReload = true, app, entityManager}: ChannelSelectProps): Promise<JSX.Element> => {
 
     /**
      * Show a dropdown menu with all channels the user is a member of.
@@ -126,15 +130,12 @@ export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: Ch
                 return existingChannel
             })
     }))
-
-    //refresh the workspace
-    await workspace.reload()
-    //for every channel with no users, create the users. 
-    for(const channel of allChannels.filter(channel => channel?.users.length == 0)) {
-        if(channel) {
-            await getUsersFromChannel({channelSlackId: channel.slackId, workspace: channel.primaryWorkspace}, app, entityManager)
-        }
+    // If we want to refresh the database, we get all the users from the channels.
+    if(shouldReload) {
+        //for every channel, create the users. 
+        await getUsersFromChannels({channels: allChannels.filter(channel => channel != null) as Channel[], teamId}, app, entityManager)
     }
+
 
     // every channel that the user can see. 
     const shownChannels = await entityManager.find(Channel, {
@@ -172,7 +173,8 @@ export const CreateSurvey = async ({userSlackId, teamId, app, entityManager}: Ch
     if(slackChannels.length) {
         return (
             <>
-                <Select placeholder="Select channel" blockId="channelSelect" label="Create a survey:" >
+                <Header>Create a survey:</Header>
+                <Select placeholder="Select channel" blockId="channelSelect" label=" " >
                     {slackChannels.map(channel => <option value={JSON.stringify([channel.channelSlackId, channel.channelTeamId])}>{channel.channelName}</option>)}
                 </Select>
                 <Actions>

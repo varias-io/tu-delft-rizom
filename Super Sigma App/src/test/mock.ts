@@ -66,6 +66,13 @@ export class FakeSelectQueryBuilder<T extends ObjectLiteral> extends SelectQuery
             this.getRawMany = () => Promise.resolve(results.next().value as unknown as T[]) as any
             this.getQuery = () => ""
             this.withDeleted = () => this
+            this.relation = () => ({
+                of: () => ({
+                    add: () => Promise.resolve(),
+                    set: () => Promise.resolve(),
+                    addAndRemove: () => Promise.resolve(),
+                })
+            } as any)
     }
 }
 

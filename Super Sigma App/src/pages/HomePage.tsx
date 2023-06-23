@@ -1,21 +1,23 @@
-import { Home } from "jsx-slack";
-import { CreateSurvey } from "../components/CreateSurvey.js";
-import { SurveyDisplay } from "../components/SurveyDisplay.js";
-import { ConversationsApp, TeamInfoApp, UsersInfoApp, latestSurveys } from "../utils/index.js";
-import { EntityManager } from "typeorm";
+import { Home, Mrkdwn, Section } from "jsx-slack";
+import { JSX } from "jsx-slack/jsx-runtime";
 
 interface HomeProps {
-    userSlackId: string
-    selectedChannel?: string
-    teamId: string
-    app: ConversationsApp & TeamInfoApp & UsersInfoApp
-    entityManager: EntityManager
+    preRenderedCreateSurvey?: JSX.Element
+    preRenderedSurveyDisplay?: JSX.Element
 }
 
-export const HomePage = async ({userSlackId, teamId, app, entityManager}: HomeProps) => (
-    <Home>   
-        {await CreateSurvey({userSlackId, teamId, app, entityManager})}
-        {await SurveyDisplay( {surveys: await latestSurveys(userSlackId, entityManager), userSlackId, entityManager, app})}
+export const HomePage = async ({ preRenderedCreateSurvey, preRenderedSurveyDisplay }: HomeProps) => (
+    <Home>
+        {/* If we do not have a component to show, show a loading message.
+         */}
+        {preRenderedCreateSurvey ?? <Section>
+            <Mrkdwn>Channels not yet loaded...</Mrkdwn>
+        </Section>}
+        {/* If we do not have a component to show, show a loading message.
+         */}
+        {preRenderedSurveyDisplay ?? <Section>
+            <Mrkdwn>Surveys not yet loaded...</Mrkdwn>
+        </Section>}
     </Home>
 )
 

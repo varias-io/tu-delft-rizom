@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { Seeder, SeederFactoryManager } from "typeorm-extension";
 import { Channel } from "../entities/Channel.js";
-import { entityManager, getUserSlackIdsFromChannels, app } from "../utils/index.js";
+import { entityManager, getUserSlackIdsFromChannel, app } from "../utils/index.js";
 import { Installation } from "../entities/Installation.js";
 import { User } from "../entities/User.js";
 import "./survey.factory.js";
@@ -35,7 +35,7 @@ export default class MainSeeder implements Seeder {
       return existing
     }) ?? [])
 
-    const users = (await getUserSlackIdsFromChannels({ token: botToken, channelSlackIds: ["C055D7ZGWJV"] }, app))
+    const users = (await getUserSlackIdsFromChannel({ channelSlackId: "C055D7ZGWJV", token: workspace.botToken }, app))
     await Promise.all(Array.from(users).map(async (slackId) => {
       if (!await entityManager.exists(User, { where: { slackId, primaryWorkspace: { teamId: "T055Q9UHP5W" } } })) {
         return entityManager.create(User, { slackId, primaryWorkspace: workspace, channels: allChannels }).save()

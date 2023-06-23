@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable, Relation, ManyToOne, Unique } from "typeorm"
+import { Entity, Column, ManyToMany, AfterLoad, AfterInsert, AfterUpdate, OneToMany, JoinTable, Relation, ManyToOne, Unique, Index } from "typeorm"
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js"
 import { Survey } from "./Survey.js"
 import { SurveyAnswer } from "./SurveyAnswer.js"
@@ -10,6 +10,7 @@ import { Channel } from "./Channel.js"
 export class User extends TimestampedBaseEntity {
 
     @Column({nullable: false})
+    @Index()
     slackId: string
     
     @OneToMany(() => Survey, survey => survey.manager)

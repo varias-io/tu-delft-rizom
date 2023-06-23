@@ -1,4 +1,4 @@
-import { Column, Entity, AfterLoad, AfterInsert, AfterUpdate, OneToMany, ManyToMany, Relation, JoinTable, ManyToOne, Unique } from "typeorm";
+import { Column, Entity, AfterLoad, AfterInsert, AfterUpdate, OneToMany, ManyToMany, Relation, JoinTable, ManyToOne, Unique, Index } from "typeorm";
 import { TimestampedBaseEntity } from "./TimeStampedBaseEntity.js";
 import { Survey } from "./Survey.js";
 import { Installation } from "./Installation.js";
@@ -9,6 +9,7 @@ import { User } from "./User.js";
 export class Channel extends TimestampedBaseEntity { 
   
   @Column({nullable: false})
+  @Index()
   slackId: string;
 
   @OneToMany(() => Survey, survey => survey.channel, { onDelete: "SET NULL" })
